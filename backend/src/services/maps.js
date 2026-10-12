@@ -58,4 +58,34 @@ function parseCoords(input) {
   return { lat, lon };
 }
 
-module.exports = { yandexRouteUrl, yandexNaviUrl, yandexGoUrl, parseCoords };
+/**
+ * parseCoords + qisqa havolalar (yandex.uz/maps/-/..., maps.app.goo.gl/...) va matn ichidagi havola/koordinata.
+ * Qisqa havola ochilib, yo'naltirilgan to'liq manzildan koordinata olinadi.
+ */
+async function resolveCoords(input) {
+  const text = String(input || '').trim();
+  const direct = parseCoords(text);
+  if (direct) return direct;
+  const url = text.match(/https?:\/\/\S+/)?.[0];
+  if (url) {
+    const fromUrl = parseCoords(url);
+    if (fromUrl) return fromUrl;
+    if (/^https?:\/\/([\w-]+\.)*(yandex\.[a-z]+|ya\.ru|goo\.gl|google\.[a-z]+)\//i.test(url)) {
+      try {
+        const res = await fetch(url, { redirect: 'follow', signal: AbortSignal.timeout(7000), headers: { 'User-Agent': 'Mozilla/5.0' } });
+        const viaRedirect = parseCoords(res.url);
+        if (viaRedirect) return viaRedirect;
+        const body = (await res.text()).slice(0, 400000);
+        const m = body.match(/[?&;](?:ll|pt)=(-?\d+\.\d+)(?:,|%2C)(-?\d+\.\d+)/);
+        if (m) return parseCoords(`${m[2]}, ${m[1]}`);
+      } catch {
+        /* tarmoq xatosi — pastda null */
+      }
+    }
+  }
+  // Matn ichidagi "41.2851, 69.2041"
+  const pair = text.match(/(-?\d{2}\.\d{3,})\s*[,;]\s*(-?\d{2}\.\d{3,})/);
+  return pair ? parseCoords(`${pair[1]}, ${pair[2]}`) : null;
+}
+
+module.exports = { yandexRouteUrl, yandexNaviUrl, yandexGoUrl, parseCoords, resolveCoords };

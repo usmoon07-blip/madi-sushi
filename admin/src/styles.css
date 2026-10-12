@@ -1010,3 +1010,51 @@ h3 {
 .field--wide {
   grid-column: 1 / -1;
 }
+
+/* Filial lokatsiyasi — xarita */
+.map-point {
+  display: grid;
+  gap: 8px;
+}
+.map-point__search {
+  position: relative;
+}
+.map-point__search input {
+  width: 100%;
+}
+.map-point__results {
+  position: absolute;
+  z-index: 1001;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  display: grid;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface-2, #1c1c20);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.map-point__results button {
+  padding: 10px 12px;
+  text-align: left;
+  color: inherit;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.map-point__map {
+  height: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #e8e4dc;
+}
+.map-point__pin span {
+  position: absolute;
+  left: 3px;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50% 50% 50% 0;
+  background: #e11d2e;
+  transform: rotate(-45deg);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  border: 3px solid #fff;
+}

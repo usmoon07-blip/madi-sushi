@@ -61,6 +61,7 @@ export const api = {
   createCategory: (data) => request('/categories', { method: 'POST', body: data }),
   updateCategory: (id, data) => request(`/categories/${id}`, { method: 'PUT', body: data }),
   deleteCategory: (id) => request(`/categories/${id}`, { method: 'DELETE' }),
+  searchAddress: (q) => request('/geocode/search', { method: 'POST', body: { q } }),
   branches: () => request('/branches'),
   createBranch: (data) => request('/branches', { method: 'POST', body: data }),
   updateBranch: (id, data) => request(`/branches/${id}`, { method: 'PUT', body: data }),

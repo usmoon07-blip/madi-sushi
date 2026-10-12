@@ -35,6 +35,7 @@ router.get('/categories', h(admin.listCategories));
 router.post('/categories', h(admin.createCategory));
 router.put('/categories/:id', h(admin.updateCategory));
 router.delete('/categories/:id', h(admin.deleteCategory));
+router.post('/geocode/search', h(admin.geocodeSearch));
 router.get('/branches', h(admin.listBranches));
 router.post('/branches', h(admin.createBranch));
 router.put('/branches/:id', h(admin.updateBranch));

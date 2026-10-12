@@ -4,7 +4,8 @@ const config = require('../config/default');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Branch = require('../models/Branch');
-const { parseCoords } = require('../services/maps');
+const { resolveCoords } = require('../services/maps');
+const { searchAddress } = require('../services/geocode');
 const Review = require('../models/Review');
 const Order = require('../models/Order');
 const Settings = require('../models/Settings');
@@ -238,7 +239,7 @@ async function deleteCategory(req, res) {
 }
 
 // ---- Filiallar ----
-function branchData(body, { partial = false } = {}) {
+async function branchData(body, { partial = false } = {}) {
   const data = {};
   const has = (k) => Object.prototype.hasOwnProperty.call(body, k);
   const text = (v, max) => String(v || '').trim().slice(0, max);
@@ -259,12 +260,17 @@ function branchData(body, { partial = false } = {}) {
     const raw = text(body.location, 500);
     if (!raw) Object.assign(data, { lat: null, lon: null });
     else {
-      const c = parseCoords(raw);
-      if (!c) throw new HttpError(400, "Lokatsiyani tushunib bo'lmadi. Masalan: 41.2851, 69.2041 yoki Yandex Maps havolasi");
+      const c = await resolveCoords(raw);
+      if (!c) throw new HttpError(400, "Lokatsiyani tushunib bo'lmadi. Xaritadan nuqtani tanlang yoki koordinata yozing: 41.2851, 69.2041");
       Object.assign(data, c);
     }
   }
   return data;
+}
+
+async function geocodeSearch(req, res) {
+  const q = String(req.body?.q || '').trim().slice(0, 120);
+  res.json({ results: q.length < 3 ? [] : await searchAddress(q) });
 }
 
 async function listBranches(req, res) {
@@ -272,11 +278,11 @@ async function listBranches(req, res) {
 }
 
 async function createBranch(req, res) {
-  res.status(201).json({ branch: await Branch.create(branchData(req.body || {})) });
+  res.status(201).json({ branch: await Branch.create(await branchData(req.body || {})) });
 }
 
 async function updateBranch(req, res) {
-  res.json({ branch: await Branch.update(parseId(req.params.id), branchData(req.body || {}, { partial: true })) });
+  res.json({ branch: await Branch.update(parseId(req.params.id), await branchData(req.body || {}, { partial: true })) });
 }
 
 async function deleteBranch(req, res) {
@@ -386,6 +392,7 @@ module.exports = {
   getSettings,
   updateSettings,
   listBranches,
+  geocodeSearch,
   createBranch,
   updateBranch,
   deleteBranch,

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import Modal from '../components/Modal.jsx';
+import MapPoint from '../components/MapPoint.jsx';
 
 const empty = { name: '', nameRu: '', address: '', phone: '', workHours: '', location: '', sortOrder: 0, isActive: true };
 const coordsText = (b) => (b?.lat != null && b?.lon != null ? `${b.lat}, ${b.lon}` : '');
@@ -11,6 +12,10 @@ function BranchForm({ branch, onSaved, onCancel }) {
   const [form, setForm] = useState(() => (branch ? { ...empty, ...branch, location: coordsText(branch) } : empty));
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const point = (() => {
+    const m = String(form.location).match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+    return m ? { lat: Number(m[1]), lon: Number(m[2]) } : null;
+  })();
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
   const submit = async (e) => {
@@ -44,11 +49,11 @@ function BranchForm({ branch, onSaved, onCancel }) {
           <span>Manzil *</span>
           <input value={form.address} onChange={set('address')} required maxLength={200} placeholder="Toshkent, Foziltepa ko'chasi, 40" />
         </label>
-        <label className="field field--wide">
-          <span>Lokatsiya (ixtiyoriy)</span>
-          <input value={form.location} onChange={set('location')} placeholder="41.2851, 69.2041 yoki Yandex Maps havolasi" />
-          <small className="muted">Yandex Maps'da filialni toping → «Ulashish» → havolani shu yerga qo'ying. Mijozga xaritada aniq ko'rsatiladi.</small>
-        </label>
+        <div className="field field--wide">
+          <span>Lokatsiya — xaritadan tanlang</span>
+          <MapPoint value={point} onChange={(lat, lon) => setForm((f) => ({ ...f, location: `${lat.toFixed(6)}, ${lon.toFixed(6)}` }))} />
+          <input value={form.location} onChange={set('location')} placeholder="yoki koordinata / Yandex Maps havolasi: 41.2851, 69.2041" />
+        </div>
         <label className="field">
           <span>Telefon</span>
           <input value={form.phone} onChange={set('phone')} maxLength={40} placeholder="+998 90 123 45 67" />

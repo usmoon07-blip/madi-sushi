@@ -103,6 +103,15 @@ async function onLocation(ctx) {
   const user = await User.upsertFromTelegram(ctx.from);
   const lang = langOf(user);
   const order = await Order.findAwaitingLocation(user.id);
+  // Admin lokatsiya yubordi (masalan, filial uchun) — koordinatani matn qilib qaytaramiz
+  if (!order && isAdmin(ctx.from.id)) {
+    const coords = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+    await ctx.reply(
+      `📍 Lokatsiya koordinatalari:\n<code>${coords}</code>\n\nUstiga bosing — nusxalanadi. Keyin admin panel → Filiallar → Tahrirlash → «Lokatsiya» maydoniga qo'ying.`,
+      { parse_mode: 'HTML', reply_markup: { remove_keyboard: true } }
+    );
+    return;
+  }
   if (!order) {
     await User.update(user.id, { lastLat: lat, lastLon: lon }).catch(() => {});
     await ctx.reply(t(lang, 'locationNoOrder'), { reply_markup: { remove_keyboard: true } });
