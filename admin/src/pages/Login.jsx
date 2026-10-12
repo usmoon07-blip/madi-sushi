@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api.js';
+import logo from '../assets/logo.webp';
 
 export default function Login({ onLogin }) {
   const [password, setPassword] = useState('');
@@ -23,7 +24,7 @@ export default function Login({ onLogin }) {
   return (
     <div className="login">
       <form className="login__card" onSubmit={submit}>
-        <span className="logo__mark logo__mark--lg">鮨</span>
+        <img className="logo__mark logo__mark--lg" src={logo} alt="Madi Sushi" />
         <h1>Madi Sushi</h1>
         <p className="muted">Admin panelga kirish</p>
         <input type="password" autoFocus placeholder="Parol" value={password} onChange={(e) => setPassword(e.target.value)} />

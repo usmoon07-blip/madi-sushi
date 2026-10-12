@@ -3,6 +3,7 @@ import { useApp } from '../appState.jsx';
 import { useT } from '../i18n.jsx';
 import { haptic } from '../telegram.js';
 import { ChevronIcon } from './Icons.jsx';
+import Logo from './Logo.jsx';
 
 // Yuqori qism: brend, manzil va "Kuryer orqali / Olib ketish" tanlovi
 export default function Header() {
@@ -15,7 +16,7 @@ export default function Header() {
   return (
     <header className="hdr">
       <div className="hdr__brand">
-        <span className="brand__mark">鮨</span>
+        <Logo size={44} />
         <div>
           <div className="brand__name">MADI SUSHI</div>
           <div className="brand__sub">{t('hello', app.user?.firstName || t('guest'))}</div>

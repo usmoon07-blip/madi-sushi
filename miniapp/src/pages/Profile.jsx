@@ -6,6 +6,7 @@ import { LANG_NAMES, useT } from '../i18n.jsx';
 import { haptic, onBackButton, openLink } from '../telegram.js';
 import { yandexSearchUrl } from '../format.js';
 import ProductCard from '../components/ProductCard.jsx';
+import Logo from '../components/Logo.jsx';
 import {
   ArrowIcon,
   ChevronIcon,
@@ -196,8 +197,7 @@ function About() {
   return (
     <div className="panel about">
       <div className="about__logo">
-        <span className="brand__mark brand__mark--lg">鮨</span>
-        <div className="brand__name">MADI SUSHI</div>
+        <Logo size={132} />
       </div>
       <p>{text}</p>
     </div>

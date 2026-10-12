@@ -9,6 +9,7 @@ import BottomNav from './components/BottomNav.jsx';
 import ProductSheet from './components/ProductSheet.jsx';
 import AddressSheet from './components/AddressSheet.jsx';
 import { Toasts } from './components/Controls.jsx';
+import Logo from './components/Logo.jsx';
 import LocationGate from './pages/LocationGate.jsx';
 import Home from './pages/Home.jsx';
 import Menu from './pages/Menu.jsx';
@@ -191,7 +192,7 @@ export default function App() {
   if (error && !data) {
     return (
       <div className="splash">
-        <div className="brand__mark brand__mark--lg">鮨</div>
+        <Logo size={96} />
         <p>{error}</p>
         <button type="button" className="btn btn--primary" onClick={load}>
           {lang === 'ru' ? 'Повторить' : 'Qayta urinish'}
@@ -203,8 +204,7 @@ export default function App() {
   if (!app) {
     return (
       <div className="splash">
-        <div className="brand__mark brand__mark--lg spin">鮨</div>
-        <div className="splash__name">MADI SUSHI</div>
+        <Logo size={128} className="pulse" />
       </div>
     );
   }

@@ -1,4 +1,5 @@
-const { InlineKeyboard } = require('grammy');
+const path = require('path');
+const { InlineKeyboard, InputFile } = require('grammy');
 const config = require('../config/default');
 const { bot } = require('../core/bot');
 const webapp = require('../core/webapp');
@@ -21,10 +22,24 @@ const menuKeyboard = (lang) => {
 
 const langKeyboard = () => new InlineKeyboard().text("🇺🇿 O'zbekcha", 'lang:uz').text('🇷🇺 Русский', 'lang:ru');
 
+const WELCOME_PHOTO = path.join(config.paths.public, 'brand/welcome.jpg');
+let welcomePhotoId = null;
+
 async function sendWelcome(ctx, lang) {
   const keyboard = menuKeyboard(lang);
   const text = `${t(lang, 'welcome', escapeHtml(ctx.from.first_name || ''), brand)}\n\n${t(lang, keyboard ? 'openMenuHint' : 'menuNotReady')}`;
-  await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard });
+  try {
+    // Brend logotipi bilan rasm; bir marta yuklangach Telegram file_id qayta ishlatiladi
+    const msg = await ctx.replyWithPhoto(welcomePhotoId || new InputFile(WELCOME_PHOTO), {
+      caption: text,
+      parse_mode: 'HTML',
+      reply_markup: keyboard,
+    });
+    welcomePhotoId = msg.photo?.at(-1)?.file_id || welcomePhotoId;
+  } catch {
+    welcomePhotoId = null;
+    await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard });
+  }
 }
 
 // /start: til tanlanmagan bo'lsa — avval til so'raladi

@@ -1,7 +1,7 @@
 import { useApp } from '../appState.jsx';
 import { LANG_NAMES, useT } from '../i18n.jsx';
 import LocationForm from '../components/LocationForm.jsx';
-import { PinIcon } from '../components/Icons.jsx';
+import Logo from '../components/Logo.jsx';
 
 // Ilova birinchi ochilganda: avval lokatsiya so'raladi
 export default function LocationGate() {
@@ -18,10 +18,7 @@ export default function LocationGate() {
         ))}
       </div>
       <div className="gate__hero">
-        <div className="gate__pin">
-          <PinIcon width={44} height={44} />
-        </div>
-        <div className="brand__name">MADI SUSHI</div>
+        <Logo size={150} className="gate__logo" />
         <h1>{t('gateTitle')}</h1>
         <p>{t('gateText')}</p>
       </div>

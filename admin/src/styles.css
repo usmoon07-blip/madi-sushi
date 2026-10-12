@@ -132,22 +132,16 @@ h3 {
   padding: 0 8px;
 }
 .logo__mark {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   flex: none;
+  display: block;
   border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 19px;
-  font-weight: 700;
-  color: #fff;
-  background: radial-gradient(circle at 30% 30%, var(--red-hi), var(--red) 55%, var(--red-deep));
-  box-shadow: 0 6px 20px rgba(225, 29, 46, 0.4);
+  object-fit: cover;
 }
 .logo__mark--lg {
-  width: 64px;
-  height: 64px;
-  font-size: 30px;
+  width: 112px;
+  height: 112px;
   margin: 0 auto 14px;
 }
 .logo__name {

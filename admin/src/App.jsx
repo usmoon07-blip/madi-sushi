@@ -7,6 +7,7 @@ import Settings from './pages/Settings.jsx';
 import Categories from './pages/Categories.jsx';
 import Reviews from './pages/Reviews.jsx';
 import KitchenPrinter from './components/KitchenPrinter.jsx';
+import logo from './assets/logo.webp';
 
 const PAGES = [
   { id: 'orders', label: 'Buyurtmalar', icon: '🧾' },
@@ -35,7 +36,7 @@ export default function App() {
     <div className="layout">
       <aside className="sidebar">
         <div className="logo">
-          <span className="logo__mark">鮨</span>
+          <img className="logo__mark" src={logo} alt="Madi Sushi" />
           <div>
             <div className="logo__name">MADI SUSHI</div>
             <div className="logo__sub">Boshqaruv paneli</div>
