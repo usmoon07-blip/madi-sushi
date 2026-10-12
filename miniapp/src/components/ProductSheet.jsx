@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
+import SafeImg from './SafeImg.jsx';
 import { useCart } from '../store.jsx';
-import { mediaUrl } from '../api.js';
 import { haptic, onBackButton } from '../telegram.js';
 import { useT } from '../i18n.jsx';
 import Price from './Price.jsx';
@@ -44,7 +44,7 @@ export default function ProductSheet({ product, onClose }) {
         <div className="sheet__handle" />
         <div className="sheet__scroll">
           <div className="sheet__media">
-            {product.imageUrl ? <img src={mediaUrl(product.imageUrl)} alt={name} /> : <div className="card__ph">🍣</div>}
+            <SafeImg src={product.imageUrl} alt={name} loading="eager" />
           </div>
           <div className="sheet__content">
             <h2 className="sheet__title">{name}</h2>

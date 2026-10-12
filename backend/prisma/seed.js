@@ -4,8 +4,11 @@ require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
-const img = (name) => `/static/products/${name}.svg`;
-const SEED_VERSION = 2;
+const svg = (name) => `/static/products/${name}.svg`;
+const photo = (name) => `/static/products/photos/${name}.jpg`;
+// Haqiqiy suratlar (Pexels, bepul litsenziya). Chizma (svg) o'rniga ishlatiladi
+const img = photo;
+const SEED_VERSION = 3;
 
 const ABOUT_UZ =
   "Madi Sushi — Toshkentdagi premium sushi bar. Biz har bir rollni buyurtmadan so'ng yangi tayyorlaymiz: " +
@@ -16,12 +19,12 @@ const ABOUT_RU =
 
 // "Nigiri" — 1-versiyadagi nom, endi "Sushi" deb ataladi
 const CATEGORIES = [
-  { nameUz: 'Setlar', nameRu: 'Сеты', imageUrl: img('madi-premium-set') },
-  { nameUz: 'Rollar', nameRu: 'Роллы', imageUrl: img('philadelphia') },
-  { nameUz: 'Sushi', nameRu: 'Суши', imageUrl: img('nigiri-salmon'), oldNames: ['Nigiri'] },
-  { nameUz: 'Salatlar', nameRu: 'Салаты', imageUrl: img('chuka-salad') },
-  { nameUz: 'Ichimliklar', nameRu: 'Напитки', imageUrl: img('coca-cola') },
-  { nameUz: 'Souslar', nameRu: 'Соусы', imageUrl: img('sauces') },
+  { nameUz: 'Setlar', nameRu: 'Сеты', imageUrl: photo('cat-sets'), oldImage: svg('madi-premium-set') },
+  { nameUz: 'Rollar', nameRu: 'Роллы', imageUrl: photo('cat-rolls'), oldImage: svg('philadelphia') },
+  { nameUz: 'Sushi', nameRu: 'Суши', imageUrl: photo('cat-sushi'), oldImage: svg('nigiri-salmon'), oldNames: ['Nigiri'] },
+  { nameUz: 'Salatlar', nameRu: 'Салаты', imageUrl: photo('caesar-salmon'), oldImage: svg('chuka-salad') },
+  { nameUz: 'Ichimliklar', nameRu: 'Напитки', imageUrl: photo('cat-drinks'), oldImage: svg('coca-cola') },
+  { nameUz: 'Souslar', nameRu: 'Соусы', imageUrl: photo('cat-sauces'), oldImage: svg('sauces') },
 ];
 
 const PRODUCTS = [
@@ -223,7 +226,8 @@ async function ensureCategories() {
         data: {
           nameUz: c.oldNames?.includes(cat.nameUz) ? c.nameUz : cat.nameUz,
           nameRu: cat.nameRu || c.nameRu,
-          imageUrl: cat.imageUrl || c.imageUrl,
+          // Bo'sh yoki eski chizma bo'lsa — surat qo'yamiz; admin yuklagan rasmga tegmaymiz
+          imageUrl: !cat.imageUrl || cat.imageUrl === c.oldImage ? c.imageUrl : cat.imageUrl,
           sortOrder: i + 1,
         },
       });
@@ -263,6 +267,7 @@ async function main() {
           ingredientsRu: old.ingredientsRu?.length ? old.ingredientsRu : p.ingredientsRu,
           isHit: anyHit ? old.isHit : Boolean(isHit),
           categoryId: old.categoryId ?? categoryId,
+          imageUrl: !old.imageUrl || /^\/static\/products\/[a-z-]+\.svg$/.test(old.imageUrl) ? p.imageUrl : old.imageUrl,
         },
       });
       updated += 1;

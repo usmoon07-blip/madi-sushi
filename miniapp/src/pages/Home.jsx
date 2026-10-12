@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useApp } from '../appState.jsx';
 import { useT } from '../i18n.jsx';
 import Header from '../components/Header.jsx';
-import CategoryTiles from '../components/CategoryTiles.jsx';
+import CategoryCarousel from '../components/CategoryCarousel.jsx';
 import ProductCard from '../components/ProductCard.jsx';
 
 // Bosh sahifa: manzil + usul, qizil "Menyu" bloki (kategoriyalar), faqat xit savdo
@@ -22,7 +22,7 @@ export default function Home() {
       <section className="menu-block">
         <div className="menu-block__glow" />
         <h2 className="menu-block__title">{t('menu')}</h2>
-        <CategoryTiles categories={categories} onSelect={(c) => app.openMenu(c.id)} />
+        <CategoryCarousel categories={categories} onSelect={(c) => app.openMenu(c.id)} />
         <button type="button" className="menu-block__link" onClick={() => app.openMenu()}>
           {t('toMenu')}
         </button>

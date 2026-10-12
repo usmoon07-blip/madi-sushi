@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12T15:10:22.791Z",
+  "generatedAt": "2026-10-12T16:34:13.950Z",
   "products": [
     {
       "id": 1,
@@ -21,7 +21,7 @@
         "Рис",
         "Нори"
       ],
-      "imageUrl": "/static/products/philadelphia.svg",
+      "imageUrl": "/static/products/photos/philadelphia.jpg",
       "oldPrice": 99000,
       "price": 89000,
       "categoryId": 2,
@@ -47,7 +47,7 @@
         "Икра масаго",
         "Японский майонез"
       ],
-      "imageUrl": "/static/products/california.svg",
+      "imageUrl": "/static/products/photos/california.jpg",
       "oldPrice": null,
       "price": 75000,
       "categoryId": 2,
@@ -75,7 +75,7 @@
         "Соус унаги",
         "Кунжут"
       ],
-      "imageUrl": "/static/products/dragon.svg",
+      "imageUrl": "/static/products/photos/dragon.jpg",
       "oldPrice": 110000,
       "price": 95000,
       "categoryId": 2,
@@ -101,7 +101,7 @@
         "Чёрный кунжут",
         "Нори"
       ],
-      "imageUrl": "/static/products/black-samurai.svg",
+      "imageUrl": "/static/products/photos/black-samurai.jpg",
       "oldPrice": null,
       "price": 85000,
       "categoryId": 2,
@@ -127,7 +127,7 @@
         "Рис",
         "Нори"
       ],
-      "imageUrl": "/static/products/spicy-tuna.svg",
+      "imageUrl": "/static/products/photos/spicy-tuna.jpg",
       "oldPrice": null,
       "price": 79000,
       "categoryId": 2,
@@ -153,7 +153,7 @@
         "Чёрный самурай — 8 шт",
         "Имбирь, васаби, соевый соус"
       ],
-      "imageUrl": "/static/products/madi-premium-set.svg",
+      "imageUrl": "/static/products/photos/madi-premium-set.jpg",
       "oldPrice": 329000,
       "price": 289000,
       "categoryId": 1,
@@ -177,7 +177,7 @@
         "Филадельфия фламбе — 8 шт",
         "Имбирь, васаби, соевый соус"
       ],
-      "imageUrl": "/static/products/philadelphia-set.svg",
+      "imageUrl": "/static/products/photos/philadelphia-set.jpg",
       "oldPrice": 259000,
       "price": 239000,
       "categoryId": 1,
@@ -199,7 +199,7 @@
         "Рис для суши",
         "Васаби"
       ],
-      "imageUrl": "/static/products/nigiri-salmon.svg",
+      "imageUrl": "/static/products/photos/nigiri-salmon.jpg",
       "oldPrice": null,
       "price": 39000,
       "categoryId": 3,
@@ -223,7 +223,7 @@
         "Соус унаги",
         "Кунжут"
       ],
-      "imageUrl": "/static/products/nigiri-eel.svg",
+      "imageUrl": "/static/products/photos/nigiri-eel.jpg",
       "oldPrice": null,
       "price": 45000,
       "categoryId": 3,
@@ -247,7 +247,7 @@
         "Кунжут",
         "Лимон"
       ],
-      "imageUrl": "/static/products/chuka-salad.svg",
+      "imageUrl": "/static/products/photos/chuka-salad.jpg",
       "oldPrice": null,
       "price": 35000,
       "categoryId": 4,
@@ -275,7 +275,7 @@
         "Перепелиное яйцо",
         "Соус Цезарь"
       ],
-      "imageUrl": "/static/products/caesar-salmon.svg",
+      "imageUrl": "/static/products/photos/caesar-salmon.jpg",
       "oldPrice": null,
       "price": 59000,
       "categoryId": 4,
@@ -289,7 +289,7 @@
       "descriptionRu": "Холодная Coca-Cola, 0,5 л.",
       "ingredients": [],
       "ingredientsRu": [],
-      "imageUrl": "/static/products/coca-cola.svg",
+      "imageUrl": "/static/products/photos/coca-cola.jpg",
       "oldPrice": null,
       "price": 12000,
       "categoryId": 5,
@@ -303,7 +303,7 @@
       "descriptionRu": "Японский зелёный чай, 0,4 л.",
       "ingredients": [],
       "ingredientsRu": [],
-      "imageUrl": "/static/products/green-tea.svg",
+      "imageUrl": "/static/products/photos/green-tea.jpg",
       "oldPrice": null,
       "price": 15000,
       "categoryId": 5,
@@ -317,7 +317,7 @@
       "descriptionRu": "40 мл.",
       "ingredients": [],
       "ingredientsRu": [],
-      "imageUrl": "/static/products/soy-sauce.svg",
+      "imageUrl": "/static/products/photos/soy-sauce.jpg",
       "oldPrice": null,
       "price": 4000,
       "categoryId": 6,
@@ -331,7 +331,7 @@
       "descriptionRu": "Острый японский соус, 40 мл.",
       "ingredients": [],
       "ingredientsRu": [],
-      "imageUrl": "/static/products/spicy-sauce.svg",
+      "imageUrl": "/static/products/photos/spicy-sauce.jpg",
       "oldPrice": null,
       "price": 5000,
       "categoryId": 6,
@@ -345,7 +345,7 @@
       "descriptionRu": "Сладко-солёный соус для угря, 40 мл.",
       "ingredients": [],
       "ingredientsRu": [],
-      "imageUrl": "/static/products/unagi-sauce.svg",
+      "imageUrl": "/static/products/photos/unagi-sauce.jpg",
       "oldPrice": null,
       "price": 5000,
       "categoryId": 6,
@@ -357,37 +357,37 @@
       "id": 1,
       "nameUz": "Setlar",
       "nameRu": "Сеты",
-      "imageUrl": "/static/products/madi-premium-set.svg"
+      "imageUrl": "/static/products/photos/cat-sets.jpg"
     },
     {
       "id": 2,
       "nameUz": "Rollar",
       "nameRu": "Роллы",
-      "imageUrl": "/static/products/philadelphia.svg"
+      "imageUrl": "/static/products/photos/cat-rolls.jpg"
     },
     {
       "id": 3,
       "nameUz": "Sushi",
       "nameRu": "Суши",
-      "imageUrl": "/static/products/nigiri-salmon.svg"
+      "imageUrl": "/static/products/photos/cat-sushi.jpg"
     },
     {
       "id": 4,
       "nameUz": "Salatlar",
       "nameRu": "Салаты",
-      "imageUrl": "/static/products/chuka-salad.svg"
+      "imageUrl": "/static/products/photos/caesar-salmon.jpg"
     },
     {
       "id": 5,
       "nameUz": "Ichimliklar",
       "nameRu": "Напитки",
-      "imageUrl": "/static/products/coca-cola.svg"
+      "imageUrl": "/static/products/photos/cat-drinks.jpg"
     },
     {
       "id": 6,
       "nameUz": "Souslar",
       "nameRu": "Соусы",
-      "imageUrl": "/static/products/sauces.svg"
+      "imageUrl": "/static/products/photos/cat-sauces.jpg"
     }
   ],
   "settings": {

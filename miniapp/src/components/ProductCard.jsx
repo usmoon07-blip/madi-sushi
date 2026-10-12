@@ -1,6 +1,6 @@
 import { useCart } from '../store.jsx';
+import SafeImg from './SafeImg.jsx';
 import { useApp } from '../appState.jsx';
-import { mediaUrl } from '../api.js';
 import { useT } from '../i18n.jsx';
 import { haptic } from '../telegram.js';
 import { HeartIcon, PlusIcon } from './Icons.jsx';
@@ -19,7 +19,7 @@ export default function ProductCard({ product }) {
   return (
     <article className="card" onClick={() => app.openProduct(product)}>
       <div className="card__media">
-        {product.imageUrl ? <img src={mediaUrl(product.imageUrl)} alt={name} loading="lazy" /> : <div className="card__ph">🍣</div>}
+        <SafeImg src={product.imageUrl} alt={name} />
         {discount > 0 && <span className="card__badge">−{discount}%</span>}
         <button
           type="button"

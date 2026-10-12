@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { api, mediaUrl } from '../api.js';
+import SafeImg from '../components/SafeImg.jsx';
+import { api } from '../api.js';
 import { useCart, toast } from '../store.jsx';
 import { useApp } from '../appState.jsx';
 import { useT } from '../i18n.jsx';
@@ -149,7 +150,7 @@ export default function Cart({ onSuccess }) {
       <div className="panel">
         {cart.lines.map(({ product, qty }) => (
           <div key={product.id} className="line">
-            <img className="line__img" src={mediaUrl(product.imageUrl)} alt="" />
+            <SafeImg className="line__img" src={product.imageUrl} />
             <div className="line__info">
               <div className="line__name">{pick(product, 'name')}</div>
               <div className="line__price">{money(product.price * qty)}</div>
@@ -161,7 +162,7 @@ export default function Cart({ onSuccess }) {
 
       {upsell && (
         <div className="upsell">
-          <img src={mediaUrl(upsell.imageUrl)} alt="" />
+          <SafeImg className="upsell__img" src={upsell.imageUrl} />
           <div className="upsell__text">
             <span dangerouslySetInnerHTML={{ __html: t('upsell', pick(upsell, 'name').replace(/</g, '&lt;')) }} />
             <span className="upsell__price">+{money(upsell.price)}</span>
