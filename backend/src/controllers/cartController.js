@@ -43,7 +43,6 @@ const publicUser = (u) => ({
 const publicSettings = (s) => ({
   cards: Array.isArray(s.cards) ? s.cards : [],
   deliveryFee: s.deliveryFee,
-  freeDeliveryFrom: s.freeDeliveryFrom,
   minOrder: s.minOrder,
   pickupAddress: s.pickupAddress,
   contactPhone: s.contactPhone,
@@ -261,10 +260,7 @@ async function createOrder(req, res) {
     throw new HttpError(400, t(req.lang, 'errAddress'));
   }
 
-  const deliveryFee =
-    deliveryType === 'DELIVERY' && !(settings.freeDeliveryFrom > 0 && subtotal >= settings.freeDeliveryFrom)
-      ? settings.deliveryFee
-      : 0;
+  const deliveryFee = deliveryType === 'DELIVERY' ? settings.deliveryFee : 0;
 
   const customerName = [req.user.firstName, req.user.lastName].filter(Boolean).join(' ').slice(0, 100);
 

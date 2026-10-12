@@ -332,7 +332,7 @@ async function getSettings(req, res) {
 async function updateSettings(req, res) {
   const body = req.body || {};
   const data = {};
-  for (const key of ['deliveryFee', 'freeDeliveryFrom', 'minOrder']) {
+  for (const key of ['deliveryFee', 'minOrder']) {
     if (key in body) {
       const n = intOrNull(body[key]);
       if (n === null || Number.isNaN(n)) throw new HttpError(400, "Summalarni to'g'ri kiriting");

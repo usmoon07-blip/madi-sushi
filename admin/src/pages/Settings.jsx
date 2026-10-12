@@ -55,7 +55,6 @@ export default function Settings() {
       const { settings } = await api.saveSettings({
         cards: form.cards,
         deliveryFee: form.deliveryFee,
-        freeDeliveryFrom: form.freeDeliveryFrom,
         minOrder: form.minOrder,
         pickupAddress: form.pickupAddress,
         contactPhone: form.contactPhone,
@@ -273,14 +272,10 @@ export default function Settings() {
 
       <section className="box">
         <h3>🛵 Yetkazib berish</h3>
-        <div className="form__grid form__grid--3">
+        <div className="form__grid">
           <label className="field">
             <span>Yetkazib berish narxi (so'm)</span>
             <input value={form.deliveryFee} onChange={set('deliveryFee')} inputMode="numeric" />
-          </label>
-          <label className="field">
-            <span>Shu summadan bepul (0 = hech qachon)</span>
-            <input value={form.freeDeliveryFrom} onChange={set('freeDeliveryFrom')} inputMode="numeric" />
           </label>
           <label className="field">
             <span>Minimal buyurtma (so'm)</span>

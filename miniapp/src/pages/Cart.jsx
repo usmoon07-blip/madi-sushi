@@ -50,8 +50,7 @@ export default function Cart({ onSuccess }) {
   }, [app.products, app.categories]);
 
   const isDelivery = mode === 'DELIVERY';
-  const freeDelivery = settings.freeDeliveryFrom > 0 && cart.subtotal >= settings.freeDeliveryFrom;
-  const deliveryFee = isDelivery && !freeDelivery ? settings.deliveryFee : 0;
+  const deliveryFee = isDelivery ? settings.deliveryFee : 0;
   const total = cart.subtotal + deliveryFee;
   const cards = settings.cards || [];
   const hasCoords = location?.lat != null && location?.lon != null;
@@ -339,11 +338,8 @@ export default function Cart({ onSuccess }) {
         {isDelivery && (
           <div className="summary__row">
             <span>{t('deliveryFee')}</span>
-            <span className={freeDelivery ? 'text-green' : ''}>{freeDelivery ? t('free') : money(settings.deliveryFee)}</span>
+            <span>{money(settings.deliveryFee)}</span>
           </div>
-        )}
-        {isDelivery && !freeDelivery && settings.freeDeliveryFrom > 0 && (
-          <div className="summary__hint">{t('moreForFree', money(settings.freeDeliveryFrom - cart.subtotal))}</div>
         )}
         <div className="summary__row summary__row--total">
           <span>{t('total')}</span>

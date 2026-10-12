@@ -7,7 +7,7 @@ import ProductCard from '../components/ProductCard.jsx';
 
 // Bosh sahifa: manzil + usul, qizil "Menyu" bloki (kategoriyalar), faqat xit savdo
 export default function Home() {
-  const { t, money } = useT();
+  const { t } = useT();
   const app = useApp();
   const hits = useMemo(() => app.products.filter((p) => p.isHit), [app.products]);
   const categories = useMemo(
@@ -28,9 +28,6 @@ export default function Home() {
         </button>
       </section>
 
-      {app.settings.freeDeliveryFrom > 0 && app.mode === 'DELIVERY' && (
-        <p className="promo-line">🛵 {t('freeDeliveryFrom', money(app.settings.freeDeliveryFrom))}</p>
-      )}
 
       {hits.length > 0 && (
         <section className="section">
