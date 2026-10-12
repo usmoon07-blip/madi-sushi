@@ -7,7 +7,7 @@ const User = require('../models/User');
 const Settings = require('../models/Settings');
 const { normalizePhone, money } = require('../services/format');
 const { t, normLang } = require('../services/i18n');
-const { reverseGeocode } = require('../services/geocode');
+const { reverseGeocode, searchAddress } = require('../services/geocode');
 const botController = require('./botController');
 const printQueue = require('../services/printQueue');
 
@@ -162,6 +162,12 @@ async function geocode(req, res) {
   res.json(await reverseGeocode(lat, lon));
 }
 
+async function geocodeSearch(req, res) {
+  const q = cleanText(req.body?.q, 120);
+  if (!q || q.length < 3) return res.json({ results: [] });
+  res.json({ results: await searchAddress(q) });
+}
+
 async function myOrders(req, res) {
   const orders = await Order.listForUser(req.user.id);
   res.json({ orders: orders.map(publicOrder) });
@@ -285,6 +291,7 @@ module.exports = {
   toggleFavorite,
   createReview,
   geocode,
+  geocodeSearch,
   myOrders,
   createOrder,
   publicProduct,

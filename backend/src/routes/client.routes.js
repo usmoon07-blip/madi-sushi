@@ -14,6 +14,7 @@ router.post('/me/location', h(cart.saveLocation));
 router.post('/favorites/:id', h(cart.toggleFavorite));
 router.post('/reviews', h(cart.createReview));
 router.post('/geocode', h(cart.geocode));
+router.post('/geocode/search', h(cart.geocodeSearch));
 router.get('/orders', h(cart.myOrders));
 router.post('/orders', h(cart.createOrder));
 

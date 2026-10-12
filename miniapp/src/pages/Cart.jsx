@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import SafeImg from '../components/SafeImg.jsx';
 import { api } from '../api.js';
 import { useCart, toast } from '../store.jsx';
-import { useApp } from '../appState.jsx';
+import { addressDetails, useApp } from '../appState.jsx';
 import { useT } from '../i18n.jsx';
 import { haptic, openLink, requestPhone, tg } from '../telegram.js';
 import { formatPhoneInput, isValidPhone, uid, yandexMapUrl, yandexSearchUrl } from '../format.js';
@@ -125,7 +125,7 @@ export default function Cart({ onSuccess }) {
         paymentType,
         phone,
         address: isDelivery ? location?.address || null : null,
-        addressNote: isDelivery ? addressNote.trim() : null,
+        addressNote: isDelivery ? [addressDetails(location), addressNote.trim()].filter(Boolean).join(' · ') : null,
         lat: isDelivery && hasCoords ? location.lat : null,
         lon: isDelivery && hasCoords ? location.lon : null,
         comment: comment.trim(),
@@ -200,6 +200,12 @@ export default function Cart({ onSuccess }) {
             <span className="addr-card__body">
               <span className="field__label">{t('address')}</span>
               <span className="addr-card__value">{location?.address || t('chooseAddress')}</span>
+              {location?.address && (
+                <span className={`addr-card__details ${addressDetails(location) ? '' : 'is-missing'}`}>
+                  {addressDetails(location) ||
+                    (location.lat != null ? `＋ ${t('detailsMissing')}` : '')}
+                </span>
+              )}
             </span>
             <span className="link">{t('change')}</span>
           </button>
@@ -214,8 +220,8 @@ export default function Cart({ onSuccess }) {
             <p className="geo-hint">{t('noLocationHint')}</p>
           )}
           <label className="field">
-            <span className="field__label">{t('addressNote')}</span>
-            <input value={addressNote} maxLength={200} placeholder={t('addressNotePh')} onChange={(e) => setAddressNote(e.target.value)} />
+            <span className="field__label">{t('courierNote')}</span>
+            <input value={addressNote} maxLength={150} placeholder={t('courierNotePh')} onChange={(e) => setAddressNote(e.target.value)} />
           </label>
         </div>
       ) : (

@@ -51,6 +51,7 @@ export const api = {
   me: () => request('/me'),
   savePhone: (phone) => request('/me/phone', { method: 'POST', body: { phone } }),
   geocode: (lat, lon) => request('/geocode', { method: 'POST', body: { lat, lon } }),
+  searchAddress: (q) => request('/geocode/search', { method: 'POST', body: { q } }),
   orders: () => request('/orders'),
   createOrder: (payload) => request('/orders', { method: 'POST', body: payload }),
 };

@@ -1,6 +1,5 @@
 import { hasLocation, useApp } from '../appState.jsx';
 import { LANG_NAMES, useT } from '../i18n.jsx';
-import LocationForm from '../components/LocationForm.jsx';
 import Logo from '../components/Logo.jsx';
 
 // Ilova birinchi ochilganda: avval lokatsiya so'raladi
@@ -37,13 +36,9 @@ export default function LocationGate() {
             <span className="gate__saved-addr">📍 {app.location.address || `${app.location.lat}, ${app.location.lon}`}</span>
           </button>
         )}
-        <LocationForm
-          onDone={(loc) => {
-            app.setLocation(loc);
-            app.setMode('DELIVERY');
-            app.finishGate();
-          }}
-        />
+        <button type="button" className="btn btn--primary btn--block btn--tall" onClick={() => app.openAddress({ onSaved: app.finishGate })}>
+          {t('pickOnMap')}
+        </button>
         <button
           type="button"
           className="btn btn--ghost btn--block"

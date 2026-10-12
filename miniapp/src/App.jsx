@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { api, setApiLang } from './api.js';
 import { CartProvider, useToastListener } from './store.jsx';
 import { AppContext, storedLocation, storedMode } from './appState.jsx';
@@ -7,7 +7,7 @@ import { onBackButton, openLink, tg } from './telegram.js';
 import { yandexSearchUrl } from './format.js';
 import BottomNav from './components/BottomNav.jsx';
 import ProductSheet from './components/ProductSheet.jsx';
-import AddressSheet from './components/AddressSheet.jsx';
+const MapPicker = lazy(() => import('./components/MapPicker.jsx'));
 import { Toasts } from './components/Controls.jsx';
 import Logo from './components/Logo.jsx';
 import LocationGate from './pages/LocationGate.jsx';
@@ -146,7 +146,8 @@ export default function App() {
         if (!categoryId) window.scrollTo({ top: 0 });
       },
       openProduct: setSheet,
-      openAddress: () => setAddressOpen(true),
+      // opts.onSaved — manzil saqlangach chaqiriladi (masalan, birinchi ekranda)
+      openAddress: (opts = {}) => setAddressOpen(opts),
       openBranches: () => openLink(yandexSearchUrl(data.settings.pickupAddress)),
       setMode: (m) => {
         setModeState(m);
@@ -234,8 +235,12 @@ export default function App() {
               {tab === 'profile' && <Profile />}
               <BottomNav tab={tab} onChange={goTab} />
               {sheet && <ProductSheet product={sheet} onClose={() => setSheet(null)} />}
-              {addressOpen && <AddressSheet onClose={() => setAddressOpen(false)} />}
             </>
+          )}
+          {addressOpen && (
+            <Suspense fallback={<div className="mappick" />}>
+              <MapPicker onClose={() => setAddressOpen(false)} onSaved={addressOpen.onSaved} />
+            </Suspense>
           )}
           <Toasts items={toasts} />
         </CartProvider>

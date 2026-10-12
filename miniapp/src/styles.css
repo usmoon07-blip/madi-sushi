@@ -1896,3 +1896,183 @@ html.is-fullscreen {
   font-size: 14px;
   line-height: 1.45;
 }
+
+/* ---------- Xaritadan manzil tanlash ---------- */
+.mappick {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  padding-top: var(--safe-top);
+}
+.mappick__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+}
+.mappick__head h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 19px;
+}
+.mappick__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.mappick__body.is-hidden {
+  display: none;
+}
+.mappick__search {
+  position: relative;
+  z-index: 3;
+  padding: 0 16px 12px;
+}
+.mappick__search input {
+  width: 100%;
+}
+.mappick__results {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: calc(100% - 6px);
+  max-height: 46vh;
+  overflow-y: auto;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+}
+.mappick__result {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.35;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+}
+.mappick__map {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: #e8e4dc;
+}
+.mappick__leaflet {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.mappick__leaflet .leaflet-control-attribution {
+  font-size: 9px;
+}
+.mappick__pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.mappick__pin-head {
+  position: absolute;
+  left: -22px;
+  top: -66px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+  transition: transform 0.18s;
+}
+.mappick__pin-head::after {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  background: #fff;
+}
+.mappick__pin-leg {
+  position: absolute;
+  left: -1.5px;
+  top: -24px;
+  width: 3px;
+  height: 24px;
+  border-radius: 2px;
+  background: var(--red);
+  transition: transform 0.18s;
+}
+.mappick__pin-shadow {
+  position: absolute;
+  left: -5px;
+  top: -2px;
+  width: 10px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+}
+.mappick__pin.is-moving .mappick__pin-head,
+.mappick__pin.is-moving .mappick__pin-leg {
+  transform: translateY(-10px);
+}
+.mappick__locate {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  z-index: 2;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 11px 18px;
+  border-radius: 999px;
+  background: #fff;
+  color: #141416;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+.mappick__foot {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px calc(14px + var(--safe-bottom));
+  background: var(--bg);
+}
+.mappick__addr {
+  min-height: 22px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 15.5px;
+  line-height: 1.35;
+}
+.mappick__details {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 4px 16px calc(20px + var(--safe-bottom));
+}
+.mappick__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.mappick__grid .field,
+.mappick__details .field {
+  display: grid;
+  gap: 6px;
+}
+.addr-card__details {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: #c4c4ca;
+}
+.addr-card__details.is-missing {
+  color: var(--red-hi);
+  font-weight: 700;
+}

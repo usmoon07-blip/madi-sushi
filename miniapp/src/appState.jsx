@@ -32,3 +32,14 @@ export const storedMode = {
   set: (mode) => write(MODE_KEY, mode),
 };
 export const hasLocation = (loc) => Boolean(loc && ((loc.lat != null && loc.lon != null) || loc.address));
+
+// Podyezd, qavat, xonadon, domofon — kuryer uchun bitta qatorda (admin va chekda shu ko'rinadi)
+export const addressDetails = (loc) =>
+  [
+    loc?.entrance && `Podyezd: ${loc.entrance}`,
+    loc?.floor && `Qavat: ${loc.floor}`,
+    loc?.apartment && `Xonadon: ${loc.apartment}`,
+    loc?.intercom && `Domofon: ${loc.intercom}`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
