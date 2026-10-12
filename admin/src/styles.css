@@ -201,7 +201,7 @@ h3 {
 }
 @media (max-width: 860px) {
   .layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .sidebar {
     position: static;
@@ -943,4 +943,20 @@ h3 {
 }
 .page-head .stat {
   min-width: 180px;
+}
+
+/* Telefon: sahifa ekrandan chiqmasin, keng jadval faqat o'z ichida suriladi */
+@media (max-width: 600px) {
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .stat__value {
+    font-size: 17px;
+  }
+  .page-head {
+    flex-wrap: wrap;
+  }
+  .page-head h1 {
+    font-size: 21px;
+  }
 }
