@@ -40,6 +40,12 @@ const dict = {
     typePickup: '🏃 Olib ketish',
     askLocation: '📍 Kuryer manzilingizni aniq topishi uchun <b>lokatsiyangizni yuboring</b> — pastdagi tugmani bosing.',
     sendLocationBtn: '📍 Lokatsiyani yuborish',
+    askReceipt: (sum, cards) =>
+      `💳 <b>Karta orqali to'lov</b>\n\n${sum} ni quyidagi kartaga o'tkazing:\n${cards}\n\n📸 <b>To'lovdan so'ng chekni (skrinshot) shu chatga yuboring.</b>\nChek kelmaguncha buyurtma tasdiqlanmaydi.`,
+    askReceiptNoCard: (sum) =>
+      `💳 <b>Karta orqali to'lov</b> — ${sum}\n\n📸 <b>To'lovdan so'ng chekni (skrinshot) shu chatga yuboring.</b>\nChek kelmaguncha buyurtma tasdiqlanmaydi.`,
+    receiptReceived: (id) => `✅ Chek qabul qilindi! Buyurtma <b>#${id}</b> — to'lov tekshirilgach tayyorlashni boshlaymiz.`,
+    receiptNoOrder: "🧾 Chek uchun karta orqali to'lanadigan faol buyurtma topilmadi. Savollar bo'lsa, biz bilan bog'laning.",
     locationNoOrder: '📍 Lokatsiya qabul qilindi. Buyurtma berish uchun «🍣 Menyu» tugmasini bosing.',
     locationAttached: (id) => `✅ Rahmat! Lokatsiya buyurtma #${id} ga biriktirildi.`,
     stAccepted: (id) => `👨‍🍳 Buyurtmangiz <b>#${id}</b> tayyorlanmoqda.`,
@@ -89,6 +95,12 @@ const dict = {
     typePickup: '🏃 Самовывоз',
     askLocation: '📍 Чтобы курьер точно нашёл вас, <b>отправьте геолокацию</b> — нажмите кнопку ниже.',
     sendLocationBtn: '📍 Отправить геолокацию',
+    askReceipt: (sum, cards) =>
+      `💳 <b>Оплата картой</b>\n\nПереведите ${sum} на карту:\n${cards}\n\n📸 <b>После оплаты отправьте чек (скриншот) в этот чат.</b>\nБез чека заказ не будет подтверждён.`,
+    askReceiptNoCard: (sum) =>
+      `💳 <b>Оплата картой</b> — ${sum}\n\n📸 <b>После оплаты отправьте чек (скриншот) в этот чат.</b>\nБез чека заказ не будет подтверждён.`,
+    receiptReceived: (id) => `✅ Чек получен! Заказ <b>#${id}</b> — начнём готовить после проверки оплаты.`,
+    receiptNoOrder: '🧾 Не нашли активный заказ с оплатой картой для этого чека. Если есть вопросы — свяжитесь с нами.',
     locationNoOrder: '📍 Геолокация получена. Чтобы сделать заказ, нажмите «🍣 Меню».',
     locationAttached: (id) => `✅ Спасибо! Геолокация добавлена к заказу #${id}.`,
     stAccepted: (id) => `👨‍🍳 Ваш заказ <b>#${id}</b> готовится.`,

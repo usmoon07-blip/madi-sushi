@@ -1831,3 +1831,36 @@ textarea:focus {
 html.is-fullscreen {
   --sticky-top: var(--safe-top);
 }
+
+/* Karta to'lovi: chek yuborish shart */
+.receipt-rule {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--red);
+  background: var(--red-soft);
+  color: #ffd0d4;
+  font-weight: 700;
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+.receipt-box {
+  width: 100%;
+  max-width: 360px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--red);
+  background: var(--red-soft);
+  text-align: left;
+}
+.receipt-box__title {
+  font-weight: 800;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+.receipt-box p {
+  margin: 0;
+  color: #ffd0d4;
+  font-size: 14px;
+  line-height: 1.45;
+}

@@ -10,6 +10,7 @@ const { createAdminToken, safeEqual, recordLoginFailure, clearLoginFailures } = 
 const Upload = require('../models/Upload');
 const { HttpError } = require('./cartController');
 const botController = require('./botController');
+const { bot } = require('../core/bot');
 const printQueue = require('../services/printQueue');
 const { parseAddress } = require('../services/printer');
 
@@ -42,6 +43,24 @@ async function listOrders(req, res) {
   if (status && status !== 'ACTIVE' && !STATUSES.includes(status)) throw new HttpError(400, "Noto'g'ri holat");
   const [orders, stats] = await Promise.all([Order.listForAdmin({ status: status || undefined }), Order.stats()]);
   res.json({ orders, stats });
+}
+
+// Mijoz botga yuborgan to'lov chekini Telegram'dan olib beradi (token brauzerga chiqmaydi)
+async function getReceipt(req, res) {
+  const id = parseId(req.params.id);
+  const order = await Order.findById(id);
+  if (!order?.receiptFileId) throw new HttpError(404, 'Chek yuborilmagan');
+  if (!bot) throw new HttpError(503, 'Bot ulanmagan');
+  const failed = new HttpError(502, "Chekni Telegramdan olib bo'lmadi. Chek botdagi xabarda ham bor");
+  const file = await bot.api.getFile(order.receiptFileId).catch(() => null);
+  if (!file?.file_path) throw failed;
+  const root = (process.env.TELEGRAM_API_ROOT || 'https://api.telegram.org').replace(/\/+$/, '');
+  const tg = await fetch(`${root}/file/bot${config.botToken}/${file.file_path}`).catch(() => null);
+  if (!tg?.ok) throw failed;
+  const ext = (file.file_path.split('.').pop() || '').toLowerCase();
+  const type = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', pdf: 'application/pdf' }[ext] || 'application/octet-stream';
+  res.set({ 'Content-Type': type, 'Cache-Control': 'private, max-age=3600' });
+  res.send(Buffer.from(await tg.arrayBuffer()));
 }
 
 async function updateOrderStatus(req, res) {
@@ -292,6 +311,7 @@ async function updateSettings(req, res) {
 module.exports = {
   login,
   listOrders,
+  getReceipt,
   updateOrderStatus,
   listProducts,
   createProduct,

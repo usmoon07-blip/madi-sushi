@@ -101,6 +101,39 @@ async function onLocation(ctx) {
   await notifyAdmins(updated, settings, { title: `📍 <b>Buyurtma #${order.id}: lokatsiya biriktirildi</b>` });
 }
 
+// Mijoz chek (rasm yoki fayl) yubordi — karta orqali to'lanadigan buyurtmasiga biriktiramiz
+async function onReceipt(ctx) {
+  if (!ctx.from) return;
+  const msg = ctx.message;
+  const doc = msg.document;
+  if (doc && !/^(image\/|application\/pdf)/.test(doc.mime_type || '')) return onHelp(ctx);
+  const user = await User.upsertFromTelegram(ctx.from);
+  const lang = langOf(user);
+  const order = await Order.findAwaitingReceipt(user.id);
+  if (!order) {
+    await ctx.reply(t(lang, 'receiptNoOrder'));
+    return;
+  }
+  const fileId = msg.photo ? msg.photo.at(-1).file_id : doc.file_id;
+  const type = msg.photo ? 'photo' : 'document';
+  const updated = await Order.setReceipt(order.id, fileId, type);
+  await ctx.reply(t(lang, 'receiptReceived', order.id), { parse_mode: 'HTML' });
+
+  const caption = [
+    `🧾 <b>Buyurtma #${order.id}: to‘lov cheki keldi</b>`,
+    `👤 ${escapeHtml(updated.customerName)} · 📞 ${escapeHtml(updated.phone)}`,
+    `💰 ${money(updated.total)} · 💳 Karta orqali`,
+  ].join('\n');
+  for (const adminId of config.adminIds) {
+    try {
+      const send = type === 'photo' ? bot.api.sendPhoto.bind(bot.api) : bot.api.sendDocument.bind(bot.api);
+      await send(adminId, fileId, { caption, parse_mode: 'HTML' });
+    } catch (err) {
+      console.warn('[bot] Chek adminga yuborilmadi:', errText(err));
+    }
+  }
+}
+
 async function onHelp(ctx) {
   if (!ctx.from) return;
   const user = await User.upsertFromTelegram(ctx.from);
@@ -164,6 +197,16 @@ async function notifyNewOrder(order) {
     });
   }
 
+  // Karta orqali to'lov — chek yuborish shart
+  if (order.paymentType === 'CARD') {
+    const cards = (Array.isArray(settings.cards) ? settings.cards : [])
+      .filter((c) => c && c.number)
+      .map((c) => `💳 <code>${escapeHtml(c.number)}</code>${c.holder ? ` — ${escapeHtml(c.holder)}` : ''}${c.bank ? ` (${escapeHtml(c.bank)})` : ''}`)
+      .join('\n');
+    const sum = money(order.total);
+    await safeSend(order.user.telegramId, cards ? t(lang, 'askReceipt', sum, cards) : t(lang, 'askReceiptNoCard', sum));
+  }
+
   await notifyAdmins(order, settings);
 }
 
@@ -190,6 +233,7 @@ async function notifyAdmins(order, settings, { title } = {}) {
     isDelivery ? `📍 ${escapeHtml(order.address || 'Lokatsiya bo‘yicha')}` : '🏃 Mijoz o‘zi olib ketadi',
     isDelivery && !hasCoords(order) ? '⚠️ <b>Lokatsiya yo‘q</b> — mijozdan so‘raldi, kelsa alohida xabar beriladi' : null,
     order.addressNote ? `🏠 ${escapeHtml(order.addressNote)}` : null,
+    order.paymentType === 'CARD' ? (order.receiptAt ? '🧾 Chek: ✅ yuborilgan' : '🧾 Chek: ⏳ kutilmoqda — mijozdan so‘raldi') : null,
     order.comment ? `💬 ${escapeHtml(order.comment)}` : null,
     '',
     orderSummary(order, 'uz'),
@@ -245,6 +289,7 @@ module.exports = {
   onCallback,
   onContact,
   onLocation,
+  onReceipt,
   onHelp,
   notifyNewOrder,
   notifyStatus,

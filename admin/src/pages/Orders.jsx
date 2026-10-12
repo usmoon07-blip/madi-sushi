@@ -4,6 +4,7 @@ import { beep } from '../sound.js';
 import { printReceipt, printerConfig } from '../printing.js';
 import { NEXT_STATUS, STATUSES, courierNote, formatDate, isTouchDevice, money, statusOf, yandexGo, yandexNavi, yandexRoute } from '../format.js';
 import YandexGoModal from '../components/YandexGoModal.jsx';
+import ReceiptModal from '../components/ReceiptModal.jsx';
 
 const FILTERS = [
   { value: 'ACTIVE', label: 'Faol' },
@@ -25,6 +26,7 @@ export default function Orders({ onActiveCount, visible }) {
   const [fresh, setFresh] = useState(new Set());
   const lastSeenId = useRef(null);
   const [goOrder, setGoOrder] = useState(null);
+  const [receiptOrder, setReceiptOrder] = useState(null);
 
   const openYandexGo = (order) => {
     const url = yandexGo(order);
@@ -216,7 +218,24 @@ export default function Orders({ onActiveCount, visible }) {
                       </>
                     )}
                   </td>
-                  <td className="nowrap">{o.paymentType === 'CARD' ? '💳 Karta' : '💵 Naqd'}</td>
+                  <td className="nowrap">
+                    {o.paymentType === 'CARD' ? (
+                      <div className="pay-cell">
+                        <span>💳 Karta</span>
+                        {o.receiptAt ? (
+                          <button type="button" className="btn btn--sm btn--receipt" onClick={() => setReceiptOrder(o)}>
+                            🧾 Chekni ko'rish
+                          </button>
+                        ) : (
+                          <span className="warn-pill" title="Bot mijozdan chek so'radi. Yuborsa, shu yerda paydo bo'ladi">
+                            ⏳ Chek kutilmoqda
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      '💵 Naqd'
+                    )}
+                  </td>
                   <td className="nowrap">
                     <div className="strong">{money(o.total)}</div>
                     {o.deliveryFee > 0 && <div className="muted small">yetkazish: {money(o.deliveryFee)}</div>}
@@ -247,6 +266,7 @@ export default function Orders({ onActiveCount, visible }) {
         {!orders && !error && <div className="empty">Yuklanmoqda...</div>}
       </div>
 
+      {receiptOrder && <ReceiptModal order={receiptOrder} onClose={() => setReceiptOrder(null)} />}
       {goOrder && (
         <YandexGoModal order={goOrder} url={yandexGo(goOrder)} note={courierNote(goOrder)} onClose={() => setGoOrder(null)} />
       )}

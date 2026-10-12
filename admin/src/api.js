@@ -44,6 +44,12 @@ async function request(path, { method = 'GET', body, form } = {}) {
 export const api = {
   login: (password) => request('/login', { method: 'POST', body: { password } }),
   orders: (status) => request(`/orders${status ? `?status=${status}` : ''}`),
+  // Chek rasmi — avtorizatsiya sarlavhasi bilan olinadi
+  receipt: async (id) => {
+    const res = await fetch(`/api/admin/orders/${id}/receipt`, { headers: { Authorization: `Bearer ${auth.get()}` } });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Chekni ochib bo'lmadi");
+    return res.blob();
+  },
   setStatus: (id, status) => request(`/orders/${id}/status`, { method: 'PATCH', body: { status } }),
   products: () => request('/products'),
   createProduct: (data) => request('/products', { method: 'POST', body: data }),

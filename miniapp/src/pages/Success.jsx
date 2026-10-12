@@ -5,8 +5,10 @@ import { useT } from '../i18n.jsx';
 
 export default function Success({ order, onDone }) {
   const { t, money } = useT();
+  const isCard = order.paymentType === 'CARD';
   useEffect(() => {
-    if (!isTelegram) return undefined;
+    // Karta to'lovida mijoz chek haqidagi xabarni o'qishi kerak — avtomatik yopilmaydi
+    if (!isTelegram || isCard) return undefined;
     const t = setTimeout(closeApp, 2800);
     return () => clearTimeout(t);
   }, []);
@@ -21,9 +23,21 @@ export default function Success({ order, onDone }) {
         {t('orderNo')} <b>#{order.id}</b> · {money(order.total)}
       </p>
       <p className="muted">{order.deliveryType === 'DELIVERY' ? t('successDelivery') : t('successPickup')}</p>
-      <button type="button" className="btn btn--ghost" onClick={isTelegram ? closeApp : onDone}>
-        {isTelegram ? t('close') : t('backToMenu')}
-      </button>
+      {isCard && (
+        <div className="receipt-box">
+          <div className="receipt-box__title">📸 {t('receiptTitle')}</div>
+          <p>{t('receiptText', money(order.total))}</p>
+        </div>
+      )}
+      {isCard && isTelegram ? (
+        <button type="button" className="btn btn--primary" onClick={closeApp}>
+          {t('receiptBtn')}
+        </button>
+      ) : (
+        <button type="button" className="btn btn--ghost" onClick={isTelegram ? closeApp : onDone}>
+          {isTelegram ? t('close') : t('backToMenu')}
+        </button>
+      )}
     </div>
   );
 }

@@ -273,7 +273,7 @@ export default function Cart({ onSuccess }) {
         <div className="panel">
           {cards.length ? (
             <>
-              <p className="muted small">{t('cardHint', isDelivery ? t('toCourier') : t('toCashier'))}</p>
+              <p className="muted small">{t('cardHint')}</p>
               {cards.map((c) => (
                 <div key={c.number} className="bank-card">
                   <div>
@@ -295,6 +295,7 @@ export default function Cart({ onSuccess }) {
                   </button>
                 </div>
               ))}
+              <p className="receipt-rule">{t('receiptRule')}</p>
             </>
           ) : (
             <p className="muted small">{t('cardByStaff', isDelivery ? t('courierWho') : t('cashierWho'))}</p>

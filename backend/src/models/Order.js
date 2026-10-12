@@ -36,6 +36,23 @@ const findAwaitingLocation = (userId) =>
     include: withUser,
   });
 
+// Karta bilan to'lanadigan oxirgi faol buyurtma (cheki yo'qlari birinchi; qayta yuborilsa — yangilanadi)
+const RECEIPT_WINDOW_MS = 24 * 60 * 60 * 1000;
+const findAwaitingReceipt = (userId) =>
+  prisma.order.findFirst({
+    where: {
+      userId,
+      paymentType: 'CARD',
+      status: { in: ACTIVE_STATUSES },
+      createdAt: { gte: new Date(Date.now() - RECEIPT_WINDOW_MS) },
+    },
+    orderBy: [{ receiptAt: { sort: 'asc', nulls: 'first' } }, { id: 'desc' }],
+    include: withUser,
+  });
+
+const setReceipt = (id, fileId, type) =>
+  prisma.order.update({ where: { id }, data: { receiptFileId: fileId, receiptType: type, receiptAt: new Date() }, include: withUser });
+
 const setLocation = (id, data) => prisma.order.update({ where: { id }, data, include: withUser });
 
 // ---- Oshxona cheki navbati ----
@@ -83,4 +100,4 @@ async function stats() {
   };
 }
 
-module.exports = { ACTIVE_STATUSES, findAwaitingLocation, setLocation, printQueue, claimPrint, releasePrint, create, findByClientRef, findById, listForUser, listForAdmin, updateStatus, stats };
+module.exports = { ACTIVE_STATUSES, findAwaitingLocation, findAwaitingReceipt, setReceipt, setLocation, printQueue, claimPrint, releasePrint, create, findByClientRef, findById, listForUser, listForAdmin, updateStatus, stats };

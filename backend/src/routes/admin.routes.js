@@ -18,6 +18,7 @@ router.post('/login', loginLimiter, h(admin.login));
 
 router.use(adminAuth);
 router.get('/orders', h(admin.listOrders));
+router.get('/orders/:id/receipt', h(admin.getReceipt));
 router.patch('/orders/:id/status', h(admin.updateOrderStatus));
 router.get('/print-queue', h(admin.getPrintQueue));
 router.post('/orders/:id/print-claim', h(admin.claimPrint));
