@@ -1,0 +1,62 @@
+# Pexels'dan (bepul litsenziya) mahsulot suratlarini yuklab, loyihaga saqlaydi.
+# Ishga tushirish: Actions → "Stok suratlarni yuklash" → Run workflow
+#   items: "nom:pexelsId nom2:pexelsId2 ..."   dir: saqlanadigan papka
+name: Stok suratlarni yuklash
+
+on:
+  workflow_dispatch:
+    inputs:
+      items:
+        description: 'nom:pexelsId juftliklari (bo‘sh joy bilan)'
+        required: true
+      dir:
+        description: 'Papka'
+        required: true
+        default: 'backend/public/products/photos'
+      size:
+        description: 'Kvadrat o‘lcham (px)'
+        required: true
+        default: '800'
+
+permissions:
+  contents: write
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Yuklash
+        env:
+          ITEMS: ${{ inputs.items }}
+          DIR: ${{ inputs.dir }}
+          SIZE: ${{ inputs.size }}
+        run: |
+          set -u
+          mkdir -p "$DIR"
+          UA='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36'
+          for pair in $ITEMS; do
+            name="${pair%%:*}"; id="${pair##*:}"
+            [[ "$name" =~ ^[a-z0-9-]+$ && "$id" =~ ^[0-9]+$ ]] || { echo "SKIP $pair"; continue; }
+            out="$DIR/$name.jpg"
+            q="auto=compress&cs=tinysrgb&w=$SIZE&h=$SIZE&fit=crop"
+            url="https://images.pexels.com/photos/$id/pexels-photo-$id.jpeg?$q"
+            if ! curl -fsSL -A "$UA" "$url" -o "$out"; then
+              # Yangi suratlarda fayl nomi boshqacha — sahifadan og:image olamiz
+              img=$(curl -fsSL -A "$UA" "https://www.pexels.com/photo/$id/" | grep -o 'https://images.pexels.com/photos/[^"?]*' | head -1 || true)
+              if [ -n "$img" ] && curl -fsSL -A "$UA" "$img?$q" -o "$out"; then echo "OK(og) $name $id"; else echo "FAIL $name $id"; rm -f "$out"; continue; fi
+            else
+              echo "OK $name $id"
+            fi
+            file "$out" | grep -q JPEG || { echo "NOT-JPEG $name $id"; rm -f "$out"; }
+          done
+          ls -la "$DIR"
+      - name: Saqlash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && { echo "O'zgarish yo'q"; exit 0; }
+          git commit -m "Stok suratlar (Pexels): ${{ inputs.dir }}"
+          git push
