@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useCart } from '../store.jsx';
+import { mediaUrl } from '../api.js';
 import { haptic, onBackButton } from '../telegram.js';
 import { money } from '../format.js';
 import Price from './Price.jsx';
@@ -39,7 +40,7 @@ export default function ProductSheet({ product, onClose }) {
         <div className="sheet__handle" />
         <div className="sheet__scroll">
           <div className="sheet__media">
-            {product.imageUrl ? <img src={product.imageUrl} alt={product.name} /> : <div className="card__ph">🍣</div>}
+            {product.imageUrl ? <img src={mediaUrl(product.imageUrl)} alt={product.name} /> : <div className="card__ph">🍣</div>}
           </div>
           <div className="sheet__content">
             <span className="eyebrow">{product.category}</span>

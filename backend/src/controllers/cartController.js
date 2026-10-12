@@ -81,6 +81,13 @@ async function bootstrap(req, res) {
   });
 }
 
+// Telegramsiz ochiq menyu: Mini App nusxasi (snapshot) va tezkor yuklash uchun
+async function publicMenu(req, res) {
+  const [products, settings] = await Promise.all([Product.listActive(), Settings.get()]);
+  res.set('Cache-Control', 'public, max-age=30');
+  res.json({ products: products.map(publicProduct), settings: publicSettings(settings) });
+}
+
 async function me(req, res) {
   const user = await User.findById(req.user.id);
   res.json({ user: publicUser(user) });
@@ -121,11 +128,13 @@ async function createOrder(req, res) {
   // Savatni tekshirish
   const rawItems = Array.isArray(body.items) ? body.items : [];
   const qtyById = new Map();
+  const nameById = new Map();
   for (const it of rawItems) {
     const id = Number(it?.productId);
     const qty = Math.floor(Number(it?.qty));
     if (!Number.isInteger(id) || id <= 0 || !Number.isFinite(qty) || qty <= 0) continue;
     qtyById.set(id, Math.min((qtyById.get(id) || 0) + qty, 50));
+    if (typeof it.name === 'string') nameById.set(id, it.name);
   }
   if (!qtyById.size) throw new HttpError(400, "Savat bo'sh");
   if (qtyById.size > 40) throw new HttpError(400, 'Savatda mahsulotlar juda ko‘p');
@@ -133,6 +142,10 @@ async function createOrder(req, res) {
   const products = await Product.findActiveByIds([...qtyById.keys()]);
   if (products.length !== qtyById.size) {
     throw new HttpError(409, "Savatdagi ba'zi mahsulotlar hozir mavjud emas. Savatni yangilang");
+  }
+  // Ilovadagi menyu nusxasi eskirgan bo'lsa, boshqa taom buyurtma qilinib qolmasin
+  if (products.some((p) => nameById.has(p.id) && nameById.get(p.id) !== p.name)) {
+    throw new HttpError(409, 'Menyu yangilandi. Savatni tekshirib, qayta tasdiqlang');
   }
 
   // Narxlar faqat serverda hisoblanadi
@@ -205,4 +218,4 @@ async function createOrder(req, res) {
   return res.status(201).json({ order: publicOrder(order) });
 }
 
-module.exports = { HttpError, bootstrap, me, savePhone, geocode, myOrders, createOrder, publicProduct };
+module.exports = { HttpError, bootstrap, publicMenu, me, savePhone, geocode, myOrders, createOrder, publicProduct };

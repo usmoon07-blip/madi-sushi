@@ -1,0 +1,175 @@
+{
+  "generatedAt": "2026-10-12T13:51:35.721Z",
+  "products": [
+    {
+      "id": 1,
+      "name": "Filadelfiya",
+      "description": "Eng mashhur roll: yangi norvej losos, yumshoq krem-pishloq va bodring.",
+      "ingredients": [
+        "Norvej losos",
+        "Krem-pishloq",
+        "Bodring",
+        "Guruch",
+        "Nori"
+      ],
+      "imageUrl": "/static/products/philadelphia.svg",
+      "oldPrice": 99000,
+      "price": 89000,
+      "category": "Rollar"
+    },
+    {
+      "id": 2,
+      "name": "Kaliforniya",
+      "description": "Klassik Kaliforniya: qisqichbaqa, avokado va to'q sariq masago ikrasi.",
+      "ingredients": [
+        "Qisqichbaqa",
+        "Avokado",
+        "Bodring",
+        "Masago ikrasi",
+        "Yapon mayonezi"
+      ],
+      "imageUrl": "/static/products/california.svg",
+      "oldPrice": null,
+      "price": 75000,
+      "category": "Rollar"
+    },
+    {
+      "id": 3,
+      "name": "Ajdaho (Dragon)",
+      "description": "Avokado bilan qoplangan, ichida dudlangan ugor va unagi sousi.",
+      "ingredients": [
+        "Dudlangan ugor",
+        "Avokado",
+        "Krem-pishloq",
+        "Bodring",
+        "Unagi sousi",
+        "Kunjut"
+      ],
+      "imageUrl": "/static/products/dragon.svg",
+      "oldPrice": 110000,
+      "price": 95000,
+      "category": "Rollar"
+    },
+    {
+      "id": 4,
+      "name": "Qora samuray",
+      "description": "Tempura krevetka, losos va krem-pishloq. Qarsildoq va to'yimli.",
+      "ingredients": [
+        "Tempura krevetka",
+        "Losos",
+        "Krem-pishloq",
+        "Qora kunjut",
+        "Nori"
+      ],
+      "imageUrl": "/static/products/black-samurai.svg",
+      "oldPrice": null,
+      "price": 85000,
+      "category": "Rollar"
+    },
+    {
+      "id": 5,
+      "name": "Spicy Tuna",
+      "description": "O'tkir sousdagi tunets va bodring — achchiq yoqtiruvchilar uchun.",
+      "ingredients": [
+        "Tunets",
+        "Spicy sous",
+        "Bodring",
+        "Guruch",
+        "Nori"
+      ],
+      "imageUrl": "/static/products/spicy-tuna.svg",
+      "oldPrice": null,
+      "price": 79000,
+      "category": "Rollar"
+    },
+    {
+      "id": 6,
+      "name": "Madi Premium set",
+      "description": "32 dona: Filadelfiya, Kaliforniya, Ajdaho va Qora samuray. 3–4 kishilik.",
+      "ingredients": [
+        "Filadelfiya — 8 dona",
+        "Kaliforniya — 8 dona",
+        "Ajdaho — 8 dona",
+        "Qora samuray — 8 dona",
+        "Imbir, vasabi, soya sousi"
+      ],
+      "imageUrl": "/static/products/madi-premium-set.svg",
+      "oldPrice": 329000,
+      "price": 289000,
+      "category": "Setlar"
+    },
+    {
+      "id": 7,
+      "name": "Filadelfiya set",
+      "description": "24 dona Filadelfiya: klassik, kunjutli va kuydirilgan losos bilan.",
+      "ingredients": [
+        "Filadelfiya klassik — 8 dona",
+        "Filadelfiya kunjutli — 8 dona",
+        "Filadelfiya flambe — 8 dona",
+        "Imbir, vasabi, soya sousi"
+      ],
+      "imageUrl": "/static/products/philadelphia-set.svg",
+      "oldPrice": 259000,
+      "price": 239000,
+      "category": "Setlar"
+    },
+    {
+      "id": 8,
+      "name": "Nigiri losos",
+      "description": "2 dona. Guruch ustida yangi losos bo‘lagi.",
+      "ingredients": [
+        "Norvej losos",
+        "Sushi guruchi",
+        "Vasabi"
+      ],
+      "imageUrl": "/static/products/nigiri-salmon.svg",
+      "oldPrice": null,
+      "price": 39000,
+      "category": "Nigiri"
+    },
+    {
+      "id": 9,
+      "name": "Nigiri ugor",
+      "description": "2 dona. Dudlangan ugor, unagi sousi va kunjut.",
+      "ingredients": [
+        "Dudlangan ugor",
+        "Sushi guruchi",
+        "Unagi sousi",
+        "Kunjut"
+      ],
+      "imageUrl": "/static/products/nigiri-eel.svg",
+      "oldPrice": null,
+      "price": 45000,
+      "category": "Nigiri"
+    },
+    {
+      "id": 10,
+      "name": "Coca-Cola 0.5",
+      "description": "Muzdek Coca-Cola, 0.5 l.",
+      "ingredients": [],
+      "imageUrl": "/static/products/coca-cola.svg",
+      "oldPrice": null,
+      "price": 12000,
+      "category": "Ichimliklar"
+    },
+    {
+      "id": 11,
+      "name": "Yashil choy",
+      "description": "Yapon yashil choyi, 0.4 l.",
+      "ingredients": [],
+      "imageUrl": "/static/products/green-tea.svg",
+      "oldPrice": null,
+      "price": 15000,
+      "category": "Ichimliklar"
+    }
+  ],
+  "settings": {
+    "cards": [],
+    "deliveryFee": 15000,
+    "freeDeliveryFrom": 200000,
+    "minOrder": 50000,
+    "pickupAddress": "Toshkent, Foziltepa ko'chasi, 40",
+    "contactPhone": "",
+    "isOpen": true
+  }
+}

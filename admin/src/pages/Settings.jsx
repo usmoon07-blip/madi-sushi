@@ -21,15 +21,17 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [connection, setConnection] = useState('USB');
   const [testing, setTesting] = useState(false);
+  const [cloud, setCloud] = useState(false);
   usePrinterConfig(); // "shu kompyuter" belgisi o'zgarsa qayta chizish uchun
   const isKitchen = device.isKitchen();
 
   useEffect(() => {
     api
       .settings()
-      .then(({ settings }) => {
+      .then(({ settings, serverMode }) => {
         setForm({ ...settings, cards: settings.cards || [] });
-        setConnection(settings.printerIp ? 'NETWORK' : 'USB');
+        setCloud(serverMode === 'cloud');
+        setConnection(settings.printerIp && serverMode !== 'cloud' ? 'NETWORK' : 'USB');
       })
       .catch((e) => setError(e.message));
   }, []);
@@ -202,12 +204,23 @@ export default function Settings() {
           <span>Printer qanday ulangan</span>
           <div className="choice">
             {[
-              { value: 'USB', title: 'USB kabel orqali', text: 'Printer kompyuterga ulangan. Chekni shu kompyuterdagi admin panel chiqaradi.' },
-              { value: 'NETWORK', title: 'Tarmoq (LAN / Wi-Fi)', text: "Printerning IP manzili bor. Server chekni to'g'ridan-to'g'ri yuboradi." },
+              {
+                value: 'USB',
+                title: 'Oshxona kompyuteri orqali',
+                text: "Printer Windows'ga o'rnatilgan (USB yoki LAN). Chekni shu kompyuterdagi admin panel chiqaradi.",
+              },
+              {
+                value: 'NETWORK',
+                title: 'Tarmoq printeri (IP)',
+                text: cloud
+                  ? "Server internetda turgani uchun ichki tarmoqdagi printerga ulana olmaydi. «Oshxona kompyuteri orqali» ni tanlang."
+                  : "Printerning IP manzili bor. Server chekni to'g'ridan-to'g'ri yuboradi.",
+              },
             ].map((c) => (
               <button
                 key={c.value}
                 type="button"
+                disabled={cloud && c.value === 'NETWORK'}
                 className={`choice__item ${connection === c.value ? 'is-active' : ''}`}
                 onClick={() => {
                   setSaved(false);

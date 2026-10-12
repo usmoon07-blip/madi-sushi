@@ -101,3 +101,11 @@ model Settings {
   printCopies      Int      @default(1)
   updatedAt        DateTime @updatedAt
 }
+
+// Yuklangan rasmlar bazada saqlanadi (bepul serverlarda disk vaqtinchalik)
+model Upload {
+  id        String   @id
+  mime      String
+  data      Bytes
+  createdAt DateTime @default(now())
+}

@@ -1,19 +1,15 @@
-const crypto = require('crypto');
 const express = require('express');
 const multer = require('multer');
-const config = require('../config/default');
+const Upload = require('../models/Upload');
 const h = require('../middlewares/asyncHandler');
 const { adminAuth, loginLimiter } = require('../middlewares/auth.middleware');
 const admin = require('../controllers/adminController');
 
-const EXT = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp' };
+// Rasm xotirada qabul qilinib, bazaga yoziladi
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: config.paths.uploads,
-    filename: (req, file, cb) => cb(null, `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${EXT[file.mimetype]}`),
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024, files: 1 },
-  fileFilter: (req, file, cb) => cb(null, Boolean(EXT[file.mimetype])),
+  fileFilter: (req, file, cb) => cb(null, Boolean(Upload.EXT[file.mimetype])),
 });
 
 const router = express.Router();

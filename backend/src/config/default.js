@@ -21,7 +21,14 @@ const config = {
     .createHash('sha256')
     .update(`${env('APP_SECRET', 'madi-sushi')}:${adminPassword}:${botToken}`)
     .digest('hex'),
-  webappUrl: env('WEBAPP_URL').replace(/\/+$/, ''),
+  // Serverning ochiq manzili (Render o'zi RENDER_EXTERNAL_URL beradi). Bo'lsa — bot webhook rejimida ishlaydi
+  publicUrl: (env('PUBLIC_URL') || env('RENDER_EXTERNAL_URL')).replace(/\/+$/, ''),
+  // Mini App manzili (masalan Vercel). Bo'sh bo'lsa: serverning o'zi yoki ngrok
+  webappUrl: (env('WEBAPP_URL') || env('WEB_APP_URL')).replace(/\/+$/, ''),
+  corsOrigins: env('CORS_ORIGINS')
+    .split(',')
+    .map((o) => o.trim().replace(/\/+$/, ''))
+    .filter(Boolean),
   yandexGeocoderKey: env('YANDEX_GEOCODER_KEY'),
   allowDevUser: env('ALLOW_DEV_USER') === 'true',
   brand: {

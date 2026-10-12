@@ -6,6 +6,7 @@ const User = require('../models/User');
 const Settings = require('../models/Settings');
 const { money, escapeHtml, normalizePhone } = require('../services/format');
 const { yandexRouteUrl } = require('../services/maps');
+const { errText } = require('../services/redact');
 
 const menuKeyboard = () => {
   const url = webapp.getUrl();
@@ -70,7 +71,7 @@ async function safeSend(chatId, text, extra = {}) {
   try {
     await bot.api.sendMessage(chatId, text, { parse_mode: 'HTML', link_preview_options: { is_disabled: true }, ...extra });
   } catch (err) {
-    console.warn(`[bot] ${chatId} ga xabar yuborilmadi:`, err.description || err.message);
+    console.warn(`[bot] ${chatId} ga xabar yuborilmadi:`, errText(err));
   }
 }
 
@@ -111,7 +112,7 @@ async function notifyNewOrder(order) {
       try {
         await bot.api.sendLocation(adminId, order.lat, order.lon);
       } catch (err) {
-        console.warn('[bot] Lokatsiya yuborilmadi:', err.description || err.message);
+        console.warn('[bot] Lokatsiya yuborilmadi:', errText(err));
       }
     }
   }

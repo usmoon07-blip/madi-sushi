@@ -1,8 +1,9 @@
 const config = require('../config/default');
 const { bot } = require('./bot');
+const { errText } = require('../services/redact');
 
-// Mini App manzili: .env dagi WEBAPP_URL yoki ishlab turgan ngrok'dan avtomatik olinadi
-let currentUrl = config.webappUrl || null;
+// Mini App manzili: WEBAPP_URL (masalan Vercel), serverning o'z manzili yoki ishlab turgan ngrok
+let currentUrl = config.webappUrl || config.publicUrl || null;
 const listeners = new Set();
 
 const getUrl = () => currentUrl;
@@ -16,7 +17,7 @@ async function setUrl(url) {
     try {
       await fn(url);
     } catch (err) {
-      console.warn('[webapp]', err.message);
+      console.warn('[webapp]', errText(err));
     }
   }
 }
@@ -38,13 +39,13 @@ async function updateMenuButton(url) {
   await bot.api.setChatMenuButton({
     menu_button: { type: 'web_app', text: '🍣 Menyu', web_app: { url } },
   });
-  console.log("[bot] Menyu tugmasi yangilandi");
+  console.log(`[bot] Menyu tugmasi yangilandi: ${url}`);
 }
 
 function start() {
   onChange(updateMenuButton);
-  if (config.webappUrl) {
-    updateMenuButton(config.webappUrl).catch((err) => console.warn('[bot] Menyu tugmasi:', err.message));
+  if (currentUrl) {
+    updateMenuButton(currentUrl).catch((err) => console.warn('[bot] Menyu tugmasi:', errText(err)));
     return;
   }
   let warned = false;

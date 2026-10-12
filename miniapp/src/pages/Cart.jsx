@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
-import { api } from '../api.js';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { api, mediaUrl } from '../api.js';
 import { useCart, toast } from '../store.jsx';
 import { getLocation, haptic, openLink, openLocationSettings, requestPhone, tg } from '../telegram.js';
 import { formatPhoneInput, isValidPhone, money, uid, yandexMapUrl, yandexSearchUrl } from '../format.js';
@@ -37,6 +37,14 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
   const clientRef = useRef(uid());
   const addressRef = useRef(null);
   const phoneRef = useRef(null);
+
+  // Server keyinroq javob bersa (menyu nusxadan ochilgan), saqlangan raqam va manzilni to'ldiramiz
+  useEffect(() => {
+    if (!user) return;
+    if (user.phone) setPhone((p) => (isValidPhone(p) ? p : formatPhoneInput(user.phone)));
+    if (user.lastAddress) setAddress((a) => a || user.lastAddress);
+    if (user.lastLat != null && user.lastLon != null) setCoords((c) => c || { lat: user.lastLat, lon: user.lastLon });
+  }, [user]);
 
   const upsell = useMemo(() => products.find((p) => /ichimlik/i.test(p.category)), [products]);
   const isDelivery = deliveryType === 'DELIVERY';
@@ -140,7 +148,7 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
     try {
       const { order } = await api.createOrder({
         clientRef: clientRef.current,
-        items: cart.lines.map((l) => ({ productId: l.product.id, qty: l.qty })),
+        items: cart.lines.map((l) => ({ productId: l.product.id, qty: l.qty, name: l.product.name })),
         deliveryType,
         paymentType,
         phone,
@@ -170,7 +178,7 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
       <div className="panel">
         {cart.lines.map(({ product, qty }) => (
           <div key={product.id} className="line">
-            <img className="line__img" src={product.imageUrl} alt="" />
+            <img className="line__img" src={mediaUrl(product.imageUrl)} alt="" />
             <div className="line__info">
               <div className="line__name">{product.name}</div>
               <div className="line__price">{money(product.price * qty)}</div>
@@ -182,7 +190,7 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
 
       {upsell && (
         <div className="upsell">
-          <img src={upsell.imageUrl} alt="" />
+          <img src={mediaUrl(upsell.imageUrl)} alt="" />
           <div className="upsell__text">
             Qo'shimcha ravishda <b>{upsell.name}</b> qo'shasizmi?
             <span className="upsell__price">+{money(upsell.price)}</span>

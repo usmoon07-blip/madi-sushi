@@ -1,4 +1,5 @@
 // Oshxona cheklarini tarmoq printeriga avtomatik chiqarish
+const config = require('../config/default');
 const Order = require('../models/Order');
 const Settings = require('../models/Settings');
 const { buildReceipt } = require('./receipt');
@@ -21,7 +22,8 @@ async function processQueue() {
   running = true;
   try {
     const settings = await Settings.get();
-    if (!settings.printerIp || settings.printMode === 'OFF') return;
+    // Internetdagi server ichki tarmoq printeriga ulana olmaydi
+    if (config.publicUrl || !settings.printerIp || settings.printMode === 'OFF') return;
     const orders = await Order.printQueue(settings.printMode);
     for (const order of orders) {
       if (!(await Order.claimPrint(order.id))) continue;

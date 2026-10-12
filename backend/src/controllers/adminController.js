@@ -4,7 +4,8 @@ const config = require('../config/default');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 const Settings = require('../models/Settings');
-const { createAdminToken, safeEqual } = require('../middlewares/auth.middleware');
+const { createAdminToken, safeEqual, recordLoginFailure, clearLoginFailures } = require('../middlewares/auth.middleware');
+const Upload = require('../models/Upload');
 const { HttpError } = require('./cartController');
 const botController = require('./botController');
 const printQueue = require('../services/printQueue');
@@ -26,8 +27,10 @@ const intOrNull = (v) => {
 async function login(req, res) {
   const password = String(req.body?.password || '');
   if (!config.adminPassword || !safeEqual(password, config.adminPassword)) {
+    recordLoginFailure(req.ip);
     throw new HttpError(401, "Parol noto'g'ri");
   }
+  clearLoginFailures(req.ip);
   res.json({ token: createAdminToken() });
 }
 
@@ -56,7 +59,7 @@ async function updateOrderStatus(req, res) {
 async function getPrintQueue(req, res) {
   const settings = await Settings.get();
   // Tarmoq printeri ulangan bo'lsa, cheklarni server o'zi chiqaradi
-  if (settings.printerIp || settings.printMode === 'OFF') return res.json({ orders: [] });
+  if ((settings.printerIp && !config.publicUrl) || settings.printMode === 'OFF') return res.json({ orders: [] });
   return res.json({ orders: await Order.printQueue(settings.printMode) });
 }
 
@@ -162,6 +165,7 @@ async function deleteProduct(req, res) {
   const id = parseId(req.params.id);
   const product = await Product.remove(id);
   if (product.imageUrl.startsWith('/uploads/')) {
+    Upload.removeByUrl(product.imageUrl).catch(() => {});
     fs.promises.unlink(path.join(config.paths.uploads, path.basename(product.imageUrl))).catch(() => {});
   }
   res.json({ ok: true });
@@ -169,12 +173,19 @@ async function deleteProduct(req, res) {
 
 async function uploadImage(req, res) {
   if (!req.file) throw new HttpError(400, 'Rasm tanlanmadi (JPG, PNG yoki WEBP, 5 MB gacha)');
-  res.status(201).json({ url: `/uploads/${req.file.filename}` });
+  const url = await Upload.save(req.file.buffer, req.file.mimetype);
+  res.status(201).json({ url });
 }
 
 // ---- Sozlamalar ----
 async function getSettings(req, res) {
-  res.json({ settings: await Settings.get(), printer: printQueue.status() });
+  // cloud: server internetda (Render) — ichki tarmoqdagi printerga ulana olmaydi
+  const settings = await Settings.get();
+  res.json({
+    settings: config.publicUrl ? { ...settings, printerIp: '' } : settings,
+    printer: printQueue.status(),
+    serverMode: config.publicUrl ? 'cloud' : 'local',
+  });
 }
 
 async function updateSettings(req, res) {
@@ -218,7 +229,7 @@ async function updateSettings(req, res) {
   }
   const settings = await Settings.update(data);
   printQueue.kick();
-  res.json({ settings });
+  res.json({ settings: config.publicUrl ? { ...settings, printerIp: '' } : settings });
 }
 
 module.exports = {

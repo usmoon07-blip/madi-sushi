@@ -1,4 +1,5 @@
 import { useCart } from '../store.jsx';
+import { mediaUrl } from '../api.js';
 import { haptic } from '../telegram.js';
 import { PlusIcon } from './Icons.jsx';
 import Price from './Price.jsx';
@@ -12,7 +13,7 @@ export default function ProductCard({ product, onOpen }) {
   return (
     <article className="card" onClick={() => onOpen(product)}>
       <div className="card__media">
-        {product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" /> : <div className="card__ph">🍣</div>}
+        {product.imageUrl ? <img src={mediaUrl(product.imageUrl)} alt={product.name} loading="lazy" /> : <div className="card__ph">🍣</div>}
         {discount > 0 && <span className="card__badge">−{discount}%</span>}
       </div>
       <div className="card__body">

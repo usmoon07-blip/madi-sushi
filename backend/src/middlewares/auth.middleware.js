@@ -81,20 +81,38 @@ function adminAuth(req, res, next) {
   return next();
 }
 
-// Parolni tanlab topishdan himoya: 1 daqiqada 10 ta urinish
-const attempts = new Map();
+// Parolni tanlab topishdan himoya: bitta IP'dan 8 ta xato urinish -> 15 daqiqa blok
+const MAX_FAILS = 8;
+const BLOCK_MS = 15 * 60 * 1000;
+const failures = new Map();
+
 function loginLimiter(req, res, next) {
-  const key = req.ip;
-  const now = Date.now();
-  const entry = attempts.get(key) || { count: 0, reset: now + 60_000 };
-  if (now > entry.reset) {
-    entry.count = 0;
-    entry.reset = now + 60_000;
+  const entry = failures.get(req.ip);
+  if (entry && entry.blockedUntil > Date.now()) {
+    const minutes = Math.ceil((entry.blockedUntil - Date.now()) / 60000);
+    return res.status(429).json({ error: `Juda ko'p xato urinish. ${minutes} daqiqadan so'ng qayta urining` });
   }
-  entry.count += 1;
-  attempts.set(key, entry);
-  if (entry.count > 10) return res.status(429).json({ error: "Juda ko'p urinish. 1 daqiqadan so'ng qayta urining" });
   return next();
 }
 
-module.exports = { verifyInitData, telegramAuth, createAdminToken, adminAuth, loginLimiter, safeEqual };
+function recordLoginFailure(ip) {
+  const entry = failures.get(ip) || { count: 0, blockedUntil: 0 };
+  if (entry.blockedUntil && entry.blockedUntil <= Date.now()) entry.count = 0;
+  entry.count += 1;
+  entry.blockedUntil = entry.count >= MAX_FAILS ? Date.now() + BLOCK_MS : 0;
+  failures.set(ip, entry);
+  if (failures.size > 10000) failures.clear();
+}
+
+const clearLoginFailures = (ip) => failures.delete(ip);
+
+module.exports = {
+  verifyInitData,
+  telegramAuth,
+  createAdminToken,
+  adminAuth,
+  loginLimiter,
+  recordLoginFailure,
+  clearLoginFailures,
+  safeEqual,
+};

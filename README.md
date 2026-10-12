@@ -2,15 +2,69 @@
 
 Toshkentdagi premium sushi bar uchun buyurtma tizimi. Qora-qizil dizaynda.
 
-| Qism | Manzil | Vazifasi |
+| Qism | Qayerda | Vazifasi |
 |---|---|---|
-| **Mini App** (mijoz) | Telegram bot ichida | Menyu · Savat · Profil |
-| **Admin panel** | http://localhost:3000/admin | Buyurtmalar, mahsulotlar, kartalar, sozlamalar |
-| **Bot + API** | `backend/` | Buyurtmalarni qabul qiladi, mijoz va adminga xabar yuboradi |
+| **Backend + bot** (webhook) | **Render** (bepul) | Buyurtmalarni qabul qiladi, mijoz va adminga xabar yuboradi |
+| **Mini App** (mijoz) | **Vercel** (bepul) | Menyu · Savat · Profil |
+| **Admin panel** | Render, `/admin` | Buyurtmalar, mahsulotlar, kartalar, oshxona cheki |
+| **Baza** | **Neon** PostgreSQL (bepul) | Buyurtmalar, menyu, yuklangan rasmlar |
+
+Kompyuter o'chiq bo'lsa ham bot ishlaydi. Kompyuterda (localhost) ishga tushirish ham mumkin — [pastda](#kompyuterda-ishga-tushirish-localhost).
 
 ---
 
-## 1. Kompyuterga kerakli dasturlar (bir marta)
+## 🚀 Serverga joylash (bir marta, ~15 daqiqa)
+
+### 1-qadam. Render — backend, bot va admin panel
+1. https://render.com → **Get Started** → **GitHub** orqali kiring.
+2. **New +** → **Blueprint** → `madi-sushi` omborini tanlang (ko'rinmasa: *Configure account* → omborga ruxsat bering).
+3. Branch: `main` → **Apply**. Render 5 ta maxfiy qiymatni so'raydi:
+
+   | Kalit | Qiymat |
+   |---|---|
+   | `DATABASE_URL` | Neon manzili, `-pooler` bilan, oxiriga `?sslmode=require&connect_timeout=15&pgbouncer=true` |
+   | `DIRECT_URL` | Xuddi shu manzil, lekin `-pooler` so'zisiz, oxiri `?sslmode=require&connect_timeout=15` |
+   | `BOT_TOKEN` | BotFather bergan token |
+   | `ADMIN_IDS` | Telegram ID (bir nechta bo'lsa vergul bilan) |
+   | `ADMIN_PASSWORD` | Admin panel paroli |
+
+4. **Deploy** tugashini kuting (3–5 daqiqa). Yuqorida manzil chiqadi: `https://madi-sushi.onrender.com` (yoki shunga o'xshash).
+5. Tekshiring: `https://SIZNING-MANZIL.onrender.com/api/health` → `{"ok":true}`.
+
+Shu zahoti bot ishlaydi: Telegramda `/start` → **🍣 Menyu**. Admin panel: `https://SIZNING-MANZIL.onrender.com/admin`.
+
+### 2-qadam. Vercel — Mini App (tez ochilishi uchun)
+1. https://vercel.com → **Sign Up** → **GitHub** orqali kiring.
+2. **Add New → Project** → `madi-sushi` → **Import**.
+3. ⚠️ **Root Directory** → **Edit** → `miniapp` ni tanlang (eng ko'p uchraydigan xato — buni unutish).
+4. **Environment Variables**: `VITE_API_URL` = `https://SIZNING-MANZIL.onrender.com/api`
+5. **Deploy**. Manzil chiqadi: `https://madi-sushi.vercel.app` (yoki shunga o'xshash).
+
+### 3-qadam. Render'ga Vercel manzilini qo'shish
+Render → servis → **Environment** → **Add Environment Variable**:
+
+| Kalit | Qiymat |
+|---|---|
+| `WEBAPP_URL` | `https://SIZNING-LOYIHA.vercel.app` |
+| `CORS_ORIGINS` | `https://SIZNING-LOYIHA.vercel.app` |
+
+**Save Changes** → server qayta ishga tushadi va botdagi **🍣 Menyu** tugmasi Vercel'ga ulanadi.
+
+### 4-qadam. Serverni uxlatmaslik
+Bepul Render 15 daqiqa jimlikdan keyin uxlaydi (uyg'onishi 30–60 soniya). GitHub Actions ish vaqtida (09:00–02:00) har 10 daqiqada uni turtib turadi.
+Render manzili `https://madi-sushi.onrender.com` dan farq qilsa: GitHub → ombor → **Settings → Secrets and variables → Actions → Variables** → `SERVER_URL` = Render manzili.
+
+### Bilib qo'ying
+- Mini App ochilishi bilan menyu **darhol** ko'rinadi (menyu nusxasi ilova bilan birga keladi), server javob bergach jimgina yangilanadi. Menyuni ko'p o'zgartirsangiz, Vercel'da **Redeploy** qiling — nusxa yangilanadi.
+- Yuklangan rasmlar **bazada** saqlanadi — Render qayta ishga tushganda o'chmaydi.
+- Bitta botni ikki joydan ishlatib bo'lmaydi: server ishlayotganda kompyuterda `npm start` qilmang.
+- Admin panelda 8 ta xato paroldan keyin o'sha IP 15 daqiqaga bloklanadi.
+
+---
+
+## Kompyuterda ishga tushirish (localhost)
+
+### 1. Kompyuterga kerakli dasturlar (bir marta)
 
 1. **Node.js** (LTS versiya): https://nodejs.org → yashil **LTS** tugmasi → o'rnating (hammasiga *Next*).
 2. **Git**: https://git-scm.com/download/win → o'rnating.
@@ -20,7 +74,7 @@ Toshkentdagi premium sushi bar uchun buyurtma tizimi. Qora-qizil dizaynda.
    ngrok config add-authtoken SIZNING_TOKENINGIZ
    ```
 
-## 2. Loyihani yuklab olish va o'rnatish
+### 2. Loyihani yuklab olish va o'rnatish
 
 **PowerShell** (Windows → Start → "PowerShell") oching va ketma-ket yozing:
 
@@ -40,7 +94,7 @@ So'ng u avtomatik:
 - boshlang'ich menyuni yozadi (`seed` — 11 ta mahsulot),
 - Mini App va Admin panelni yig'adi (`build`).
 
-## 3. Har kuni ishga tushirish
+### 3. Har kuni ishga tushirish
 
 **1-oyna** (PowerShell, `madi-sushi` papkasida):
 ```powershell
@@ -84,17 +138,21 @@ Har bir buyurtma yonidagi **🖨 Chek** tugmasi chekni qayta chiqaradi.
 - **Chek qachon chiqsin**: *yangi buyurtma kelishi bilan* yoki *«Qabul qilish» bosilganda*;
 - **Qog'oz kengligi**: 80 mm yoki 58 mm; **nusxalar soni**: 1–3 ta (masalan oshxona + kuryer uchun).
 
-### A) Tarmoq (LAN / Wi-Fi) printer — eng ishonchli yo'l
+> **Server Render'da bo'lsa:** server internetda turadi va oshxonadagi ichki tarmoq printeriga ulana olmaydi. Shuning uchun **B) usulini** ishlating.
+> LAN printerni ham Windows'ga printer qilib qo'shing (drayver o'rnatishda IP manzilini kiriting) — keyin xuddi USB kabi ishlaydi.
+> Chrome yorlig'idagi manzil: `https://SIZNING-MANZIL.onrender.com/admin`.
+
+### A) Tarmoq (LAN / Wi-Fi) printer — faqat kompyuterda (localhost) ishlaganda
 1. Printerni router'ga kabel bilan ulang.
 2. Printerning IP manzilini bilib oling. Printer o'chiq turganda **FEED** tugmasini bosib turib yoqing, shunda chiqadigan sinov chekida `IP Address: 192.168.x.x` yozilgan bo'ladi.
 3. Sozlamalarda **Tarmoq (LAN / Wi-Fi)** ni tanlang, IP manzilni yozing va **Saqlash** ni bosing, keyin **🧾 Sinov cheki** ni bosing.
 
 Bu usulda cheklarni server o'zi chiqaradi, admin panelni ochib qo'yish shart emas.
 
-### B) USB printer (kompyuterga ulangan)
+### B) Oshxona kompyuteri orqali (USB yoki Windows'ga qo'shilgan LAN printer)
 1. Printer drayverini o'rnating va Windows'da uni **asosiy printer** qiling: *Sozlamalar → Printerlar → printer → «Использовать по умолчанию» / «Set as default»*.
 2. Printer xususiyatlarida qog'oz o'lchamini 80 mm (yoki 58 mm) qilib qo'ying.
-3. Oshxona kompyuterida Admin panelni oching. **Sozlamalar → USB kabel orqali** ni tanlang, **Saqlash** ni bosing, keyin **«Shu kompyuter — oshxona kompyuteri»** tugmasini yoqing.
+3. Oshxona kompyuterida Admin panelni oching. **Sozlamalar → Oshxona kompyuteri orqali** ni tanlang, **Saqlash** ni bosing, keyin **«Shu kompyuter — oshxona kompyuteri»** tugmasini yoqing.
 4. Chek oynasiz, avtomatik chiqishi uchun maxsus Chrome yorlig'ini yarating. Ish stolida sichqonchaning o'ng tugmasini bosing → *Создать → Ярлык* (*New → Shortcut*) → quyidagini kiriting:
    ```
    "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk-printing --app=http://localhost:3000/admin

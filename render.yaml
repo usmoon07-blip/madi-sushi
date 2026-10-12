@@ -1,0 +1,33 @@
+# Render Blueprint: backend + bot (webhook) + admin panel (/admin)
+# Render → New → Blueprint → shu omborni tanlang
+services:
+  - type: web
+    name: madi-sushi
+    runtime: node
+    plan: free
+    region: frankfurt
+    # Render NODE_ENV=production qo'yadi — dev-paketlar (vite, prisma) uchun --include=dev shart
+    buildCommand: >-
+      npm install --include=dev --prefix backend &&
+      npm install --include=dev --prefix admin && npm run build --prefix admin &&
+      npm install --include=dev --prefix miniapp && npm run build --prefix miniapp
+    startCommand: npm run start:prod --prefix backend
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_IDS
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: APP_SECRET
+        generateValue: true
+      - key: ALLOW_DEV_USER
+        value: "false"

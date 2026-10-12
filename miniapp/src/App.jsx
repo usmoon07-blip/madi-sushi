@@ -9,9 +9,16 @@ import Menu from './pages/Menu.jsx';
 import Cart from './pages/Cart.jsx';
 import Profile from './pages/Profile.jsx';
 import Success from './pages/Success.jsx';
+import snapshot from './menu-snapshot.json';
+
+const hasSnapshot = Array.isArray(snapshot.products) && snapshot.products.length > 0;
+const RETRY_MS = 4000;
 
 export default function App() {
-  const [data, setData] = useState(null);
+  // Menyu nusxasi ilova bilan birga keladi: server uyg'onguncha mijoz menyuni ko'rib turadi
+  const [data, setData] = useState(() =>
+    hasSnapshot ? { products: snapshot.products, settings: snapshot.settings, user: null, fromSnapshot: true } : null
+  );
   const [error, setError] = useState('');
   const [tab, setTab] = useState('menu');
   const [sheet, setSheet] = useState(null);
@@ -22,12 +29,31 @@ export default function App() {
     setError('');
     return api
       .bootstrap()
-      .then(setData)
-      .catch((e) => setError(e.message));
+      .then((d) => {
+        setData(d);
+        return true;
+      })
+      .catch((e) => {
+        // Nusxa bor bo'lsa xatolik ko'rsatilmaydi — mijoz menyuni ko'rib turadi
+        if (!hasSnapshot) setError(e.message);
+        return e.status === 401 ? 'stop' : false;
+      });
   }, []);
 
+  // Server uxlab yotgan bo'lsa (bepul tarif), uyg'onguncha jimgina qayta urinamiz
   useEffect(() => {
-    load();
+    let cancelled = false;
+    let timer;
+    const attempt = async (n) => {
+      const ok = await load();
+      if (cancelled || ok === true || ok === 'stop' || !hasSnapshot || n >= 30) return;
+      timer = setTimeout(() => attempt(n + 1), RETRY_MS);
+    };
+    attempt(1);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [load]);
 
   useToastListener(
