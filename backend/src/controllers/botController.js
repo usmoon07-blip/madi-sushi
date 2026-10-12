@@ -59,8 +59,23 @@ async function onLangCommand(ctx) {
   await ctx.reply(t(langOf(user), 'chooseLang'), { reply_markup: langKeyboard() });
 }
 
+const isAdmin = (id) => config.adminIds.map(String).includes(String(id));
+
+// Admin botdagi chek ostidagi tugmani bosdi
+async function onReceiptDecision(ctx, action, id) {
+  if (!isAdmin(ctx.from?.id)) return ctx.answerCallbackQuery();
+  const order = action === 'ok' ? await confirmOrderReceipt(id) : await rejectOrderReceipt(id);
+  if (!order) return ctx.answerCallbackQuery({ text: 'Buyurtma topilmadi' });
+  const mark = action === 'ok' ? '✅ <b>To‘lov tasdiqlandi</b>' : '❌ <b>Chek rad etildi</b> — mijozdan qayta so‘raldi';
+  const caption = ctx.callbackQuery.message?.caption;
+  await ctx.editMessageCaption({ caption: `${escapeHtml(caption || `Buyurtma #${id}`)}\n\n${mark}`, parse_mode: 'HTML' }).catch(() => {});
+  return ctx.answerCallbackQuery({ text: action === 'ok' ? 'Tasdiqlandi' : 'Rad etildi' });
+}
+
 async function onCallback(ctx) {
   const data = ctx.callbackQuery.data || '';
+  const rc = data.match(/^rc:(ok|no):(\d+)$/);
+  if (rc) return onReceiptDecision(ctx, rc[1], Number(rc[2]));
   const m = data.match(/^lang:(uz|ru)$/);
   if (!m || !ctx.from) return ctx.answerCallbackQuery();
   const lang = m[1];
@@ -101,6 +116,26 @@ async function onLocation(ctx) {
   await notifyAdmins(updated, settings, { title: `📍 <b>Buyurtma #${order.id}: lokatsiya biriktirildi</b>` });
 }
 
+const receiptKeyboard = (id) => new InlineKeyboard().text('✅ Tasdiqlash', `rc:ok:${id}`).text('❌ Rad etish', `rc:no:${id}`);
+
+// Chekni tasdiqlash / rad etish — botdagi tugma va admin panel uchun umumiy
+async function confirmOrderReceipt(id) {
+  const current = await Order.findById(id);
+  if (!current?.receiptAt) return null;
+  if (current.receiptConfirmedAt) return current;
+  const order = await Order.confirmReceipt(id);
+  await safeSend(order.user.telegramId, t(langOf(order.user), 'receiptConfirmed', order.id));
+  return order;
+}
+
+async function rejectOrderReceipt(id) {
+  const current = await Order.findById(id);
+  if (!current) return null;
+  const order = await Order.rejectReceipt(id);
+  await safeSend(order.user.telegramId, t(langOf(order.user), 'receiptRejected', order.id));
+  return order;
+}
+
 // Mijoz chek (rasm yoki fayl) yubordi — karta orqali to'lanadigan buyurtmasiga biriktiramiz
 async function onReceipt(ctx) {
   if (!ctx.from) return;
@@ -127,7 +162,7 @@ async function onReceipt(ctx) {
   for (const adminId of config.adminIds) {
     try {
       const send = type === 'photo' ? bot.api.sendPhoto.bind(bot.api) : bot.api.sendDocument.bind(bot.api);
-      await send(adminId, fileId, { caption, parse_mode: 'HTML' });
+      await send(adminId, fileId, { caption, parse_mode: 'HTML', reply_markup: receiptKeyboard(order.id) });
     } catch (err) {
       console.warn('[bot] Chek adminga yuborilmadi:', errText(err));
     }
@@ -233,7 +268,13 @@ async function notifyAdmins(order, settings, { title } = {}) {
     isDelivery ? `📍 ${escapeHtml(order.address || 'Lokatsiya bo‘yicha')}` : '🏃 Mijoz o‘zi olib ketadi',
     isDelivery && !hasCoords(order) ? '⚠️ <b>Lokatsiya yo‘q</b> — mijozdan so‘raldi, kelsa alohida xabar beriladi' : null,
     order.addressNote ? `🏠 ${escapeHtml(order.addressNote)}` : null,
-    order.paymentType === 'CARD' ? (order.receiptAt ? '🧾 Chek: ✅ yuborilgan' : '🧾 Chek: ⏳ kutilmoqda — mijozdan so‘raldi') : null,
+    order.paymentType === 'CARD'
+      ? order.receiptConfirmedAt
+        ? '🧾 To‘lov: ✅ tasdiqlangan'
+        : order.receiptAt
+          ? '🧾 Chek: 🔎 tekshirilishi kerak'
+          : '🧾 Chek: ⏳ kutilmoqda — mijozdan so‘raldi'
+      : null,
     order.comment ? `💬 ${escapeHtml(order.comment)}` : null,
     '',
     orderSummary(order, 'uz'),
@@ -294,4 +335,6 @@ module.exports = {
   notifyNewOrder,
   notifyStatus,
   notifyReview,
+  confirmOrderReceipt,
+  rejectOrderReceipt,
 };

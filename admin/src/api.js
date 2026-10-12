@@ -50,6 +50,8 @@ export const api = {
     if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Chekni ochib bo'lmadi");
     return res.blob();
   },
+  confirmReceipt: (id) => request(`/orders/${id}/receipt/confirm`, { method: 'POST' }),
+  rejectReceipt: (id) => request(`/orders/${id}/receipt/reject`, { method: 'POST' }),
   setStatus: (id, status) => request(`/orders/${id}/status`, { method: 'PATCH', body: { status } }),
   products: () => request('/products'),
   createProduct: (data) => request('/products', { method: 'POST', body: data }),

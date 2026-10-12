@@ -63,6 +63,19 @@ async function getReceipt(req, res) {
   res.send(Buffer.from(await tg.arrayBuffer()));
 }
 
+async function confirmReceipt(req, res) {
+  const order = await botController.confirmOrderReceipt(parseId(req.params.id));
+  if (!order) throw new HttpError(404, 'Chek topilmadi');
+  printQueue.kick();
+  res.json({ order });
+}
+
+async function rejectReceipt(req, res) {
+  const order = await botController.rejectOrderReceipt(parseId(req.params.id));
+  if (!order) throw new HttpError(404, 'Buyurtma topilmadi');
+  res.json({ order });
+}
+
 async function updateOrderStatus(req, res) {
   const id = parseId(req.params.id);
   const status = String(req.body?.status || '');
@@ -312,6 +325,8 @@ module.exports = {
   login,
   listOrders,
   getReceipt,
+  confirmReceipt,
+  rejectReceipt,
   updateOrderStatus,
   listProducts,
   createProduct,

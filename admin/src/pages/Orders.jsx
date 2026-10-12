@@ -222,9 +222,13 @@ export default function Orders({ onActiveCount, visible }) {
                     {o.paymentType === 'CARD' ? (
                       <div className="pay-cell">
                         <span>💳 Karta</span>
-                        {o.receiptAt ? (
+                        {o.receiptConfirmedAt ? (
                           <button type="button" className="btn btn--sm btn--receipt" onClick={() => setReceiptOrder(o)}>
-                            🧾 Chekni ko'rish
+                            ✅ To'lov tasdiqlangan
+                          </button>
+                        ) : o.receiptAt ? (
+                          <button type="button" className="btn btn--sm btn--receipt-new" onClick={() => setReceiptOrder(o)}>
+                            🔎 Chekni tekshirish
                           </button>
                         ) : (
                           <span className="warn-pill" title="Bot mijozdan chek so'radi. Yuborsa, shu yerda paydo bo'ladi">
@@ -266,7 +270,7 @@ export default function Orders({ onActiveCount, visible }) {
         {!orders && !error && <div className="empty">Yuklanmoqda...</div>}
       </div>
 
-      {receiptOrder && <ReceiptModal order={receiptOrder} onClose={() => setReceiptOrder(null)} />}
+      {receiptOrder && <ReceiptModal order={receiptOrder} onClose={() => setReceiptOrder(null)} onChanged={load} />}
       {goOrder && (
         <YandexGoModal order={goOrder} url={yandexGo(goOrder)} note={courierNote(goOrder)} onClose={() => setGoOrder(null)} />
       )}

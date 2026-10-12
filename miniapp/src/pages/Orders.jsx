@@ -25,6 +25,21 @@ export default function Orders() {
   };
   useEffect(load, []);
 
+  // Sahifa ochiq turganda holatlar har 15 soniyada jimgina yangilanadi
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (document.hidden) return;
+      api
+        .orders()
+        .then((d) => {
+          setOrders(d.orders);
+          setError('');
+        })
+        .catch(() => {});
+    }, 15000);
+    return () => clearInterval(timer);
+  }, []);
+
   const reorder = (order) => {
     const available = new Set(app.products.map((p) => p.id));
     let added = 0;
@@ -83,6 +98,11 @@ export default function Orders() {
             </span>
             <b>{money(o.total)}</b>
           </div>
+          {o.paymentType === 'CARD' && o.status !== 'CANCELLED' && (
+            <div className={`pay-state ${o.receiptConfirmedAt ? 'is-ok' : o.receiptAt ? 'is-check' : 'is-wait'}`}>
+              {o.receiptConfirmedAt ? t('payConfirmed') : o.receiptAt ? t('payChecking') : t('payWaiting')}
+            </div>
+          )}
           <button type="button" className="btn btn--outline btn--block" onClick={() => reorder(o)}>
             <RepeatIcon width={18} height={18} /> {t('reorder')}
           </button>

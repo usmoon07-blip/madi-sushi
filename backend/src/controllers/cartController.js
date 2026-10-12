@@ -89,6 +89,8 @@ const publicOrder = (o) => ({
   deliveryType: o.deliveryType,
   paymentType: o.paymentType,
   address: o.address,
+  receiptAt: o.receiptAt,
+  receiptConfirmedAt: o.receiptConfirmedAt,
   status: o.status,
   createdAt: o.createdAt,
 });

@@ -125,6 +125,7 @@ model Order {
   receiptFileId String?
   receiptType  String?
   receiptAt    DateTime?
+  receiptConfirmedAt DateTime?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 

@@ -43,6 +43,7 @@ const findAwaitingReceipt = (userId) =>
     where: {
       userId,
       paymentType: 'CARD',
+      receiptConfirmedAt: null,
       status: { in: ACTIVE_STATUSES },
       createdAt: { gte: new Date(Date.now() - RECEIPT_WINDOW_MS) },
     },
@@ -51,7 +52,30 @@ const findAwaitingReceipt = (userId) =>
   });
 
 const setReceipt = (id, fileId, type) =>
-  prisma.order.update({ where: { id }, data: { receiptFileId: fileId, receiptType: type, receiptAt: new Date() }, include: withUser });
+  prisma.order.update({
+    where: { id },
+    data: { receiptFileId: fileId, receiptType: type, receiptAt: new Date(), receiptConfirmedAt: null },
+    include: withUser,
+  });
+
+// Admin chekni tasdiqladi: yangi buyurtma darhol "Tayyorlanmoqda"ga o'tadi
+const confirmReceipt = async (id) => {
+  const order = await prisma.order.findUnique({ where: { id } });
+  if (!order) return null;
+  return prisma.order.update({
+    where: { id },
+    data: { receiptConfirmedAt: new Date(), ...(order.status === 'NEW' ? { status: 'ACCEPTED' } : {}) },
+    include: withUser,
+  });
+};
+
+// Chek rad etildi — mijoz qayta yuborishi uchun tozalanadi
+const rejectReceipt = (id) =>
+  prisma.order.update({
+    where: { id },
+    data: { receiptFileId: null, receiptType: null, receiptAt: null, receiptConfirmedAt: null },
+    include: withUser,
+  });
 
 const setLocation = (id, data) => prisma.order.update({ where: { id }, data, include: withUser });
 
@@ -100,4 +124,4 @@ async function stats() {
   };
 }
 
-module.exports = { ACTIVE_STATUSES, findAwaitingLocation, findAwaitingReceipt, setReceipt, setLocation, printQueue, claimPrint, releasePrint, create, findByClientRef, findById, listForUser, listForAdmin, updateStatus, stats };
+module.exports = { ACTIVE_STATUSES, findAwaitingLocation, findAwaitingReceipt, setReceipt, confirmReceipt, rejectReceipt, setLocation, printQueue, claimPrint, releasePrint, create, findByClientRef, findById, listForUser, listForAdmin, updateStatus, stats };

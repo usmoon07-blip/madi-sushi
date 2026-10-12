@@ -44,7 +44,9 @@ const dict = {
       `💳 <b>Karta orqali to'lov</b>\n\nIltimos, ${sum} ni quyidagi kartaga o'tkazing:\n${cards}\n\n📸 To'lovni amalga oshirgach, <b>to'lov chekini shu chatga jo'nating</b> — buyurtmangiz tez orada tasdiqlanadi.\n\nRahmat! 🙏`,
     askReceiptNoCard: (sum) =>
       `💳 <b>Karta orqali to'lov</b> — ${sum}\n\n📸 To'lovni amalga oshirgach, <b>to'lov chekini shu chatga jo'nating</b> — buyurtmangiz tez orada tasdiqlanadi.\n\nRahmat! 🙏`,
-    receiptReceived: (id) => `✅ Rahmat, chekingiz qabul qilindi!\nBuyurtma <b>#${id}</b> tez orada tasdiqlanadi va tayyorlashni boshlaymiz 🍣`,
+    receiptReceived: (id) => `✅ Rahmat, chekingiz qabul qilindi!\n🔎 Buyurtma <b>#${id}</b> bo'yicha chek tekshirilmoqda. To'lov tasdiqlangach, sizga xabar beramiz.`,
+    receiptConfirmed: (id) => `✅ <b>To'lovingiz tasdiqlandi!</b>\nBuyurtma <b>#${id}</b> tasdiqlandi va tayyorlanmoqda 👨‍🍳`,
+    receiptRejected: (id) => `😔 Afsuski, buyurtma <b>#${id}</b> bo'yicha chekni tasdiqlay olmadik.\nIltimos, to'lovni tekshirib, to'lov chekini shu chatga qayta jo'nating.`,
     receiptNoOrder: "🧾 Rahmat! Afsuski, bu chekni biriktirish uchun karta orqali to'lanadigan faol buyurtma topa olmadik. Savollaringiz bo'lsa, biz bilan bog'laning — albatta yordam beramiz.",
     locationNoOrder: '📍 Lokatsiya qabul qilindi. Buyurtma berish uchun «🍣 Menyu» tugmasini bosing.',
     locationAttached: (id) => `✅ Rahmat! Lokatsiya buyurtma #${id} ga biriktirildi.`,
@@ -99,7 +101,9 @@ const dict = {
       `💳 <b>Оплата картой</b>\n\nПожалуйста, переведите ${sum} на карту:\n${cards}\n\n📸 После оплаты, пожалуйста, <b>отправьте чек в этот чат</b> — и мы скоро подтвердим ваш заказ.\n\nСпасибо! 🙏`,
     askReceiptNoCard: (sum) =>
       `💳 <b>Оплата картой</b> — ${sum}\n\n📸 После оплаты, пожалуйста, <b>отправьте чек в этот чат</b> — и мы скоро подтвердим ваш заказ.\n\nСпасибо! 🙏`,
-    receiptReceived: (id) => `✅ Спасибо, чек получен!\nЗаказ <b>#${id}</b> скоро будет подтверждён, и мы начнём его готовить 🍣`,
+    receiptReceived: (id) => `✅ Спасибо, чек получен!\n🔎 Проверяем чек по заказу <b>#${id}</b>. Как только оплата подтвердится, мы сообщим вам.`,
+    receiptConfirmed: (id) => `✅ <b>Оплата подтверждена!</b>\nЗаказ <b>#${id}</b> подтверждён и уже готовится 👨‍🍳`,
+    receiptRejected: (id) => `😔 К сожалению, мы не смогли подтвердить чек по заказу <b>#${id}</b>.\nПожалуйста, проверьте оплату и отправьте чек в этот чат ещё раз.`,
     receiptNoOrder: '🧾 Спасибо! К сожалению, мы не нашли активный заказ с оплатой картой для этого чека. Если есть вопросы — свяжитесь с нами, мы обязательно поможем.',
     locationNoOrder: '📍 Геолокация получена. Чтобы сделать заказ, нажмите «🍣 Меню».',
     locationAttached: (id) => `✅ Спасибо! Геолокация добавлена к заказу #${id}.`,

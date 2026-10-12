@@ -11,7 +11,10 @@ export function Segmented({ value, onChange, options }) {
           onClick={() => onChange(o.value)}
         >
           <span className="segmented__icon">{o.icon}</span>
-          {o.label}
+          <span className="segmented__text">
+            {o.label}
+            {o.hint && <small className="segmented__hint">{o.hint}</small>}
+          </span>
         </button>
       ))}
     </div>

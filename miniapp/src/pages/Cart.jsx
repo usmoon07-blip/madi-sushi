@@ -186,8 +186,8 @@ export default function Cart({ onSuccess }) {
           app.setMode(v);
         }}
         options={[
-          { value: 'DELIVERY', label: t('courier'), icon: '🛵' },
-          { value: 'PICKUP', label: t('pickup'), icon: '🏃' },
+          { value: 'DELIVERY', label: t('courier'), icon: '🛵', hint: t('etaDelivery') },
+          { value: 'PICKUP', label: t('pickup'), icon: '🏃', hint: t('etaPickup') },
         ]}
       />
 

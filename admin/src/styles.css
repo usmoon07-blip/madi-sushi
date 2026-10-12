@@ -981,3 +981,28 @@ h3 {
   border-radius: 12px;
   background: #000;
 }
+.btn--receipt-new {
+  background: var(--red);
+  color: #fff;
+  animation: receipt-pulse 1.6s ease-in-out infinite;
+}
+@keyframes receipt-pulse {
+  50% {
+    box-shadow: 0 0 0 6px rgba(225, 29, 46, 0.25);
+  }
+}
+.receipt-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.receipt-actions .btn {
+  flex: 1;
+}
+.receipt-ok {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(53, 194, 122, 0.14);
+  color: #5fe0a0;
+  font-weight: 700;
+}
