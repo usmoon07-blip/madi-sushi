@@ -290,12 +290,9 @@ export default function Settings() {
       </section>
 
       <section className="box">
-        <h3>📍 Filial</h3>
+        <h3>📞 Aloqa</h3>
+        <p className="muted small">Olib ketish manzillari endi «🏪 Filiallar» bo'limida — u yerda yangi filial qo'shasiz.</p>
         <div className="form__grid">
-          <label className="field">
-            <span>Olib ketish manzili</span>
-            <input value={form.pickupAddress} onChange={set('pickupAddress')} />
-          </label>
           <label className="field">
             <span>Aloqa telefoni</span>
             <input value={form.contactPhone} onChange={set('contactPhone')} placeholder="+998 90 123 45 67" />

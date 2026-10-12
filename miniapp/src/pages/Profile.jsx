@@ -7,6 +7,7 @@ import { haptic, onBackButton, openLink } from '../telegram.js';
 import { yandexSearchUrl } from '../format.js';
 import ProductCard from '../components/ProductCard.jsx';
 import Logo from '../components/Logo.jsx';
+import { branchMapUrl } from '../components/BranchSheet.jsx';
 import {
   ArrowIcon,
   ChevronIcon,
@@ -110,39 +111,47 @@ function Favorites() {
 }
 
 function Branches() {
-  const { t } = useT();
-  const { settings } = useApp();
+  const { t, pick } = useT();
+  const { settings, branches } = useApp();
+  const list = branches.length ? branches : [{ id: 0, name: 'Madi Sushi', address: settings.pickupAddress, workHours: settings.workHours }];
   return (
-    <div className="panel branch">
-      <div className="branch__icon">
-        <StoreIcon />
-      </div>
-      <div className="branch__body">
-        <div className="branch__name">Madi Sushi</div>
-        <div className="branch__addr">{settings.pickupAddress}</div>
-        {settings.workHours && (
-          <div className="muted small">
-            🕒 {t('workHours')}: {settings.workHours}
+    <div className="branches">
+      {list.map((b) => {
+        const phone = b.phone || settings.contactPhone;
+        return (
+          <div key={b.id} className="panel branch">
+            <div className="branch__icon">
+              <StoreIcon />
+            </div>
+            <div className="branch__body">
+              <div className="branch__name">{pick(b, 'name') || b.name}</div>
+              <div className="branch__addr">{b.address}</div>
+              {b.workHours && (
+                <div className="muted small">
+                  🕒 {t('workHours')}: {b.workHours}
+                </div>
+              )}
+              <div className="branch__actions">
+                <button type="button" className="btn btn--outline" onClick={() => openLink(branchMapUrl(b))}>
+                  <PinIcon width={18} height={18} /> {t('openInMaps')}
+                </button>
+                {phone && (
+                  <a className="btn btn--outline" href={`tel:${phone.replace(/[^\d+]/g, '')}`}>
+                    <PhoneIcon width={18} height={18} /> {t('call')}
+                  </a>
+                )}
+              </div>
+            </div>
           </div>
-        )}
-        <div className="branch__actions">
-          <button type="button" className="btn btn--outline" onClick={() => openLink(yandexSearchUrl(settings.pickupAddress))}>
-            <PinIcon width={18} height={18} /> {t('openInMaps')}
-          </button>
-          {settings.contactPhone && (
-            <a className="btn btn--outline" href={`tel:${settings.contactPhone.replace(/[^\d+]/g, '')}`}>
-              <PhoneIcon width={18} height={18} /> {t('call')}
-            </a>
-          )}
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 }
 
 function Contacts() {
   const { t } = useT();
-  const { settings } = useApp();
+  const { settings, branches } = useApp();
   const rows = [
     settings.contactPhone && {
       icon: <PhoneIcon width={20} height={20} />,
@@ -156,12 +165,12 @@ function Contacts() {
       value: `@${settings.instagram}`,
       link: `https://instagram.com/${settings.instagram}`,
     },
-    {
+    ...(branches.length ? branches : [{ id: 0, address: settings.pickupAddress }]).map((b) => ({
       icon: <PinIcon width={20} height={20} />,
-      label: t('branches'),
-      value: settings.pickupAddress,
-      link: yandexSearchUrl(settings.pickupAddress),
-    },
+      label: b.name ? `${t('branches')} · ${b.name}` : t('branches'),
+      value: b.address,
+      link: b.id ? branchMapUrl(b) : yandexSearchUrl(b.address),
+    })),
   ].filter(Boolean);
   return (
     <div className="panel contact">

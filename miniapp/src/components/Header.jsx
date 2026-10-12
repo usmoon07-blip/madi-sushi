@@ -11,7 +11,7 @@ export default function Header() {
   const app = useApp();
   const [modeOpen, setModeOpen] = useState(false);
   const isPickup = app.mode === 'PICKUP';
-  const address = isPickup ? app.settings.pickupAddress : app.location?.address || t('chooseAddress');
+  const address = isPickup ? app.branch?.address || app.settings.pickupAddress : app.location?.address || t('chooseAddress');
 
   return (
     <header className="hdr">

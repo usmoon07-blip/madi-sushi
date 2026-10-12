@@ -126,6 +126,8 @@ model Order {
   receiptType  String?
   receiptAt    DateTime?
   receiptConfirmedAt DateTime?
+  branchId     Int?
+  branch       Branch?      @relation(fields: [branchId], references: [id], onDelete: SetNull)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
@@ -165,4 +167,21 @@ model Upload {
   mime      String
   data      Bytes
   createdAt DateTime @default(now())
+}
+
+// Olib ketish filiallari
+model Branch {
+  id        Int      @id @default(autoincrement())
+  name      String
+  nameRu    String   @default("")
+  address   String
+  lat       Float?
+  lon       Float?
+  phone     String   @default("")
+  workHours String   @default("")
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -5,6 +5,7 @@ const Review = require('../models/Review');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const Settings = require('../models/Settings');
+const Branch = require('../models/Branch');
 const { normalizePhone, money } = require('../services/format');
 const { t, normLang } = require('../services/i18n');
 const { reverseGeocode, searchAddress } = require('../services/geocode');
@@ -69,13 +70,30 @@ const publicProduct = (p) => ({
   isHit: p.isHit,
 });
 
+const publicBranch = (b) => ({
+  id: b.id,
+  name: b.name,
+  nameRu: b.nameRu,
+  address: b.address,
+  lat: b.lat,
+  lon: b.lon,
+  phone: b.phone,
+  workHours: b.workHours,
+});
+
 const publicCategory = (c) => ({ id: c.id, nameUz: c.nameUz, nameRu: c.nameRu, imageUrl: c.imageUrl });
 
 async function loadMenu() {
-  const [products, categories, settings] = await Promise.all([Product.listActive(), Category.listActive(), Settings.get()]);
+  const [products, categories, settings, branches] = await Promise.all([
+    Product.listActive(),
+    Category.listActive(),
+    Settings.get(),
+    Branch.listActive(),
+  ]);
   return {
     products: products.map(publicProduct),
     categories: categories.map(publicCategory),
+    branches: branches.map(publicBranch),
     settings: publicSettings(settings),
   };
 }
@@ -231,7 +249,14 @@ async function createOrder(req, res) {
 
   const lat = deliveryType === 'DELIVERY' ? toCoord(body.lat, 90) : null;
   const lon = deliveryType === 'DELIVERY' ? toCoord(body.lon, 180) : null;
-  const address = deliveryType === 'DELIVERY' ? cleanText(body.address, 300) : settings.pickupAddress;
+  // Olib ketishda — mijoz tanlagan filial (bo'lmasa birinchi faol filial)
+  let branch = null;
+  if (deliveryType === 'PICKUP') {
+    const branchId = Number(body.branchId);
+    if (Number.isInteger(branchId) && branchId > 0) branch = await Branch.findActive(branchId);
+    if (!branch) [branch] = await Branch.listActive();
+  }
+  const address = deliveryType === 'DELIVERY' ? cleanText(body.address, 300) : branch?.address || settings.pickupAddress;
   if (deliveryType === 'DELIVERY' && !address && (lat === null || lon === null)) {
     throw new HttpError(400, t(req.lang, 'errAddress'));
   }
@@ -257,6 +282,7 @@ async function createOrder(req, res) {
       customerName,
       phone,
       address,
+      branchId: branch?.id ?? null,
       addressNote: deliveryType === 'DELIVERY' ? cleanText(body.addressNote, 200) : null,
       lat,
       lon,

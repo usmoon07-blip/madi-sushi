@@ -9,6 +9,7 @@ import { formatPhoneInput, isValidPhone, uid, yandexMapUrl, yandexSearchUrl } fr
 import Stepper from '../components/Stepper.jsx';
 import { Segmented, Switch } from '../components/Controls.jsx';
 import { ArrowIcon, CartIcon, CopyIcon, PhoneIcon, PinIcon } from '../components/Icons.jsx';
+import { branchMapUrl } from '../components/BranchSheet.jsx';
 
 async function copyText(text) {
   try {
@@ -125,6 +126,7 @@ export default function Cart({ onSuccess }) {
         paymentType,
         phone,
         address: isDelivery ? location?.address || null : null,
+        branchId: isDelivery ? null : app.branch?.id ?? null,
         addressNote: isDelivery ? [addressDetails(location), addressNote.trim()].filter(Boolean).join(' · ') : null,
         lat: isDelivery && hasCoords ? location.lat : null,
         lon: isDelivery && hasCoords ? location.lon : null,
@@ -230,11 +232,26 @@ export default function Cart({ onSuccess }) {
             <PinIcon />
           </div>
           <div>
-            <div className="pickup__label">{t('pickupFrom')}</div>
-            <div className="pickup__addr">{settings.pickupAddress}</div>
-            <button type="button" className="link" onClick={() => openLink(yandexSearchUrl(settings.pickupAddress))}>
-              {t('openInMaps')} <ArrowIcon width={14} height={14} />
-            </button>
+            <div className="pickup__label">
+              {t('pickupFrom')}
+              {app.branch && ` · ${pick(app.branch, 'name') || app.branch.name}`}
+            </div>
+            <div className="pickup__addr">{app.branch?.address || settings.pickupAddress}</div>
+            {app.branch?.workHours && <div className="muted small">🕒 {app.branch.workHours}</div>}
+            <div className="pickup__links">
+              <button
+                type="button"
+                className="link"
+                onClick={() => openLink(app.branch ? branchMapUrl(app.branch) : yandexSearchUrl(settings.pickupAddress))}
+              >
+                {t('openInMaps')} <ArrowIcon width={14} height={14} />
+              </button>
+              {app.branches.length > 1 && (
+                <button type="button" className="link" onClick={app.openBranchPicker}>
+                  {t('changeBranch')}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

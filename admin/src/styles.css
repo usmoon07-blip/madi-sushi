@@ -1006,3 +1006,7 @@ h3 {
   color: #5fe0a0;
   font-weight: 700;
 }
+
+.field--wide {
+  grid-column: 1 / -1;
+}

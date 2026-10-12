@@ -1,10 +1,10 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { api, setApiLang } from './api.js';
 import { CartProvider, useToastListener } from './store.jsx';
-import { AppContext, storedLocation, storedMode } from './appState.jsx';
+import { AppContext, storedBranch, storedLocation, storedMode } from './appState.jsx';
+import BranchSheet from './components/BranchSheet.jsx';
 import { LangContext, guessLang } from './i18n.jsx';
-import { onBackButton, openLink, tg } from './telegram.js';
-import { yandexSearchUrl } from './format.js';
+import { onBackButton, tg } from './telegram.js';
 import BottomNav from './components/BottomNav.jsx';
 import ProductSheet from './components/ProductSheet.jsx';
 const MapPicker = lazy(() => import('./components/MapPicker.jsx'));
@@ -59,6 +59,8 @@ export default function App() {
   const [favorites, setFavorites] = useState(() => new Set());
   const [location, setLocationState] = useState(() => storedLocation.get());
   const [mode, setModeState] = useState(() => storedMode.get());
+  const [branchId, setBranchId] = useState(() => storedBranch.get());
+  const [branchesOpen, setBranchesOpen] = useState(false);
   // Har safar ilova ochilganda mijoz avval yetkazish yoki olib ketishni tanlaydi
   const [gateDone, setGateDone] = useState(false);
   const [tab, setTab] = useState('home');
@@ -126,14 +128,24 @@ export default function App() {
 
   // Telegram "orqaga" tugmasi: bosh sahifaga qaytaradi
   useEffect(() => {
-    if (tab === 'home' || tab === 'profile' || sheet || addressOpen || order) return undefined;
+    if (tab === 'home' || tab === 'profile' || sheet || addressOpen || branchesOpen || order) return undefined;
     return onBackButton(() => goTab('home'));
-  }, [tab, sheet, addressOpen, order, goTab]);
+  }, [tab, sheet, addressOpen, branchesOpen, order, goTab]);
 
   const app = useMemo(() => {
     if (!data) return null;
+    const branches = data.branches || [];
+    // Tanlangan filial (o'chirilgan bo'lsa — birinchisi)
+    const branch = branches.find((b) => b.id === branchId) || branches[0] || null;
     return {
       ...data,
+      branches,
+      branch,
+      setBranch: (id) => {
+        setBranchId(id);
+        storedBranch.set(id);
+      },
+      openBranchPicker: () => setBranchesOpen(true),
       favorites,
       location,
       mode,
@@ -148,7 +160,7 @@ export default function App() {
       openProduct: setSheet,
       // opts.onSaved — manzil saqlangach chaqiriladi (masalan, birinchi ekranda)
       openAddress: (opts = {}) => setAddressOpen(opts),
-      openBranches: () => openLink(yandexSearchUrl(data.settings.pickupAddress)),
+      openBranches: () => setBranchesOpen(true),
       setMode: (m) => {
         setModeState(m);
         storedMode.set(m);
@@ -175,7 +187,7 @@ export default function App() {
           .catch(() => {});
       },
     };
-  }, [data, favorites, location, mode, load, goTab]);
+  }, [data, favorites, location, mode, branchId, load, goTab]);
 
   const langCtx = useMemo(
     () => ({
@@ -242,6 +254,7 @@ export default function App() {
               <MapPicker onClose={() => setAddressOpen(false)} onSaved={addressOpen.onSaved} />
             </Suspense>
           )}
+          {branchesOpen && <BranchSheet onClose={() => setBranchesOpen(false)} />}
           <Toasts items={toasts} />
         </CartProvider>
       </AppContext.Provider>

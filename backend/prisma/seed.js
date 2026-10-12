@@ -246,6 +246,13 @@ async function main() {
     return;
   }
 
+  // Yangi bazada birinchi filial — olib ketish manzilidan
+  if ((await prisma.branch.count()) === 0 && settings.pickupAddress) {
+    await prisma.branch.create({
+      data: { name: 'Foziltepa', nameRu: 'Фозилтепа', address: settings.pickupAddress, phone: settings.contactPhone, workHours: settings.workHours },
+    });
+  }
+
   const categories = await ensureCategories();
   const existing = await prisma.product.findMany();
   const existingByName = new Map(existing.map((p) => [p.name, p]));

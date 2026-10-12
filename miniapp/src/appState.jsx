@@ -31,6 +31,11 @@ export const storedMode = {
   get: () => (read(MODE_KEY) === 'PICKUP' ? 'PICKUP' : 'DELIVERY'),
   set: (mode) => write(MODE_KEY, mode),
 };
+const BRANCH_KEY = 'madi_branch_v1';
+export const storedBranch = {
+  get: () => Number(read(BRANCH_KEY)) || null,
+  set: (id) => write(BRANCH_KEY, id),
+};
 export const hasLocation = (loc) => Boolean(loc && ((loc.lat != null && loc.lon != null) || loc.address));
 
 // Podyezd, qavat, xonadon, domofon — kuryer uchun bitta qatorda (admin va chekda shu ko'rinadi)

@@ -5,6 +5,7 @@ import Orders from './pages/Orders.jsx';
 import Products from './pages/Products.jsx';
 import Settings from './pages/Settings.jsx';
 import Categories from './pages/Categories.jsx';
+import Branches from './pages/Branches.jsx';
 import Reviews from './pages/Reviews.jsx';
 import KitchenPrinter from './components/KitchenPrinter.jsx';
 import logo from './assets/logo.webp';
@@ -13,13 +14,14 @@ const PAGES = [
   { id: 'orders', label: 'Buyurtmalar', icon: '🧾' },
   { id: 'products', label: 'Mahsulotlar', icon: '🍣' },
   { id: 'categories', label: 'Kategoriyalar', icon: '🗂' },
+  { id: 'branches', label: 'Filiallar', icon: '🏪' },
   { id: 'reviews', label: 'Otzivlar', icon: '⭐' },
   { id: 'settings', label: 'Sozlamalar', icon: '⚙️' },
 ];
 
 export default function App() {
   const [token, setToken] = useState(auth.get());
-  const [page, setPage] = useState(() => (location.hash.slice(1) in { orders: 1, products: 1, categories: 1, reviews: 1, settings: 1 } ? location.hash.slice(1) : 'orders'));
+  const [page, setPage] = useState(() => (location.hash.slice(1) in { orders: 1, products: 1, categories: 1, branches: 1, reviews: 1, settings: 1 } ? location.hash.slice(1) : 'orders'));
   const [activeCount, setActiveCount] = useState(0);
 
   useEffect(() => setUnauthorizedHandler(() => setToken('')), []);
@@ -70,6 +72,7 @@ export default function App() {
         </div>
         {page === 'products' && <Products />}
         {page === 'categories' && <Categories />}
+        {page === 'branches' && <Branches />}
         {page === 'reviews' && <Reviews />}
         {page === 'settings' && <Settings />}
       </main>

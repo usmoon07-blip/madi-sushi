@@ -35,6 +35,10 @@ router.get('/categories', h(admin.listCategories));
 router.post('/categories', h(admin.createCategory));
 router.put('/categories/:id', h(admin.updateCategory));
 router.delete('/categories/:id', h(admin.deleteCategory));
+router.get('/branches', h(admin.listBranches));
+router.post('/branches', h(admin.createBranch));
+router.put('/branches/:id', h(admin.updateBranch));
+router.delete('/branches/:id', h(admin.deleteBranch));
 router.get('/reviews', h(admin.listReviews));
 router.post('/upload', upload.single('image'), h(admin.uploadImage));
 

@@ -6,6 +6,7 @@ const webapp = require('../core/webapp');
 const User = require('../models/User');
 const Order = require('../models/Order');
 const Settings = require('../models/Settings');
+const Branch = require('../models/Branch');
 const { money, escapeHtml, normalizePhone } = require('../services/format');
 const { yandexRouteUrl, yandexGoUrl } = require('../services/maps');
 const { reverseGeocode } = require('../services/geocode');
@@ -173,11 +174,14 @@ async function onHelp(ctx) {
   if (!ctx.from) return;
   const user = await User.upsertFromTelegram(ctx.from);
   const lang = langOf(user);
-  const settings = await Settings.get();
+  const [settings, branches] = await Promise.all([Settings.get(), Branch.listActive()]);
+  const branchLines = branches.length
+    ? branches.map((b) => `📍 <b>${escapeHtml(lang === 'ru' && b.nameRu ? b.nameRu : b.name)}</b> — ${escapeHtml(b.address)}${b.workHours ? ` (🕒 ${escapeHtml(b.workHours)})` : ''}`)
+    : [`📍 ${escapeHtml(settings.pickupAddress)}`];
   const lines = [
     `<b>${brand}</b>`,
-    `📍 ${escapeHtml(settings.pickupAddress)}`,
-    settings.workHours ? `🕒 ${escapeHtml(settings.workHours)}` : null,
+    ...branchLines,
+    settings.workHours && !branches.length ? `🕒 ${escapeHtml(settings.workHours)}` : null,
     settings.contactPhone ? `📞 ${escapeHtml(settings.contactPhone)}` : null,
     '',
     t(lang, 'helpTail'),
@@ -218,7 +222,7 @@ async function notifyNewOrder(order) {
   const isDelivery = order.deliveryType === 'DELIVERY';
 
   // Mijozga — o'z tilida
-  const tail = isDelivery ? t(lang, 'courierSoon') : t(lang, 'pickupSoon', escapeHtml(settings.pickupAddress));
+  const tail = isDelivery ? t(lang, 'courierSoon') : t(lang, 'pickupSoon', escapeHtml(order.address || settings.pickupAddress));
   await safeSend(order.user.telegramId, `${t(lang, 'orderAccepted', order.id)}\n\n${orderSummary(order, lang)}\n\n${tail}`);
 
   // Lokatsiya yuborilmagan bo'lsa — mijozdan so'raymiz (kuryer aniq topishi uchun)
@@ -265,7 +269,7 @@ async function notifyAdmins(order, settings, { title } = {}) {
     '',
     `👤 ${escapeHtml(order.customerName)}${order.user.username ? ` (@${escapeHtml(order.user.username)})` : ''}`,
     `📞 ${escapeHtml(order.phone)}`,
-    isDelivery ? `📍 ${escapeHtml(order.address || 'Lokatsiya bo‘yicha')}` : '🏃 Mijoz o‘zi olib ketadi',
+    isDelivery ? `📍 ${escapeHtml(order.address || 'Lokatsiya bo‘yicha')}` : `🏃 Mijoz o‘zi olib ketadi — 🏪 ${escapeHtml(order.address || '')}`,
     isDelivery && !hasCoords(order) ? '⚠️ <b>Lokatsiya yo‘q</b> — mijozdan so‘raldi, kelsa alohida xabar beriladi' : null,
     order.addressNote ? `🏠 ${escapeHtml(order.addressNote)}` : null,
     order.paymentType === 'CARD'
@@ -299,7 +303,7 @@ async function notifyStatus(order) {
   const settings = await Settings.get();
   const lang = langOf(order.user);
   const isDelivery = order.deliveryType === 'DELIVERY';
-  const addr = escapeHtml(settings.pickupAddress);
+  const addr = escapeHtml(order.address || settings.pickupAddress);
   const messages = {
     ACCEPTED: t(lang, 'stAccepted', order.id),
     ON_WAY: isDelivery ? t(lang, 'stOnWayDelivery', order.id) : t(lang, 'stOnWayPickup', order.id, addr),

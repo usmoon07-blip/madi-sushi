@@ -2076,3 +2076,68 @@ html.is-fullscreen {
   color: var(--red-hi);
   font-weight: 700;
 }
+
+/* ---------- Filiallar ---------- */
+.branches {
+  display: grid;
+  gap: 12px;
+}
+.branch-list {
+  display: grid;
+  gap: 10px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.branch-opt {
+  border-radius: var(--radius);
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  padding: 12px 14px;
+}
+.branch-opt.is-active {
+  border-color: var(--red);
+  background: var(--red-soft);
+}
+.branch-opt__main {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  color: var(--text);
+}
+.branch-opt__icon {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-3);
+}
+.branch-opt.is-active .branch-opt__icon {
+  background: var(--red);
+  color: #fff;
+}
+.branch-opt__body {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.branch-opt__name {
+  font-weight: 800;
+  font-size: 16px;
+}
+.branch-opt__addr {
+  font-size: 14px;
+  color: #d4d4d8;
+}
+.branch-opt__map {
+  margin: 8px 0 0 48px;
+  font-size: 13px;
+}
+.pickup__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 4px;
+}

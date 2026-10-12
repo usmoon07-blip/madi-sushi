@@ -3,6 +3,8 @@ const path = require('path');
 const config = require('../config/default');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
+const Branch = require('../models/Branch');
+const { parseCoords } = require('../services/maps');
 const Review = require('../models/Review');
 const Order = require('../models/Order');
 const Settings = require('../models/Settings');
@@ -235,6 +237,54 @@ async function deleteCategory(req, res) {
   res.json({ ok: true });
 }
 
+// ---- Filiallar ----
+function branchData(body, { partial = false } = {}) {
+  const data = {};
+  const has = (k) => Object.prototype.hasOwnProperty.call(body, k);
+  const text = (v, max) => String(v || '').trim().slice(0, max);
+  if (!partial || has('name')) {
+    data.name = text(body.name, 60);
+    if (!data.name) throw new HttpError(400, 'Filial nomini kiriting');
+  }
+  if (!partial || has('address')) {
+    data.address = text(body.address, 200);
+    if (!data.address) throw new HttpError(400, 'Filial manzilini kiriting');
+  }
+  if (has('nameRu')) data.nameRu = text(body.nameRu, 60);
+  if (has('phone')) data.phone = text(body.phone, 40);
+  if (has('workHours')) data.workHours = text(body.workHours, 60);
+  if (has('sortOrder')) data.sortOrder = Math.round(Number(body.sortOrder)) || 0;
+  if (has('isActive')) data.isActive = Boolean(body.isActive);
+  if (has('location')) {
+    const raw = text(body.location, 500);
+    if (!raw) Object.assign(data, { lat: null, lon: null });
+    else {
+      const c = parseCoords(raw);
+      if (!c) throw new HttpError(400, "Lokatsiyani tushunib bo'lmadi. Masalan: 41.2851, 69.2041 yoki Yandex Maps havolasi");
+      Object.assign(data, c);
+    }
+  }
+  return data;
+}
+
+async function listBranches(req, res) {
+  res.json({ branches: await Branch.listAll() });
+}
+
+async function createBranch(req, res) {
+  res.status(201).json({ branch: await Branch.create(branchData(req.body || {})) });
+}
+
+async function updateBranch(req, res) {
+  res.json({ branch: await Branch.update(parseId(req.params.id), branchData(req.body || {}, { partial: true })) });
+}
+
+async function deleteBranch(req, res) {
+  // Eski buyurtmalar o'chmaydi — manzili buyurtmaning o'zida saqlangan
+  await Branch.remove(parseId(req.params.id));
+  res.json({ ok: true });
+}
+
 // ---- Otzivlar ----
 async function listReviews(req, res) {
   res.json({ reviews: await Review.list() });
@@ -335,6 +385,10 @@ module.exports = {
   uploadImage,
   getSettings,
   updateSettings,
+  listBranches,
+  createBranch,
+  updateBranch,
+  deleteBranch,
   listCategories,
   createCategory,
   updateCategory,
