@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+<defs>
+  <radialGradient id="bg8" cx="50%" cy="45%" r="70%">
+    <stop offset="0" stop-color="#2a1416"/><stop offset="0.55" stop-color="#140c0d"/><stop offset="1" stop-color="#0a0a0b"/>
+  </radialGradient>
+  <radialGradient id="rice8" cx="45%" cy="40%" r="60%">
+    <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e9e4da"/>
+  </radialGradient>
+  <filter id="sh8" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.6"/>
+  </filter>
+</defs>
+<rect width="600" height="600" fill="url(#bg8)"/>
+<circle cx="300" cy="300" r="250" fill="none" stroke="#e11d2e" stroke-opacity="0.12" stroke-width="2"/><g filter="url(#sh8)"><ellipse cx="300" cy="245" rx="150" ry="55" fill="url(#rice8)"/><path d="M125,230 Q300,145 475,225 Q460,270 300,260 Q140,265 125,230 Z" fill="#5a2f17"/></g><path d="M180,190 q12,30 0,60" stroke="#a8693f" stroke-width="5" fill="none" opacity="0.5"/><path d="M225,190 q12,30 0,60" stroke="#a8693f" stroke-width="5" fill="none" opacity="0.5"/><path d="M270,190 q12,30 0,60" stroke="#a8693f" stroke-width="5" fill="none" opacity="0.5"/><path d="M315,190 q12,30 0,60" stroke="#a8693f" stroke-width="5" fill="none" opacity="0.5"/><path d="M360,190 q12,30 0,60" stroke="#a8693f" stroke-width="5" fill="none" opacity="0.5"/><path d="M405,190 q12,30 0,60" stroke="#a8693f" stroke-width="5" fill="none" opacity="0.5"/><g filter="url(#sh8)"><ellipse cx="300" cy="405" rx="150" ry="55" fill="url(#rice8)"/><path d="M125,390 Q300,305 475,385 Q460,430 300,420 Q140,425 125,390 Z" fill="#5a2f17"/></g><path d="M180,350 q12,30 0,60" stroke="#a8693f" stroke-width="5" fill="none" opacity="0.5"/><path d="M225,350 q12,30 0,60" stroke="#a8693f" stroke-width="5" fill="none" opacity="0.5"/><path d="M270,350 q12,30 0,60" stroke="#a8693f" stroke-width="5" fill="none" opacity="0.5"/><path d="M315,350 q12,30 0,60" stroke="#a8693f" stroke-width="5" fill="none" opacity="0.5"/><path d="M360,350 q12,30 0,60" stroke="#a8693f" stroke-width="5" fill="none" opacity="0.5"/><path d="M405,350 q12,30 0,60" stroke="#a8693f" stroke-width="5" fill="none" opacity="0.5"/></svg>

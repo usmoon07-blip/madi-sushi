@@ -1,0 +1,59 @@
+const TOKEN_KEY = 'madi_admin_token';
+
+export const auth = {
+  get: () => {
+    try {
+      return localStorage.getItem(TOKEN_KEY) || '';
+    } catch {
+      return '';
+    }
+  },
+  set: (t) => {
+    try {
+      if (t) localStorage.setItem(TOKEN_KEY, t);
+      else localStorage.removeItem(TOKEN_KEY);
+    } catch {
+      /* ignore */
+    }
+  },
+};
+
+let onUnauthorized = () => {};
+export const setUnauthorizedHandler = (fn) => {
+  onUnauthorized = fn;
+};
+
+async function request(path, { method = 'GET', body, form } = {}) {
+  const headers = { Authorization: `Bearer ${auth.get()}`, 'ngrok-skip-browser-warning': '1' };
+  if (body) headers['Content-Type'] = 'application/json';
+  let res;
+  try {
+    res = await fetch(`/api/admin${path}`, { method, headers, body: form || (body ? JSON.stringify(body) : undefined) });
+  } catch {
+    throw new Error("Server bilan aloqa yo'q. Backend ishlayaptimi?");
+  }
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && path !== '/login') {
+    auth.set('');
+    onUnauthorized();
+  }
+  if (!res.ok) throw new Error(data.error || 'Xatolik yuz berdi');
+  return data;
+}
+
+export const api = {
+  login: (password) => request('/login', { method: 'POST', body: { password } }),
+  orders: (status) => request(`/orders${status ? `?status=${status}` : ''}`),
+  setStatus: (id, status) => request(`/orders/${id}/status`, { method: 'PATCH', body: { status } }),
+  products: () => request('/products'),
+  createProduct: (data) => request('/products', { method: 'POST', body: data }),
+  updateProduct: (id, data) => request(`/products/${id}`, { method: 'PUT', body: data }),
+  deleteProduct: (id) => request(`/products/${id}`, { method: 'DELETE' }),
+  upload: (file) => {
+    const form = new FormData();
+    form.append('image', file);
+    return request('/upload', { method: 'POST', form });
+  },
+  settings: () => request('/settings'),
+  saveSettings: (data) => request('/settings', { method: 'PUT', body: data }),
+};

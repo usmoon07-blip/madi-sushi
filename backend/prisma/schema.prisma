@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum OrderStatus {
+  NEW
+  ACCEPTED
+  ON_WAY
+  DONE
+  CANCELLED
+}
+
+enum DeliveryType {
+  DELIVERY
+  PICKUP
+}
+
+enum PaymentType {
+  CASH
+  CARD
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  telegramId  String   @unique
+  firstName   String
+  lastName    String?
+  username    String?
+  phone       String?
+  lastAddress String?
+  lastLat     Float?
+  lastLon     Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orders      Order[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String   @default("")
+  ingredients String[] @default([])
+  imageUrl    String   @default("")
+  oldPrice    Int?
+  price       Int
+  category    String
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, category])
+}
+
+model Order {
+  id           Int          @id @default(autoincrement())
+  clientRef    String?      @unique
+  userId       Int
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items        Json
+  subtotal     Int
+  deliveryFee  Int          @default(0)
+  total        Int
+  deliveryType DeliveryType
+  paymentType  PaymentType
+  customerName String
+  phone        String
+  address      String?
+  addressNote  String?
+  lat          Float?
+  lon          Float?
+  comment      String?
+  status       OrderStatus  @default(NEW)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+}
+
+model Settings {
+  id               Int      @id @default(1)
+  cards            Json     @default("[]")
+  deliveryFee      Int      @default(15000)
+  freeDeliveryFrom Int      @default(200000)
+  minOrder         Int      @default(50000)
+  pickupAddress    String   @default("Toshkent, Foziltepa ko'chasi, 40")
+  contactPhone     String   @default("")
+  isOpen           Boolean  @default(true)
+  updatedAt        DateTime @updatedAt
+}

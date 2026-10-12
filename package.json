@@ -1,0 +1,17 @@
+{
+  "name": "madi-sushi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Madi Sushi — Telegram Mini App, bot va admin panel",
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "start": "npm start --prefix backend",
+    "build": "npm run build --prefix miniapp && npm run build --prefix admin",
+    "db:migrate": "npm run db:migrate --prefix backend",
+    "db:seed": "npm run db:seed --prefix backend",
+    "db:studio": "npm run db:studio --prefix backend"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

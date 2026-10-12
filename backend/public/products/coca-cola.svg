@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+<defs>
+  <radialGradient id="bg9" cx="50%" cy="45%" r="70%">
+    <stop offset="0" stop-color="#2a1416"/><stop offset="0.55" stop-color="#140c0d"/><stop offset="1" stop-color="#0a0a0b"/>
+  </radialGradient>
+  <radialGradient id="rice9" cx="45%" cy="40%" r="60%">
+    <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e9e4da"/>
+  </radialGradient>
+  <filter id="sh9" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.6"/>
+  </filter>
+</defs>
+<rect width="600" height="600" fill="url(#bg9)"/>
+<circle cx="300" cy="300" r="250" fill="none" stroke="#e11d2e" stroke-opacity="0.12" stroke-width="2"/><g filter="url(#sh9)"><rect x="215" y="120" width="170" height="360" rx="34" fill="#c8102e"/>
+<rect x="215" y="120" width="170" height="40" rx="18" fill="#d9d9d9"/><rect x="215" y="440" width="170" height="40" rx="18" fill="#bdbdbd"/></g>
+<path d="M230,260 C280,220 330,320 370,270" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round"/>
+<path d="M230,300 C280,260 330,360 370,310" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.7"/>
+<rect x="240" y="170" width="18" height="260" rx="9" fill="#fff" opacity="0.15"/></svg>
