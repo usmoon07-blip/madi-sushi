@@ -4,6 +4,7 @@ import Login from './pages/Login.jsx';
 import Orders from './pages/Orders.jsx';
 import Products from './pages/Products.jsx';
 import Settings from './pages/Settings.jsx';
+import KitchenPrinter from './components/KitchenPrinter.jsx';
 
 const PAGES = [
   { id: 'orders', label: 'Buyurtmalar', icon: '🧾' },
@@ -45,6 +46,7 @@ export default function App() {
             </button>
           ))}
         </nav>
+        <KitchenPrinter />
         <button
           type="button"
           className="menu__item menu__logout"

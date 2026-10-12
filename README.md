@@ -70,11 +70,53 @@ Hammasi shu. Server ngrok manzilini **o'zi topadi** va botdagi **🍣 Menyu** tu
   Holat tugmalari: *Qabul qilish → Jo'natish → Yakunlash*. Har bir o'zgarishda mijozga botdan xabar boradi.
   **🗺 Yandex Maps** / **🧭 Navigator** tugmalari mijoz lokatsiyasiga to'g'ridan-to'g'ri yo'l ochadi.
 - **Mahsulotlar**: qo'shish, tahrirlash, rasm yuklash, **Faol/Nofaol** qilish, o'chirish.
-- **Sozlamalar**: karta raqamlari (Uzcard/Humo), yetkazib berish narxi, bepul yetkazish chegarasi, minimal summa, filial manzili, telefon, buyurtma qabul qilishni to'xtatish.
+- **Sozlamalar**: karta raqamlari (Uzcard/Humo), yetkazib berish narxi, bepul yetkazish chegarasi, minimal summa, filial manzili, telefon, buyurtma qabul qilishni to'xtatish, **oshxona cheki** (5-bo'lim).
 
 Yangi buyurtma kelganda, adminning Telegramiga ham xabar, Yandex tugmasi va xaritadagi nuqta (lokatsiya) yuboriladi.
 
-## 5. Foydali buyruqlar
+## 5. 🖨 Oshxona cheki (avtomatik chop etish)
+
+Buyurtma kelganda oshxona printerida chek **avtomatik** chiqadi: buyurtma raqami, mahsulotlar (katta harfda), izoh, mijoz telefoni, manzil, to'lov turi va summa.
+Bitta chek hech qachon ikki marta chiqmaydi. Printer o'chiq bo'lsa, chek yo'qolmaydi: printer yoqilishi bilan chiqadi.
+Har bir buyurtma yonidagi **🖨 Chek** tugmasi chekni qayta chiqaradi.
+
+**Admin panel → Sozlamalar → 🖨 Oshxona cheki** bo'limida quyidagilarni tanlang:
+- **Chek qachon chiqsin**: *yangi buyurtma kelishi bilan* yoki *«Qabul qilish» bosilganda*;
+- **Qog'oz kengligi**: 80 mm yoki 58 mm; **nusxalar soni**: 1–3 ta (masalan oshxona + kuryer uchun).
+
+### A) Tarmoq (LAN / Wi-Fi) printer — eng ishonchli yo'l
+1. Printerni router'ga kabel bilan ulang.
+2. Printerning IP manzilini bilib oling. Printer o'chiq turganda **FEED** tugmasini bosib turib yoqing, shunda chiqadigan sinov chekida `IP Address: 192.168.x.x` yozilgan bo'ladi.
+3. Sozlamalarda **Tarmoq (LAN / Wi-Fi)** ni tanlang, IP manzilni yozing va **Saqlash** ni bosing, keyin **🧾 Sinov cheki** ni bosing.
+
+Bu usulda cheklarni server o'zi chiqaradi, admin panelni ochib qo'yish shart emas.
+
+### B) USB printer (kompyuterga ulangan)
+1. Printer drayverini o'rnating va Windows'da uni **asosiy printer** qiling: *Sozlamalar → Printerlar → printer → «Использовать по умолчанию» / «Set as default»*.
+2. Printer xususiyatlarida qog'oz o'lchamini 80 mm (yoki 58 mm) qilib qo'ying.
+3. Oshxona kompyuterida Admin panelni oching. **Sozlamalar → USB kabel orqali** ni tanlang, **Saqlash** ni bosing, keyin **«Shu kompyuter — oshxona kompyuteri»** tugmasini yoqing.
+4. Chek oynasiz, avtomatik chiqishi uchun maxsus Chrome yorlig'ini yarating. Ish stolida sichqonchaning o'ng tugmasini bosing → *Создать → Ярлык* (*New → Shortcut*) → quyidagini kiriting:
+   ```
+   "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk-printing --app=http://localhost:3000/admin
+   ```
+   Nomini **Madi Oshxona** qilib qo'ying. Admin panelni har doim shu yorliq orqali oching.
+   Avval barcha Chrome oynalarini yoping, aks holda `--kiosk-printing` ishlamaydi.
+5. **🧾 Sinov cheki** ni bosib tekshiring.
+
+> USB usulida Admin panel oynasi oshxona kompyuterida **ochiq turishi** kerak (oynani yig'ishtirib qo'ymang).
+> Yon paneldagi yashil **🖨 Chek: shu kompyuter** yozuvi hammasi ishlayotganini bildiradi.
+
+## 6. Yangilanishni o'rnatish
+
+Loyihaning yangi versiyasi chiqqanda (`npm start` oynasini yopib, `madi-sushi` papkasida):
+```powershell
+git pull
+npm run setup
+npm start
+```
+`npm run setup` sozlamalaringizga tegmaydi: faqat yangi paketlarni o'rnatadi va bazani yangilaydi.
+
+## 7. Foydali buyruqlar
 
 | Buyruq | Vazifasi |
 |---|---|
@@ -86,7 +128,7 @@ Yangi buyurtma kelganda, adminning Telegramiga ham xabar, Yandex tugmasi va xari
 
 Sozlamalarni o'zgartirish uchun `backend/.env` faylini Notepad'da oching (yoki uni o'chirib, `npm run setup` ni qayta ishga tushiring).
 
-## 6. Muammolar
+## 8. Muammolar
 
 | Belgi | Yechim |
 |---|---|
@@ -94,6 +136,8 @@ Sozlamalarni o'zgartirish uchun `backend/.env` faylini Notepad'da oching (yoki u
 | `BOT_TOKEN noto'g'ri` | BotFather'dan tokenni qayta nusxalang |
 | `Bot boshqa joyda ham ishga tushirilgan` | Faqat bitta `npm start` oynasi ochiq qolsin |
 | Menyu tugmasi chiqmayapti | 2-oynada `ngrok http 3000` ishlayotganini tekshiring, botga `/start` yozing |
+| `Printer: ulanmagan` (yon panelda qizil) | Printer yoqilganini, kabelni va IP manzilni tekshiring |
+| USB printerda chop etish oynasi chiqyapti | Admin panelni `--kiosk-printing` yorlig'i orqali oching (5-bo'lim) |
 | Lokatsiya aniqlanmayapti | Telefonda Telegram'ga joylashuv ruxsatini bering yoki manzilni qo'lda yozing |
 
 ## Loyiha tuzilishi
@@ -109,7 +153,7 @@ madi-sushi/
 │   │   ├── controllers/botController.js, cartController.js, adminController.js
 │   │   ├── routes/bot.routes.js, client.routes.js, admin.routes.js
 │   │   ├── middlewares/auth.middleware.js
-│   │   ├── services/geocode.js, maps.js, format.js
+│   │   ├── services/geocode.js, maps.js, format.js, receipt.js, printer.js, printQueue.js
 │   │   └── index.js
 │   ├── prisma/schema.prisma, migrations/, seed.js
 │   └── public/products/     # menyu rasmlari

@@ -7,6 +7,8 @@ const Settings = require('../models/Settings');
 const { createAdminToken, safeEqual } = require('../middlewares/auth.middleware');
 const { HttpError } = require('./cartController');
 const botController = require('./botController');
+const printQueue = require('../services/printQueue');
+const { parseAddress } = require('../services/printer');
 
 const STATUSES = ['NEW', 'ACCEPTED', 'ON_WAY', 'DONE', 'CANCELLED'];
 
@@ -46,7 +48,61 @@ async function updateOrderStatus(req, res) {
   if (current.status === status) return res.json({ order: current });
   const order = await Order.updateStatus(id, status);
   botController.notifyStatus(order).catch((err) => console.warn('[admin] notify:', err.message));
+  printQueue.kick();
   return res.json({ order });
+}
+
+// ---- Oshxona cheki ----
+async function getPrintQueue(req, res) {
+  const settings = await Settings.get();
+  // Tarmoq printeri ulangan bo'lsa, cheklarni server o'zi chiqaradi
+  if (settings.printerIp || settings.printMode === 'OFF') return res.json({ orders: [] });
+  return res.json({ orders: await Order.printQueue(settings.printMode) });
+}
+
+async function claimPrint(req, res) {
+  res.json({ claimed: await Order.claimPrint(parseId(req.params.id)) });
+}
+
+async function printOrderNow(req, res) {
+  const settings = await Settings.get();
+  if (!settings.printerIp) throw new HttpError(400, 'Tarmoq printeri sozlanmagan');
+  const order = await Order.findById(parseId(req.params.id));
+  if (!order) throw new HttpError(404, 'Buyurtma topilmadi');
+  try {
+    await printQueue.printOrder(order, settings, { reprint: true });
+  } catch (err) {
+    throw new HttpError(502, err.message);
+  }
+  res.json({ ok: true });
+}
+
+async function printTest(req, res) {
+  const settings = await Settings.get();
+  if (!settings.printerIp) throw new HttpError(400, 'Avval printer IP manzilini kiriting va saqlang');
+  const sample = {
+    id: 0,
+    createdAt: new Date(),
+    deliveryType: 'DELIVERY',
+    paymentType: 'CASH',
+    items: [
+      { name: 'Filadelfiya', qty: 2, price: 89000 },
+      { name: "Coca-Cola 0.5", qty: 1, price: 12000 },
+    ],
+    comment: 'Sinov cheki - printer ishlayapti',
+    subtotal: 190000,
+    deliveryFee: 15000,
+    total: 205000,
+    customerName: 'Sinov',
+    phone: '+998 90 000 00 00',
+    address: settings.pickupAddress,
+  };
+  try {
+    await printQueue.printOrder(sample, settings, { reprint: false });
+  } catch (err) {
+    throw new HttpError(502, err.message);
+  }
+  res.json({ ok: true });
 }
 
 // ---- Mahsulotlar ----
@@ -118,7 +174,7 @@ async function uploadImage(req, res) {
 
 // ---- Sozlamalar ----
 async function getSettings(req, res) {
-  res.json({ settings: await Settings.get() });
+  res.json({ settings: await Settings.get(), printer: printQueue.status() });
 }
 
 async function updateSettings(req, res) {
@@ -134,6 +190,20 @@ async function updateSettings(req, res) {
   if ('pickupAddress' in body) data.pickupAddress = String(body.pickupAddress || '').trim().slice(0, 200);
   if ('contactPhone' in body) data.contactPhone = String(body.contactPhone || '').trim().slice(0, 40);
   if ('isOpen' in body) data.isOpen = Boolean(body.isOpen);
+  if ('printMode' in body) {
+    if (!['OFF', 'NEW', 'ACCEPTED'].includes(body.printMode)) throw new HttpError(400, "Chek rejimi noto'g'ri");
+    data.printMode = body.printMode;
+  }
+  if ('paperWidth' in body) data.paperWidth = Number(body.paperWidth) === 58 ? 58 : 80;
+  if ('printCopies' in body) data.printCopies = Math.min(3, Math.max(1, Math.round(Number(body.printCopies)) || 1));
+  if ('printerIp' in body) {
+    const value = String(body.printerIp || '').trim();
+    const { host, port } = parseAddress(value);
+    if (value && (!/^[a-zA-Z0-9.-]+$/.test(host) || port < 1 || port > 65535)) {
+      throw new HttpError(400, "Printer manzili noto'g'ri. Masalan: 192.168.1.100");
+    }
+    data.printerIp = value;
+  }
   if ('cards' in body) {
     if (!Array.isArray(body.cards)) throw new HttpError(400, "Kartalar ro'yxati noto'g'ri");
     data.cards = body.cards.slice(0, 5).map((c) => {
@@ -146,7 +216,9 @@ async function updateSettings(req, res) {
       };
     });
   }
-  res.json({ settings: await Settings.update(data) });
+  const settings = await Settings.update(data);
+  printQueue.kick();
+  res.json({ settings });
 }
 
 module.exports = {
@@ -160,4 +232,8 @@ module.exports = {
   uploadImage,
   getSettings,
   updateSettings,
+  getPrintQueue,
+  claimPrint,
+  printOrderNow,
+  printTest,
 };

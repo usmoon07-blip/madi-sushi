@@ -54,6 +54,10 @@ export const api = {
     form.append('image', file);
     return request('/upload', { method: 'POST', form });
   },
+  printQueue: () => request('/print-queue'),
+  claimPrint: (id) => request(`/orders/${id}/print-claim`, { method: 'POST' }),
+  printNow: (id) => request(`/orders/${id}/print`, { method: 'POST' }),
+  printTest: () => request('/print-test', { method: 'POST' }),
   settings: () => request('/settings'),
   saveSettings: (data) => request('/settings', { method: 'PUT', body: data }),
 };

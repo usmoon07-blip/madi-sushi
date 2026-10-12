@@ -77,6 +77,7 @@ model Order {
   lon          Float?
   comment      String?
   status       OrderStatus  @default(NEW)
+  printedAt    DateTime?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
@@ -93,5 +94,10 @@ model Settings {
   pickupAddress    String   @default("Toshkent, Foziltepa ko'chasi, 40")
   contactPhone     String   @default("")
   isOpen           Boolean  @default(true)
+  // Oshxona cheki: OFF | NEW (yangi buyurtma kelganda) | ACCEPTED ("Qabul qilish" bosilganda)
+  printMode        String   @default("NEW")
+  printerIp        String   @default("")
+  paperWidth       Int      @default(80)
+  printCopies      Int      @default(1)
   updatedAt        DateTime @updatedAt
 }

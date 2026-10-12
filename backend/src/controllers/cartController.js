@@ -5,6 +5,7 @@ const Settings = require('../models/Settings');
 const { normalizePhone } = require('../services/format');
 const { reverseGeocode } = require('../services/geocode');
 const botController = require('./botController');
+const printQueue = require('../services/printQueue');
 
 class HttpError extends Error {
   constructor(status, message) {
@@ -199,6 +200,7 @@ async function createOrder(req, res) {
   await User.update(req.user.id, userUpdate).catch((err) => console.warn('[order] user update:', err.message));
 
   botController.notifyNewOrder(order).catch((err) => console.warn('[order] notify:', err.message));
+  printQueue.kick();
 
   return res.status(201).json({ order: publicOrder(order) });
 }

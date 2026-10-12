@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api.js';
 import { beep } from '../sound.js';
+import { printReceipt, printerConfig } from '../printing.js';
 import { NEXT_STATUS, STATUSES, formatDate, money, statusOf, yandexNavi, yandexRoute } from '../format.js';
 
 const FILTERS = [
@@ -64,6 +65,22 @@ export default function Orders({ onActiveCount, visible }) {
       alert(e.message);
     } finally {
       setBusy(null);
+    }
+  };
+
+  const reprint = async (order) => {
+    const config = printerConfig.get();
+    if (config?.printerIp) {
+      setBusy(order.id);
+      try {
+        await api.printNow(order.id);
+      } catch (e) {
+        alert(e.message);
+      } finally {
+        setBusy(null);
+      }
+    } else {
+      printReceipt(order, { paperWidth: config?.paperWidth || 80, copies: 1, reprint: true });
     }
   };
 
@@ -136,6 +153,9 @@ export default function Orders({ onActiveCount, visible }) {
                   <td>
                     <div className="strong">#{o.id}</div>
                     <div className="muted small nowrap">{formatDate(o.createdAt)}</div>
+                    <button type="button" className="btn btn--ghost btn--xs" disabled={busy === o.id} onClick={() => reprint(o)} title="Chekni chop etish">
+                      🖨 Chek
+                    </button>
                   </td>
                   <td>
                     <div className="strong">{o.customerName}</div>

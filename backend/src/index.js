@@ -5,6 +5,7 @@ const config = require('./config/default');
 const { prisma, connectWithRetry } = require('./database/connection');
 const { bot } = require('./core/bot');
 const webapp = require('./core/webapp');
+const printQueue = require('./services/printQueue');
 const { registerBotRoutes } = require('./routes/bot.routes');
 const clientRoutes = require('./routes/client.routes');
 const adminRoutes = require('./routes/admin.routes');
@@ -67,6 +68,8 @@ async function main() {
     console.log(`   Mini App:    http://localhost:${config.port}`);
     console.log(`   Admin panel: http://localhost:${config.port}/admin\n`);
   });
+
+  printQueue.start();
 
   if (bot) {
     registerBotRoutes(bot);

@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
+import { SAMPLE_ORDER, device, printReceipt, printerConfig, usePrinterConfig } from '../printing.js';
+
+const PRINT_MODES = [
+  { value: 'NEW', label: 'Yangi buyurtma kelishi bilan' },
+  { value: 'ACCEPTED', label: '«Qabul qilish» bosilganda' },
+  { value: 'OFF', label: "O'chirilgan" },
+];
 
 const formatCard = (v) =>
   String(v)
@@ -12,11 +19,18 @@ export default function Settings() {
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [connection, setConnection] = useState('USB');
+  const [testing, setTesting] = useState(false);
+  usePrinterConfig(); // "shu kompyuter" belgisi o'zgarsa qayta chizish uchun
+  const isKitchen = device.isKitchen();
 
   useEffect(() => {
     api
       .settings()
-      .then(({ settings }) => setForm({ ...settings, cards: settings.cards || [] }))
+      .then(({ settings }) => {
+        setForm({ ...settings, cards: settings.cards || [] });
+        setConnection(settings.printerIp ? 'NETWORK' : 'USB');
+      })
       .catch((e) => setError(e.message));
   }, []);
 
@@ -44,13 +58,34 @@ export default function Settings() {
         pickupAddress: form.pickupAddress,
         contactPhone: form.contactPhone,
         isOpen: form.isOpen,
+        printMode: form.printMode,
+        paperWidth: form.paperWidth,
+        printCopies: form.printCopies,
+        printerIp: connection === 'NETWORK' ? form.printerIp : '',
       });
       setForm({ ...settings, cards: settings.cards || [] });
+      printerConfig.set({ ...settings, printerError: null });
       setSaved(true);
     } catch (err) {
       setError(err.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const testPrint = async () => {
+    if (connection === 'USB') {
+      printReceipt({ ...SAMPLE_ORDER, createdAt: new Date().toISOString() }, { paperWidth: form.paperWidth, copies: 1 });
+      return;
+    }
+    setTesting(true);
+    try {
+      await api.printTest();
+      alert('Sinov cheki printerga yuborildi ✅');
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setTesting(false);
     }
   };
 
@@ -128,6 +163,95 @@ export default function Settings() {
             </button>
           </div>
         ))}
+      </section>
+
+      <section className="box">
+        <div>
+          <h3>🖨 Oshxona cheki</h3>
+          <p className="muted small">Buyurtma kelganda oshxona printerida chek avtomatik chiqadi</p>
+        </div>
+        <div className="form__grid form__grid--3">
+          <label className="field">
+            <span>Chek qachon chiqsin</span>
+            <select value={form.printMode} onChange={set('printMode')}>
+              {PRINT_MODES.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>Qog'oz kengligi</span>
+            <select value={form.paperWidth} onChange={set('paperWidth')}>
+              <option value={80}>80 mm</option>
+              <option value={58}>58 mm</option>
+            </select>
+          </label>
+          <label className="field">
+            <span>Nechta nusxa</span>
+            <select value={form.printCopies} onChange={set('printCopies')}>
+              <option value={1}>1 ta</option>
+              <option value={2}>2 ta (oshxona + kuryer)</option>
+              <option value={3}>3 ta</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="field">
+          <span>Printer qanday ulangan</span>
+          <div className="choice">
+            {[
+              { value: 'USB', title: 'USB kabel orqali', text: 'Printer kompyuterga ulangan. Chekni shu kompyuterdagi admin panel chiqaradi.' },
+              { value: 'NETWORK', title: 'Tarmoq (LAN / Wi-Fi)', text: "Printerning IP manzili bor. Server chekni to'g'ridan-to'g'ri yuboradi." },
+            ].map((c) => (
+              <button
+                key={c.value}
+                type="button"
+                className={`choice__item ${connection === c.value ? 'is-active' : ''}`}
+                onClick={() => {
+                  setSaved(false);
+                  setConnection(c.value);
+                }}
+              >
+                <b>{c.title}</b>
+                <span>{c.text}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {connection === 'NETWORK' ? (
+          <label className="field">
+            <span>Printer IP manzili (printerdan chiqadigan «self-test» chekida yozilgan)</span>
+            <input value={form.printerIp} onChange={set('printerIp')} placeholder="192.168.1.100" required />
+          </label>
+        ) : (
+          <div className="kitchen-device">
+            <div>
+              <b>Shu kompyuter — oshxona kompyuteri</b>
+              <p className="muted small">
+                Faqat printer ulangan kompyuterda yoqing. Admin panel shu kompyuterda doim ochiq tursin.
+              </p>
+            </div>
+            <button type="button" className={`toggle toggle--lg ${isKitchen ? 'is-on' : ''}`} onClick={() => device.setKitchen(!isKitchen)}>
+              <span className="toggle__knob" />
+              {isKitchen ? 'Yoqilgan' : "O'chiq"}
+            </button>
+          </div>
+        )}
+
+        <div className="row-actions">
+          <button type="button" className="btn btn--ghost" onClick={testPrint} disabled={testing}>
+            {testing ? 'Yuborilmoqda...' : '🧾 Sinov cheki'}
+          </button>
+          {connection === 'NETWORK' && <span className="muted small">Avval «Saqlash» ni bosing</span>}
+        </div>
+        {connection === 'USB' && (
+          <p className="hint">
+            💡 Chek oynasiz (avtomatik) chiqishi uchun admin panelni maxsus Chrome yorlig'i orqali oching — qo'llanma README faylida.
+          </p>
+        )}
       </section>
 
       <section className="box">
