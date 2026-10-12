@@ -1,0 +1,30 @@
+# Saytdagi Mini App qaysi versiya ekanini tekshirish (qo'lda ishga tushiriladi)
+name: Sayt versiyasini tekshirish
+
+on:
+  workflow_dispatch:
+    inputs:
+      find:
+        description: "JS ichidan qidiriladigan matn"
+        default: 'gateSaved'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check
+        env:
+          SERVER_URL: ${{ vars.SERVER_URL || 'https://madi-sushi.onrender.com' }}
+          FIND: ${{ inputs.find }}
+        run: |
+          curl -fsS --retry 3 --retry-delay 20 --max-time 90 "$SERVER_URL/api/health"; echo
+          curl -sSI "$SERVER_URL/" | grep -iE "cache|etag|last-mod" || true
+          html=$(curl -fsS "$SERVER_URL/")
+          echo "$html"
+          js=$(echo "$html" | grep -oE '/assets/index-[^"]+\.js' | head -1)
+          echo "JS: $js"
+          curl -fsS "$SERVER_URL$js" -o app.js
+          for s in $FIND gateSaved is-fullscreen requestFullscreen madi_gate_done_v1 brand__logo; do
+            printf '%-22s %s\n' "$s" "$(grep -c "$s" app.js)"
+          done
