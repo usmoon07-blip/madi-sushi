@@ -15,17 +15,13 @@ function yandexNaviUrl({ lat, lon }) {
 }
 
 /**
- * Yandex Go — "Dostavka" bo'limi. "Qayerga" = mijoz nuqtasi, "Qayerdan" = filial (bo'lsa).
+ * Yandex Go — "Dostavka" bo'limi. Faqat "Qayerga" = mijoz nuqtasi; "Qayerdan"ni buyurtmachi o'zi tanlaydi.
  * Rasmiy format: https://3.redirect.appmetrica.yandex.com/route?...&vertical=delivery
  * (3 — Yandex Go ilovasi kodi; tracking_id — ilova o'rnatilmagan bo'lsa do'konga yo'naltiradi)
  */
-function yandexGoUrl({ lat, lon }, shop = {}) {
+function yandexGoUrl({ lat, lon }) {
   if (!isNum(lat) || !isNum(lon)) return null;
   const params = new URLSearchParams();
-  if (isNum(shop.shopLat) && isNum(shop.shopLon)) {
-    params.set('start-lat', fix(shop.shopLat));
-    params.set('start-lon', fix(shop.shopLon));
-  }
   params.set('end-lat', fix(lat));
   params.set('end-lon', fix(lon));
   params.set('vertical', 'delivery');

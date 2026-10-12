@@ -33,14 +33,10 @@ export const yandexNavi = (o) => `yandexnavi://build_route_on_map?lat_to=${o.lat
 const hasCoords = (o) => o?.lat != null && o?.lon != null;
 const fix = (n) => Number(n).toFixed(6);
 
-// Yandex Go — "Dostavka" bo'limi: "Qayerga" = mijoz nuqtasi, "Qayerdan" = filial (sozlamalarda bo'lsa)
-export function yandexGo(o, settings) {
+// Yandex Go — "Dostavka" bo'limi: faqat "Qayerga" = mijoz nuqtasi ("Qayerdan"ni buyurtmachi o'zi tanlaydi)
+export function yandexGo(o) {
   if (!hasCoords(o)) return null;
   const p = new URLSearchParams();
-  if (settings?.shopLat != null && settings?.shopLon != null) {
-    p.set('start-lat', fix(settings.shopLat));
-    p.set('start-lon', fix(settings.shopLon));
-  }
   p.set('end-lat', fix(o.lat));
   p.set('end-lon', fix(o.lon));
   p.set('vertical', 'delivery');

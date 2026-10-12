@@ -120,7 +120,7 @@ async function startBot() {
     await bot.init();
     await bot.api.setWebhook(`${config.publicUrl}${webhook.path}`, {
       secret_token: webhook.secretToken,
-      allowed_updates: ['message', 'callback_query'],
+      allowed_updates: ['message'],
     });
     console.log(`[bot] @${bot.botInfo.username} webhook rejimida ishlayapti ✅`);
     return;
@@ -129,7 +129,7 @@ async function startBot() {
   bot
     .start({
         drop_pending_updates: true,
-        allowed_updates: ['message', 'callback_query'],
+        allowed_updates: ['message'],
       onStart: (me) => console.log(`[bot] @${me.username} ishlayapti ✅`),
     })
     .catch((err) => {

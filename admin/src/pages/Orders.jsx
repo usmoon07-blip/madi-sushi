@@ -3,7 +3,6 @@ import { api } from '../api.js';
 import { beep } from '../sound.js';
 import { printReceipt, printerConfig } from '../printing.js';
 import { NEXT_STATUS, STATUSES, courierNote, formatDate, isTouchDevice, money, statusOf, yandexGo, yandexNavi, yandexRoute } from '../format.js';
-import { usePrinterConfig } from '../printing.js';
 import YandexGoModal from '../components/YandexGoModal.jsx';
 
 const FILTERS = [
@@ -25,11 +24,10 @@ export default function Orders({ onActiveCount, visible }) {
   const [busy, setBusy] = useState(null);
   const [fresh, setFresh] = useState(new Set());
   const lastSeenId = useRef(null);
-  const settings = usePrinterConfig(); // sozlamalar (filial lokatsiyasi shu yerda)
   const [goOrder, setGoOrder] = useState(null);
 
   const openYandexGo = (order) => {
-    const url = yandexGo(order, settings);
+    const url = yandexGo(order);
     if (!url) return;
     // Telefonda — ilovani to'g'ridan-to'g'ri ochamiz, kompyuterda — QR-kod
     if (isTouchDevice()) window.location.href = url;
@@ -250,7 +248,7 @@ export default function Orders({ onActiveCount, visible }) {
       </div>
 
       {goOrder && (
-        <YandexGoModal order={goOrder} url={yandexGo(goOrder, settings)} note={courierNote(goOrder)} onClose={() => setGoOrder(null)} />
+        <YandexGoModal order={goOrder} url={yandexGo(goOrder)} note={courierNote(goOrder)} onClose={() => setGoOrder(null)} />
       )}
     </div>
   );

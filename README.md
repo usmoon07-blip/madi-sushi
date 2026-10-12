@@ -131,12 +131,10 @@ Yangi buyurtma kelganda, adminning Telegramiga ham xabar, Yandex tugmasi va xari
 ## 🚕 Yandex Go orqali kuryer chaqirish
 
 Har bir yetkazib berish buyurtmasida **🚕 Yandex Go** tugmasi bor (admin panelda va adminga keladigan Telegram xabarida).
-U Yandex Go ilovasining **Dostavka** bo'limini ochadi: **Qayerga** maydonida mijozning aniq lokatsiyasi (koordinata), **Qayerdan** maydonida filial turadi.
+U Yandex Go ilovasining **Dostavka** bo'limini ochadi: **Qayerga** maydonida mijozning aniq lokatsiyasi (koordinata) turadi. **Qayerdan** maydonini buyurtmachi o'zi tanlaydi.
 
 - **Telefonda** bosilsa — Yandex Go darhol ochiladi.
 - **Kompyuterda** bosilsa — QR-kod chiqadi: telefon kamerasi bilan skanerlang. U yerda **📋 Kuryerga izohni nusxalash** tugmasi ham bor (mijoz telefoni, podyezd, naqd summa).
-- **Filial nuqtasi (eng oson):** restoranda turib botga `/filial` deb yozing → **📍 Restoran lokatsiyasini yuborish** → **🏠 Filial lokatsiyasi qilib saqlash**. Shundan so'ng «Qayerdan» maydoniga doim shu nuqta qo'yiladi.
-  Yoki: Admin panel → Sozlamalar → Filial → «Filial lokatsiyasi» ga koordinata yoki Yandex Maps havolasini qo'ying.
 - Mijoz lokatsiya yubormay faqat manzil yozgan bo'lsa, bot undan **lokatsiya so'raydi**. Yuborsa, buyurtmaga avtomatik biriktiriladi va sizga yangi xabar keladi. Shungacha admin panelda «⚠️ Lokatsiya yo'q» yozuvi turadi.
 
 ## 5. 🖨 Oshxona cheki (avtomatik chop etish)
