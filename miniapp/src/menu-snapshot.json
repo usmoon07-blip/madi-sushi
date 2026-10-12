@@ -1,10 +1,12 @@
 {
-  "generatedAt": "2026-10-12T13:51:35.721Z",
+  "generatedAt": "2026-10-12T15:10:22.791Z",
   "products": [
     {
       "id": 1,
       "name": "Filadelfiya",
+      "nameRu": "Филадельфия",
       "description": "Eng mashhur roll: yangi norvej losos, yumshoq krem-pishloq va bodring.",
+      "descriptionRu": "Самый популярный ролл: свежий норвежский лосось, нежный сливочный сыр и огурец.",
       "ingredients": [
         "Norvej losos",
         "Krem-pishloq",
@@ -12,15 +14,25 @@
         "Guruch",
         "Nori"
       ],
+      "ingredientsRu": [
+        "Норвежский лосось",
+        "Сливочный сыр",
+        "Огурец",
+        "Рис",
+        "Нори"
+      ],
       "imageUrl": "/static/products/philadelphia.svg",
       "oldPrice": 99000,
       "price": 89000,
-      "category": "Rollar"
+      "categoryId": 2,
+      "isHit": true
     },
     {
       "id": 2,
       "name": "Kaliforniya",
+      "nameRu": "Калифорния",
       "description": "Klassik Kaliforniya: qisqichbaqa, avokado va to'q sariq masago ikrasi.",
+      "descriptionRu": "Классическая Калифорния: краб, авокадо и икра масаго.",
       "ingredients": [
         "Qisqichbaqa",
         "Avokado",
@@ -28,15 +40,25 @@
         "Masago ikrasi",
         "Yapon mayonezi"
       ],
+      "ingredientsRu": [
+        "Краб",
+        "Авокадо",
+        "Огурец",
+        "Икра масаго",
+        "Японский майонез"
+      ],
       "imageUrl": "/static/products/california.svg",
       "oldPrice": null,
       "price": 75000,
-      "category": "Rollar"
+      "categoryId": 2,
+      "isHit": true
     },
     {
       "id": 3,
       "name": "Ajdaho (Dragon)",
+      "nameRu": "Дракон",
       "description": "Avokado bilan qoplangan, ichida dudlangan ugor va unagi sousi.",
+      "descriptionRu": "Покрыт авокадо, внутри копчёный угорь и соус унаги.",
       "ingredients": [
         "Dudlangan ugor",
         "Avokado",
@@ -45,15 +67,26 @@
         "Unagi sousi",
         "Kunjut"
       ],
+      "ingredientsRu": [
+        "Копчёный угорь",
+        "Авокадо",
+        "Сливочный сыр",
+        "Огурец",
+        "Соус унаги",
+        "Кунжут"
+      ],
       "imageUrl": "/static/products/dragon.svg",
       "oldPrice": 110000,
       "price": 95000,
-      "category": "Rollar"
+      "categoryId": 2,
+      "isHit": true
     },
     {
       "id": 4,
       "name": "Qora samuray",
+      "nameRu": "Чёрный самурай",
       "description": "Tempura krevetka, losos va krem-pishloq. Qarsildoq va to'yimli.",
+      "descriptionRu": "Креветка темпура, лосось и сливочный сыр. Хрустящий и сытный.",
       "ingredients": [
         "Tempura krevetka",
         "Losos",
@@ -61,15 +94,25 @@
         "Qora kunjut",
         "Nori"
       ],
+      "ingredientsRu": [
+        "Креветка темпура",
+        "Лосось",
+        "Сливочный сыр",
+        "Чёрный кунжут",
+        "Нори"
+      ],
       "imageUrl": "/static/products/black-samurai.svg",
       "oldPrice": null,
       "price": 85000,
-      "category": "Rollar"
+      "categoryId": 2,
+      "isHit": false
     },
     {
       "id": 5,
       "name": "Spicy Tuna",
+      "nameRu": "Спайси тунец",
       "description": "O'tkir sousdagi tunets va bodring — achchiq yoqtiruvchilar uchun.",
+      "descriptionRu": "Тунец в остром соусе и огурец — для любителей острого.",
       "ingredients": [
         "Tunets",
         "Spicy sous",
@@ -77,15 +120,25 @@
         "Guruch",
         "Nori"
       ],
+      "ingredientsRu": [
+        "Тунец",
+        "Соус спайси",
+        "Огурец",
+        "Рис",
+        "Нори"
+      ],
       "imageUrl": "/static/products/spicy-tuna.svg",
       "oldPrice": null,
       "price": 79000,
-      "category": "Rollar"
+      "categoryId": 2,
+      "isHit": false
     },
     {
       "id": 6,
       "name": "Madi Premium set",
+      "nameRu": "Сет Madi Premium",
       "description": "32 dona: Filadelfiya, Kaliforniya, Ajdaho va Qora samuray. 3–4 kishilik.",
+      "descriptionRu": "32 штуки: Филадельфия, Калифорния, Дракон и Чёрный самурай. На 3–4 персоны.",
       "ingredients": [
         "Filadelfiya — 8 dona",
         "Kaliforniya — 8 dona",
@@ -93,74 +146,248 @@
         "Qora samuray — 8 dona",
         "Imbir, vasabi, soya sousi"
       ],
+      "ingredientsRu": [
+        "Филадельфия — 8 шт",
+        "Калифорния — 8 шт",
+        "Дракон — 8 шт",
+        "Чёрный самурай — 8 шт",
+        "Имбирь, васаби, соевый соус"
+      ],
       "imageUrl": "/static/products/madi-premium-set.svg",
       "oldPrice": 329000,
       "price": 289000,
-      "category": "Setlar"
+      "categoryId": 1,
+      "isHit": true
     },
     {
       "id": 7,
       "name": "Filadelfiya set",
+      "nameRu": "Сет Филадельфия",
       "description": "24 dona Filadelfiya: klassik, kunjutli va kuydirilgan losos bilan.",
+      "descriptionRu": "24 штуки Филадельфии: классическая, с кунжутом и с опалённым лососем.",
       "ingredients": [
         "Filadelfiya klassik — 8 dona",
         "Filadelfiya kunjutli — 8 dona",
         "Filadelfiya flambe — 8 dona",
         "Imbir, vasabi, soya sousi"
       ],
+      "ingredientsRu": [
+        "Филадельфия классика — 8 шт",
+        "Филадельфия с кунжутом — 8 шт",
+        "Филадельфия фламбе — 8 шт",
+        "Имбирь, васаби, соевый соус"
+      ],
       "imageUrl": "/static/products/philadelphia-set.svg",
       "oldPrice": 259000,
       "price": 239000,
-      "category": "Setlar"
+      "categoryId": 1,
+      "isHit": false
     },
     {
       "id": 8,
       "name": "Nigiri losos",
+      "nameRu": "Нигири лосось",
       "description": "2 dona. Guruch ustida yangi losos bo‘lagi.",
+      "descriptionRu": "2 штуки. Свежий лосось на рисе.",
       "ingredients": [
         "Norvej losos",
         "Sushi guruchi",
         "Vasabi"
       ],
+      "ingredientsRu": [
+        "Норвежский лосось",
+        "Рис для суши",
+        "Васаби"
+      ],
       "imageUrl": "/static/products/nigiri-salmon.svg",
       "oldPrice": null,
       "price": 39000,
-      "category": "Nigiri"
+      "categoryId": 3,
+      "isHit": false
     },
     {
       "id": 9,
       "name": "Nigiri ugor",
+      "nameRu": "Нигири угорь",
       "description": "2 dona. Dudlangan ugor, unagi sousi va kunjut.",
+      "descriptionRu": "2 штуки. Копчёный угорь, соус унаги и кунжут.",
       "ingredients": [
         "Dudlangan ugor",
         "Sushi guruchi",
         "Unagi sousi",
         "Kunjut"
       ],
+      "ingredientsRu": [
+        "Копчёный угорь",
+        "Рис для суши",
+        "Соус унаги",
+        "Кунжут"
+      ],
       "imageUrl": "/static/products/nigiri-eel.svg",
       "oldPrice": null,
       "price": 45000,
-      "category": "Nigiri"
+      "categoryId": 3,
+      "isHit": false
     },
     {
       "id": 10,
-      "name": "Coca-Cola 0.5",
-      "description": "Muzdek Coca-Cola, 0.5 l.",
-      "ingredients": [],
-      "imageUrl": "/static/products/coca-cola.svg",
+      "name": "Chuka salat",
+      "nameRu": "Салат Чука",
+      "description": "Dengiz o'tlari, yong'oq sousi va kunjut.",
+      "descriptionRu": "Морские водоросли, ореховый соус и кунжут.",
+      "ingredients": [
+        "Chuka dengiz o'ti",
+        "Yong'oq sousi",
+        "Kunjut",
+        "Limon"
+      ],
+      "ingredientsRu": [
+        "Водоросли чука",
+        "Ореховый соус",
+        "Кунжут",
+        "Лимон"
+      ],
+      "imageUrl": "/static/products/chuka-salad.svg",
       "oldPrice": null,
-      "price": 12000,
-      "category": "Ichimliklar"
+      "price": 35000,
+      "categoryId": 4,
+      "isHit": false
     },
     {
       "id": 11,
-      "name": "Yashil choy",
-      "description": "Yapon yashil choyi, 0.4 l.",
+      "name": "Sezar losos bilan",
+      "nameRu": "Цезарь с лососем",
+      "description": "Aysberg salati, losos, parmezan, kruton va Sezar sousi.",
+      "descriptionRu": "Салат айсберг, лосось, пармезан, крутоны и соус Цезарь.",
+      "ingredients": [
+        "Aysberg salati",
+        "Losos",
+        "Parmezan",
+        "Kruton",
+        "Bedana tuxumi",
+        "Sezar sousi"
+      ],
+      "ingredientsRu": [
+        "Салат айсберг",
+        "Лосось",
+        "Пармезан",
+        "Крутоны",
+        "Перепелиное яйцо",
+        "Соус Цезарь"
+      ],
+      "imageUrl": "/static/products/caesar-salmon.svg",
+      "oldPrice": null,
+      "price": 59000,
+      "categoryId": 4,
+      "isHit": false
+    },
+    {
+      "id": 12,
+      "name": "Coca-Cola 0.5",
+      "nameRu": "Coca-Cola 0.5",
+      "description": "Muzdek Coca-Cola, 0.5 l.",
+      "descriptionRu": "Холодная Coca-Cola, 0,5 л.",
       "ingredients": [],
+      "ingredientsRu": [],
+      "imageUrl": "/static/products/coca-cola.svg",
+      "oldPrice": null,
+      "price": 12000,
+      "categoryId": 5,
+      "isHit": false
+    },
+    {
+      "id": 13,
+      "name": "Yashil choy",
+      "nameRu": "Зелёный чай",
+      "description": "Yapon yashil choyi, 0.4 l.",
+      "descriptionRu": "Японский зелёный чай, 0,4 л.",
+      "ingredients": [],
+      "ingredientsRu": [],
       "imageUrl": "/static/products/green-tea.svg",
       "oldPrice": null,
       "price": 15000,
-      "category": "Ichimliklar"
+      "categoryId": 5,
+      "isHit": false
+    },
+    {
+      "id": 14,
+      "name": "Soya sousi",
+      "nameRu": "Соевый соус",
+      "description": "40 ml.",
+      "descriptionRu": "40 мл.",
+      "ingredients": [],
+      "ingredientsRu": [],
+      "imageUrl": "/static/products/soy-sauce.svg",
+      "oldPrice": null,
+      "price": 4000,
+      "categoryId": 6,
+      "isHit": false
+    },
+    {
+      "id": 15,
+      "name": "Spicy sous",
+      "nameRu": "Соус спайси",
+      "description": "O'tkir yapon sousi, 40 ml.",
+      "descriptionRu": "Острый японский соус, 40 мл.",
+      "ingredients": [],
+      "ingredientsRu": [],
+      "imageUrl": "/static/products/spicy-sauce.svg",
+      "oldPrice": null,
+      "price": 5000,
+      "categoryId": 6,
+      "isHit": false
+    },
+    {
+      "id": 16,
+      "name": "Unagi sousi",
+      "nameRu": "Соус унаги",
+      "description": "Shirin-sho‘r ugor sousi, 40 ml.",
+      "descriptionRu": "Сладко-солёный соус для угря, 40 мл.",
+      "ingredients": [],
+      "ingredientsRu": [],
+      "imageUrl": "/static/products/unagi-sauce.svg",
+      "oldPrice": null,
+      "price": 5000,
+      "categoryId": 6,
+      "isHit": false
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "nameUz": "Setlar",
+      "nameRu": "Сеты",
+      "imageUrl": "/static/products/madi-premium-set.svg"
+    },
+    {
+      "id": 2,
+      "nameUz": "Rollar",
+      "nameRu": "Роллы",
+      "imageUrl": "/static/products/philadelphia.svg"
+    },
+    {
+      "id": 3,
+      "nameUz": "Sushi",
+      "nameRu": "Суши",
+      "imageUrl": "/static/products/nigiri-salmon.svg"
+    },
+    {
+      "id": 4,
+      "nameUz": "Salatlar",
+      "nameRu": "Салаты",
+      "imageUrl": "/static/products/chuka-salad.svg"
+    },
+    {
+      "id": 5,
+      "nameUz": "Ichimliklar",
+      "nameRu": "Напитки",
+      "imageUrl": "/static/products/coca-cola.svg"
+    },
+    {
+      "id": 6,
+      "nameUz": "Souslar",
+      "nameRu": "Соусы",
+      "imageUrl": "/static/products/sauces.svg"
     }
   ],
   "settings": {
@@ -170,6 +397,10 @@
     "minOrder": 50000,
     "pickupAddress": "Toshkent, Foziltepa ko'chasi, 40",
     "contactPhone": "",
-    "isOpen": true
+    "isOpen": true,
+    "workHours": "10:00 – 02:00",
+    "instagram": "",
+    "aboutUz": "Madi Sushi — Toshkentdagi premium sushi bar. Biz har bir rollni buyurtmadan so'ng yangi tayyorlaymiz: sifatli baliq, maxsus sushi guruchi va mualliflik souslari. Shahar bo‘ylab tez yetkazib beramiz.",
+    "aboutRu": "Madi Sushi — премиальный суши-бар в Ташкенте. Каждый ролл готовим сразу после заказа: отборная рыба, специальный рис для суши и авторские соусы. Быстро доставляем по всему городу."
   }
 }

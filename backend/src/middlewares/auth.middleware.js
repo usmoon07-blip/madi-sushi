@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const config = require('../config/default');
 const User = require('../models/User');
+const { t, guessLang, normLang } = require('../services/i18n');
 
 const safeEqual = (a, b) => {
   const ba = Buffer.from(String(a));
@@ -44,10 +45,12 @@ async function telegramAuth(req, res, next) {
       tgUser = { id: 1, first_name: 'Test', username: 'dev' };
     }
     if (!tgUser) {
-      return res.status(401).json({ error: "Ilovani Telegram bot orqali oching" });
+      return res.status(401).json({ error: t(normLang(req.get('x-lang')), 'errOpenInTelegram') });
     }
     req.tgUser = tgUser;
     req.user = await User.ensure(tgUser);
+    // Til: foydalanuvchi tanlagani, bo'lmasa Telegram tilidan taxmin
+    req.lang = normLang(req.user.lang || guessLang(tgUser.language_code));
     return next();
   } catch (err) {
     return next(err);

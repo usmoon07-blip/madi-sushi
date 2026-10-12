@@ -59,6 +59,10 @@ export default function Settings() {
         minOrder: form.minOrder,
         pickupAddress: form.pickupAddress,
         contactPhone: form.contactPhone,
+        workHours: form.workHours,
+        instagram: form.instagram,
+        aboutUz: form.aboutUz,
+        aboutRu: form.aboutRu,
         isOpen: form.isOpen,
         printMode: form.printMode,
         paperWidth: form.paperWidth,
@@ -295,6 +299,29 @@ export default function Settings() {
           <label className="field">
             <span>Aloqa telefoni</span>
             <input value={form.contactPhone} onChange={set('contactPhone')} placeholder="+998 90 123 45 67" />
+          </label>
+          <label className="field">
+            <span>Ish vaqti</span>
+            <input value={form.workHours} onChange={set('workHours')} placeholder="10:00 – 02:00" />
+          </label>
+          <label className="field">
+            <span>Instagram (username)</span>
+            <input value={form.instagram} onChange={set('instagram')} placeholder="madisushi" />
+          </label>
+        </div>
+      </section>
+
+      <section className="box">
+        <h3>ℹ️ Biz haqimizda</h3>
+        <p className="muted small">Mini App → Profil → «Biz haqimizda» bo'limida ko'rinadi</p>
+        <div className="form__grid">
+          <label className="field">
+            <span>🇺🇿 O'zbekcha</span>
+            <textarea rows={5} value={form.aboutUz} onChange={set('aboutUz')} maxLength={2000} />
+          </label>
+          <label className="field">
+            <span>🇷🇺 Ruscha</span>
+            <textarea rows={5} value={form.aboutRu} onChange={set('aboutRu')} maxLength={2000} />
           </label>
         </div>
       </section>

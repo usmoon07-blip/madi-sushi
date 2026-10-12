@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { api, mediaUrl } from '../api.js';
 import { useCart, toast } from '../store.jsx';
-import { getLocation, haptic, openLink, openLocationSettings, requestPhone, tg } from '../telegram.js';
-import { formatPhoneInput, isValidPhone, money, uid, yandexMapUrl, yandexSearchUrl } from '../format.js';
+import { useApp } from '../appState.jsx';
+import { useT } from '../i18n.jsx';
+import { haptic, openLink, requestPhone, tg } from '../telegram.js';
+import { formatPhoneInput, isValidPhone, uid, yandexMapUrl, yandexSearchUrl } from '../format.js';
 import Stepper from '../components/Stepper.jsx';
 import { Segmented, Switch } from '../components/Controls.jsx';
-import { CartIcon, CopyIcon, PinIcon, PhoneIcon, ArrowIcon } from '../components/Icons.jsx';
+import { ArrowIcon, CartIcon, CopyIcon, PhoneIcon, PinIcon } from '../components/Icons.jsx';
 
 async function copyText(text) {
   try {
@@ -20,38 +22,37 @@ async function copyText(text) {
   }
 }
 
-export default function Cart({ products, settings, user, onUserChange, onSuccess, onGoMenu, onReload }) {
+export default function Cart({ onSuccess }) {
   const cart = useCart();
-  const [deliveryType, setDeliveryType] = useState('DELIVERY');
+  const app = useApp();
+  const { t, pick, money } = useT();
+  const { settings, user, mode, location } = app;
   const [paymentType, setPaymentType] = useState('CASH');
   const [phone, setPhone] = useState(user?.phone ? formatPhoneInput(user.phone) : '+998');
-  const [address, setAddress] = useState(user?.lastAddress || '');
-  const [coords, setCoords] = useState(
-    user?.lastLat != null && user?.lastLon != null ? { lat: user.lastLat, lon: user.lastLon } : null
-  );
   const [addressNote, setAddressNote] = useState('');
   const [comment, setComment] = useState('');
-  const [locating, setLocating] = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const clientRef = useRef(uid());
   const addressRef = useRef(null);
   const phoneRef = useRef(null);
 
-  // Server keyinroq javob bersa (menyu nusxadan ochilgan), saqlangan raqam va manzilni to'ldiramiz
+  // Server keyinroq javob bersa (menyu nusxadan ochilgan), saqlangan raqamni to'ldiramiz
   useEffect(() => {
-    if (!user) return;
-    if (user.phone) setPhone((p) => (isValidPhone(p) ? p : formatPhoneInput(user.phone)));
-    if (user.lastAddress) setAddress((a) => a || user.lastAddress);
-    if (user.lastLat != null && user.lastLon != null) setCoords((c) => c || { lat: user.lastLat, lon: user.lastLon });
+    if (user?.phone) setPhone((p) => (isValidPhone(p) ? p : formatPhoneInput(user.phone)));
   }, [user]);
 
-  const upsell = useMemo(() => products.find((p) => /ichimlik/i.test(p.category)), [products]);
-  const isDelivery = deliveryType === 'DELIVERY';
+  const upsell = useMemo(() => {
+    const drinks = app.categories.find((c) => /ichimlik/i.test(c.nameUz));
+    return drinks ? app.products.find((p) => p.categoryId === drinks.id) : null;
+  }, [app.products, app.categories]);
+
+  const isDelivery = mode === 'DELIVERY';
   const freeDelivery = settings.freeDeliveryFrom > 0 && cart.subtotal >= settings.freeDeliveryFrom;
   const deliveryFee = isDelivery && !freeDelivery ? settings.deliveryFee : 0;
   const total = cart.subtotal + deliveryFee;
   const cards = settings.cards || [];
+  const hasCoords = location?.lat != null && location?.lon != null;
 
   if (!cart.lines.length) {
     return (
@@ -60,43 +61,15 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
           <div className="empty-state__icon">
             <CartIcon width={40} height={40} />
           </div>
-          <h2>Savat bo'sh</h2>
-          <p className="muted">Menyudan sevimli rollaringizni tanlang</p>
-          <button type="button" className="btn btn--primary" onClick={onGoMenu}>
-            Menyuga o'tish
+          <h2>{t('cartEmpty')}</h2>
+          <p className="muted">{t('cartEmptyText')}</p>
+          <button type="button" className="btn btn--primary" onClick={() => app.openMenu()}>
+            {t('toMenu')}
           </button>
         </div>
       </div>
     );
   }
-
-  const locate = async () => {
-    haptic.tap();
-    setLocating(true);
-    try {
-      const pos = await getLocation();
-      setCoords(pos);
-      setAddress('Manzil aniqlanmoqda...');
-      try {
-        const res = await api.geocode(pos.lat, pos.lon);
-        setAddress(res.address);
-      } catch {
-        setAddress(`${pos.lat.toFixed(5)}, ${pos.lon.toFixed(5)}`);
-      }
-      haptic.success();
-    } catch (err) {
-      haptic.error();
-      if (err.message === 'denied') {
-        toast("Lokatsiyaga ruxsat berilmagan. Sozlamalardan ruxsat bering yoki manzilni qo'lda yozing", 'error');
-        openLocationSettings();
-      } else {
-        toast("Lokatsiyani aniqlab bo'lmadi. Manzilni qo'lda yozing", 'error');
-      }
-      addressRef.current?.focus();
-    } finally {
-      setLocating(false);
-    }
-  };
 
   const shareTelegramPhone = async () => {
     setPhoneLoading(true);
@@ -107,7 +80,7 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
         return;
       }
       if (!res.ok) {
-        if (!tg) toast('Raqamni qo‘lda kiriting');
+        if (!tg) toast(t('errPhoneManual'));
         return;
       }
       // Raqam botga yuborildi — serverdan olamiz
@@ -116,7 +89,7 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
         const { user: fresh } = await api.me();
         if (fresh.phone) {
           setPhone(formatPhoneInput(fresh.phone));
-          onUserChange(fresh);
+          app.setUser(fresh);
           return;
         }
       }
@@ -129,19 +102,17 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
 
   const submit = async () => {
     if (submitting) return;
-    if (!settings.isOpen) return toast('Hozir buyurtmalar qabul qilinmayapti', 'error');
-    if (cart.subtotal < settings.minOrder) {
-      return toast(`Minimal buyurtma: ${money(settings.minOrder)}`, 'error');
-    }
-    if (isDelivery && !address.trim() && !coords) {
+    if (!settings.isOpen) return toast(t('errClosed'), 'error');
+    if (cart.subtotal < settings.minOrder) return toast(t('minOrder', money(settings.minOrder)), 'error');
+    if (isDelivery && !location?.address && !hasCoords) {
       haptic.error();
-      addressRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return toast("Lokatsiyani yuboring yoki manzilni yozing", 'error');
+      app.openAddress();
+      return toast(t('errAddress'), 'error');
     }
     if (!isValidPhone(phone)) {
       haptic.error();
       phoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return toast("Telefon raqamini to'liq kiriting", 'error');
+      return toast(t('errPhone'), 'error');
     }
 
     setSubmitting(true);
@@ -149,13 +120,13 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
       const { order } = await api.createOrder({
         clientRef: clientRef.current,
         items: cart.lines.map((l) => ({ productId: l.product.id, qty: l.qty, name: l.product.name })),
-        deliveryType,
+        deliveryType: mode,
         paymentType,
         phone,
-        address: isDelivery ? address.trim() : null,
+        address: isDelivery ? location?.address || null : null,
         addressNote: isDelivery ? addressNote.trim() : null,
-        lat: isDelivery ? coords?.lat ?? null : null,
-        lon: isDelivery ? coords?.lon ?? null : null,
+        lat: isDelivery && hasCoords ? location.lat : null,
+        lon: isDelivery && hasCoords ? location.lon : null,
         comment: comment.trim(),
       });
       haptic.success();
@@ -165,7 +136,7 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
     } catch (err) {
       haptic.error();
       toast(err.message, 'error');
-      if (err.status === 409) onReload();
+      if (err.status === 409) app.reload();
     } finally {
       setSubmitting(false);
     }
@@ -173,14 +144,14 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
 
   return (
     <div className="page page--checkout">
-      <h1 className="page__title">Savat</h1>
+      <h1 className="page__title">{t('cart')}</h1>
 
       <div className="panel">
         {cart.lines.map(({ product, qty }) => (
           <div key={product.id} className="line">
             <img className="line__img" src={mediaUrl(product.imageUrl)} alt="" />
             <div className="line__info">
-              <div className="line__name">{product.name}</div>
+              <div className="line__name">{pick(product, 'name')}</div>
               <div className="line__price">{money(product.price * qty)}</div>
             </div>
             <Stepper value={qty} onChange={(v) => cart.setQty(product.id, v)} size="sm" />
@@ -192,11 +163,11 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
         <div className="upsell">
           <img src={mediaUrl(upsell.imageUrl)} alt="" />
           <div className="upsell__text">
-            Qo'shimcha ravishda <b>{upsell.name}</b> qo'shasizmi?
+            <span dangerouslySetInnerHTML={{ __html: t('upsell', pick(upsell, 'name').replace(/</g, '&lt;')) }} />
             <span className="upsell__price">+{money(upsell.price)}</span>
           </div>
           <Switch
-            label={`${upsell.name} qo'shish`}
+            label="+"
             checked={cart.qtyOf(upsell.id) > 0}
             onChange={(on) => {
               haptic.tap();
@@ -206,54 +177,44 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
         </div>
       )}
 
-      <h3 className="block-title">Qabul qilish usuli</h3>
+      <h3 className="block-title">{t('howToGet')}</h3>
       <Segmented
-        value={deliveryType}
+        value={mode}
         onChange={(v) => {
           haptic.tap();
-          setDeliveryType(v);
+          app.setMode(v);
         }}
         options={[
-          { value: 'DELIVERY', label: 'Yetkazib berish', icon: '🛵' },
-          { value: 'PICKUP', label: 'Olib ketish', icon: '🏃' },
+          { value: 'DELIVERY', label: t('courier'), icon: '🛵' },
+          { value: 'PICKUP', label: t('pickup'), icon: '🏃' },
         ]}
       />
 
       {isDelivery ? (
-        <div className="panel panel--form">
-          <button type="button" className="btn btn--outline btn--block" onClick={locate} disabled={locating}>
-            <PinIcon width={18} height={18} />
-            {locating ? 'Aniqlanmoqda...' : coords ? 'Lokatsiyani qayta aniqlash' : 'Lokatsiyamni aniqlash'}
+        <div className="panel panel--form" ref={addressRef}>
+          <button type="button" className="addr-card" onClick={() => app.openAddress()}>
+            <span className="addr-card__icon">
+              <PinIcon width={20} height={20} />
+            </span>
+            <span className="addr-card__body">
+              <span className="field__label">{t('address')}</span>
+              <span className="addr-card__value">{location?.address || t('chooseAddress')}</span>
+            </span>
+            <span className="link">{t('change')}</span>
           </button>
-
-          <label className="field">
-            <span className="field__label">Manzil</span>
-            <textarea
-              ref={addressRef}
-              rows={2}
-              value={address}
-              maxLength={300}
-              placeholder="Tuman, ko'cha, uy raqami"
-              onChange={(e) => setAddress(e.target.value)}
-            />
-          </label>
-          {!coords && (
-            <p className="geo-hint">📍 Kuryer sizni aniq va tez topishi uchun lokatsiyani yuboring</p>
-          )}
-          {coords && (
+          {hasCoords ? (
             <div className="geo-row">
-              <span className="geo-row__dot" /> Lokatsiya biriktirildi
-              <button type="button" className="link" onClick={() => openLink(yandexMapUrl(coords.lat, coords.lon))}>
-                Xaritada ko'rish <ArrowIcon width={14} height={14} />
-              </button>
-              <button type="button" className="link link--muted" onClick={() => setCoords(null)}>
-                Olib tashlash
+              <span className="geo-row__dot" />
+              <button type="button" className="link" onClick={() => openLink(yandexMapUrl(location.lat, location.lon))}>
+                {t('openInMaps')} <ArrowIcon width={14} height={14} />
               </button>
             </div>
+          ) : (
+            <p className="geo-hint">{t('noLocationHint')}</p>
           )}
           <label className="field">
-            <span className="field__label">Xonadon, podyezd, qavat</span>
-            <input value={addressNote} maxLength={200} placeholder="Masalan: 12-xonadon, 3-podyezd, 4-qavat" onChange={(e) => setAddressNote(e.target.value)} />
+            <span className="field__label">{t('addressNote')}</span>
+            <input value={addressNote} maxLength={200} placeholder={t('addressNotePh')} onChange={(e) => setAddressNote(e.target.value)} />
           </label>
         </div>
       ) : (
@@ -262,16 +223,16 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
             <PinIcon />
           </div>
           <div>
-            <div className="pickup__label">Olib ketish manzili</div>
+            <div className="pickup__label">{t('pickupFrom')}</div>
             <div className="pickup__addr">{settings.pickupAddress}</div>
             <button type="button" className="link" onClick={() => openLink(yandexSearchUrl(settings.pickupAddress))}>
-              Yandex xaritada ochish <ArrowIcon width={14} height={14} />
+              {t('openInMaps')} <ArrowIcon width={14} height={14} />
             </button>
           </div>
         </div>
       )}
 
-      <h3 className="block-title">Telefon raqam</h3>
+      <h3 className="block-title">{t('phone')}</h3>
       <div className="panel panel--form">
         <div className="phone-row">
           <input
@@ -283,19 +244,19 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
             placeholder="+998 90 123 45 67"
           />
           {tg && (
-            <button type="button" className="btn btn--outline btn--icon" onClick={shareTelegramPhone} disabled={phoneLoading} aria-label="Telegram raqamini yuborish">
+            <button type="button" className="btn btn--outline btn--icon" onClick={shareTelegramPhone} disabled={phoneLoading} aria-label={t('sendTgPhone')}>
               <PhoneIcon width={18} height={18} />
             </button>
           )}
         </div>
         {tg && !isValidPhone(phone) && (
           <button type="button" className="link" onClick={shareTelegramPhone} disabled={phoneLoading}>
-            {phoneLoading ? 'Kutilmoqda...' : 'Telegram raqamimni yuborish'}
+            {phoneLoading ? t('waiting') : t('sendTgPhone')}
           </button>
         )}
       </div>
 
-      <h3 className="block-title">To'lov usuli</h3>
+      <h3 className="block-title">{t('payment')}</h3>
       <Segmented
         value={paymentType}
         onChange={(v) => {
@@ -303,30 +264,30 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
           setPaymentType(v);
         }}
         options={[
-          { value: 'CASH', label: 'Naqd', icon: '💵' },
-          { value: 'CARD', label: 'Karta', icon: '💳' },
+          { value: 'CASH', label: t('cash'), icon: '💵' },
+          { value: 'CARD', label: t('card'), icon: '💳' },
         ]}
       />
       {paymentType === 'CARD' && (
         <div className="panel">
           {cards.length ? (
             <>
-              <p className="muted small">Quyidagi kartaga o'tkazing va chekni {isDelivery ? 'kuryerga' : 'kassada'} ko'rsating:</p>
+              <p className="muted small">{t('cardHint', isDelivery ? t('toCourier') : t('toCashier'))}</p>
               {cards.map((c) => (
                 <div key={c.number} className="bank-card">
                   <div>
-                    <div className="bank-card__bank">{c.bank || 'Karta'}</div>
+                    <div className="bank-card__bank">{c.bank || t('card')}</div>
                     <div className="bank-card__number">{c.number}</div>
                     {c.holder && <div className="bank-card__holder">{c.holder}</div>}
                   </div>
                   <button
                     type="button"
                     className="btn btn--outline btn--icon"
-                    aria-label="Nusxalash"
+                    aria-label="copy"
                     onClick={async () => {
                       await copyText(c.number.replace(/\s/g, ''));
                       haptic.success();
-                      toast('Karta raqami nusxalandi', 'success');
+                      toast(t('copied'), 'success');
                     }}
                   >
                     <CopyIcon width={18} height={18} />
@@ -335,44 +296,44 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
               ))}
             </>
           ) : (
-            <p className="muted small">Karta ma'lumotlari {isDelivery ? 'kuryer' : 'kassir'} tomonidan beriladi.</p>
+            <p className="muted small">{t('cardByStaff', isDelivery ? t('courierWho') : t('cashierWho'))}</p>
           )}
         </div>
       )}
 
-      <h3 className="block-title">Izoh</h3>
+      <h3 className="block-title">{t('comment')}</h3>
       <div className="panel panel--form">
-        <input value={comment} maxLength={300} placeholder="Masalan: qo'ng'iroq qilmang, eshik oldida qoldiring" onChange={(e) => setComment(e.target.value)} />
+        <input value={comment} maxLength={300} placeholder={t('commentPh')} onChange={(e) => setComment(e.target.value)} />
       </div>
 
       <div className="panel summary">
         <div className="summary__row">
-          <span>Mahsulotlar</span>
+          <span>{t('products')}</span>
           <span>{money(cart.subtotal)}</span>
         </div>
         {isDelivery && (
           <div className="summary__row">
-            <span>Yetkazib berish</span>
-            <span className={freeDelivery ? 'text-green' : ''}>{freeDelivery ? 'Bepul' : money(settings.deliveryFee)}</span>
+            <span>{t('deliveryFee')}</span>
+            <span className={freeDelivery ? 'text-green' : ''}>{freeDelivery ? t('free') : money(settings.deliveryFee)}</span>
           </div>
         )}
         {isDelivery && !freeDelivery && settings.freeDeliveryFrom > 0 && (
-          <div className="summary__hint">Yana {money(settings.freeDeliveryFrom - cart.subtotal)} — yetkazib berish bepul</div>
+          <div className="summary__hint">{t('moreForFree', money(settings.freeDeliveryFrom - cart.subtotal))}</div>
         )}
         <div className="summary__row summary__row--total">
-          <span>Jami</span>
+          <span>{t('total')}</span>
           <span>{money(total)}</span>
         </div>
-        {cart.subtotal < settings.minOrder && (
-          <div className="summary__hint summary__hint--red">Minimal buyurtma summasi: {money(settings.minOrder)}</div>
-        )}
+        {cart.subtotal < settings.minOrder && <div className="summary__hint summary__hint--red">{t('minOrder', money(settings.minOrder))}</div>}
       </div>
 
       <div className="checkout-bar">
         <button type="button" className="btn btn--primary btn--block btn--lg" onClick={submit} disabled={submitting}>
-          {submitting ? 'Yuborilmoqda...' : (
+          {submitting ? (
+            t('sending')
+          ) : (
             <>
-              <span>Buyurtmani tasdiqlash</span>
+              <span>{t('confirm')}</span>
               <span className="btn__sum">{money(total)}</span>
             </>
           )}

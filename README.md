@@ -5,11 +5,25 @@ Toshkentdagi premium sushi bar uchun buyurtma tizimi. Qora-qizil dizaynda.
 | Qism | Qayerda | Vazifasi |
 |---|---|---|
 | **Backend + bot** (webhook) | **Render** (bepul) | Buyurtmalarni qabul qiladi, mijoz va adminga xabar yuboradi |
-| **Mini App** (mijoz) | **Vercel** (bepul) | Menyu · Savat · Profil |
+| **Mini App** (mijoz) | Render (yoki Vercel) | Bosh sahifa · Savat · Buyurtmalar · Profil |
 | **Admin panel** | Render, `/admin` | Buyurtmalar, mahsulotlar, kartalar, oshxona cheki |
 | **Baza** | **Neon** PostgreSQL (bepul) | Buyurtmalar, menyu, yuklangan rasmlar |
 
-Kompyuter o'chiq bo'lsa ham bot ishlaydi. Kompyuterda (localhost) ishga tushirish ham mumkin — [pastda](#kompyuterda-ishga-tushirish-localhost).
+Kompyuter o'chiq bo'lsa ham bot ishlaydi. Bot va Mini App **o'zbek va rus** tillarida ishlaydi.
+
+### Mijoz nimani ko'radi
+1. Botga `/start` → **til tanlash** (🇺🇿 / 🇷🇺; keyin `/lang` bilan o'zgartiriladi).
+2. Mini App ochilganda **avval lokatsiya** so'raladi (yoki «Olib ketaman», yoki manzilni qo'lda yozish).
+3. **Bosh sahifa:** manzil va «Kuryer orqali / Olib ketish» tanlovi, qizil «Menyu» blokida rasmli kategoriyalar, «Menyuga o'tish» tugmasi va faqat **Xit savdo** taomlari.
+4. **Menyu:** rasmli kategoriyalar qatori va kategoriyalarga ajratilgan to'liq menyu.
+5. **Pastki panel:** Bosh sahifa · Savat · Buyurtmalar · Profil.
+6. **Profil:** Yoqtirilganlar, Menyu, Filiallar, Kontaktlar, Biz haqimizda, Otziv qoldirish, Til.
+
+### Admin panelda
+- **Kategoriyalar:** nomi (uz/ru), rasmi, tartibi, faol/nofaol.
+- **Mahsulotlar:** uz/ru nomi, ta'rifi, tarkibi, **⭐ Xit savdo** belgisi (bosh sahifada chiqadi).
+- **Otzivlar:** mijozlar baholari (yangi otziv Telegramga ham keladi).
+- **Sozlamalar:** ish vaqti, Instagram, «Biz haqimizda» matni (uz/ru). Kompyuterda (localhost) ishga tushirish ham mumkin — [pastda](#kompyuterda-ishga-tushirish-localhost).
 
 ---
 

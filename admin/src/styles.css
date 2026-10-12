@@ -918,3 +918,29 @@ h3 {
   color: var(--red-hi);
   font-weight: 700;
 }
+
+/* ---------- 2-versiya ---------- */
+.form__grid--tight {
+  gap: 10px;
+}
+.reviews {
+  display: grid;
+  gap: 12px;
+}
+.review-item {
+  gap: 8px;
+}
+.review-stars {
+  color: #ffc83a;
+  font-size: 18px;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+.review-text {
+  margin: 0;
+  color: #dcdce0;
+  white-space: pre-wrap;
+}
+.page-head .stat {
+  min-width: 180px;
+}

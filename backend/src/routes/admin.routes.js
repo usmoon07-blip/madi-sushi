@@ -28,6 +28,11 @@ router.get('/products', h(admin.listProducts));
 router.post('/products', h(admin.createProduct));
 router.put('/products/:id', h(admin.updateProduct));
 router.delete('/products/:id', h(admin.deleteProduct));
+router.get('/categories', h(admin.listCategories));
+router.post('/categories', h(admin.createCategory));
+router.put('/categories/:id', h(admin.updateCategory));
+router.delete('/categories/:id', h(admin.deleteCategory));
+router.get('/reviews', h(admin.listReviews));
 router.post('/upload', upload.single('image'), h(admin.uploadImage));
 
 router.get('/settings', h(admin.getSettings));

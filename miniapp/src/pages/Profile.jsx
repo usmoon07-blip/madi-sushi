@@ -1,145 +1,277 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
-import { useCart, toast } from '../store.jsx';
-import { haptic, openLink } from '../telegram.js';
-import { STATUS, formatDate, formatPhoneInput, isValidPhone, money, yandexSearchUrl } from '../format.js';
-import { RepeatIcon, PinIcon, PhoneIcon, ArrowIcon } from '../components/Icons.jsx';
+import { toast } from '../store.jsx';
+import { useApp } from '../appState.jsx';
+import { LANG_NAMES, useT } from '../i18n.jsx';
+import { haptic, onBackButton, openLink } from '../telegram.js';
+import { yandexSearchUrl } from '../format.js';
+import ProductCard from '../components/ProductCard.jsx';
+import {
+  ArrowIcon,
+  ChevronIcon,
+  GlobeIcon,
+  HeartIcon,
+  InfoIcon,
+  MenuListIcon,
+  PhoneIcon,
+  PinIcon,
+  StarIcon,
+  StoreIcon,
+} from '../components/Icons.jsx';
 
-export default function Profile({ user, settings, products, onUserChange, onGoCart }) {
-  const cart = useCart();
-  const [orders, setOrders] = useState(null);
-  const [error, setError] = useState('');
-  const [editing, setEditing] = useState(false);
-  const [phone, setPhone] = useState(user?.phone ? formatPhoneInput(user.phone) : '+998');
+// 3-rasmdagidek: faqat kerakli bo'limlar ro'yxati
+export default function Profile() {
+  const { t, lang } = useT();
+  const app = useApp();
+  const [sub, setSub] = useState(null);
 
-  const load = () => {
-    setError('');
-    api
-      .orders()
-      .then((d) => setOrders(d.orders))
-      .catch((e) => setError(e.message));
-  };
-  useEffect(load, []);
+  useEffect(() => {
+    if (!sub) return undefined;
+    window.scrollTo({ top: 0 });
+    return onBackButton(() => setSub(null));
+  }, [sub]);
 
-  const savePhone = async () => {
-    if (!isValidPhone(phone)) return toast("Telefon raqamini to'liq kiriting", 'error');
-    try {
-      const { user: fresh } = await api.savePhone(phone);
-      onUserChange(fresh);
-      setEditing(false);
-      toast('Saqlandi', 'success');
-    } catch (e) {
-      toast(e.message, 'error');
-    }
-  };
+  const items = [
+    { id: 'favorites', icon: <HeartIcon />, label: t('favorites'), badge: app.favorites.size || null },
+    { id: 'menu', icon: <MenuListIcon />, label: t('menu'), action: () => app.openMenu() },
+    { id: 'branches', icon: <PinIcon />, label: t('branches') },
+    { id: 'contacts', icon: <PhoneIcon />, label: t('contacts') },
+    { id: 'about', icon: <InfoIcon />, label: t('about') },
+    { id: 'review', icon: <StarIcon />, label: t('leaveReview') },
+    { id: 'language', icon: <GlobeIcon />, label: t('language'), value: LANG_NAMES[lang] },
+  ];
 
-  const reorder = (order) => {
-    const available = new Set(products.map((p) => p.id));
-    let added = 0;
-    let missing = 0;
-    for (const item of order.items) {
-      if (available.has(item.productId)) {
-        cart.setQty(item.productId, item.qty);
-        added += 1;
-      } else missing += 1;
-    }
-    if (!added) return toast("Bu buyurtmadagi mahsulotlar hozir mavjud emas", 'error');
-    haptic.success();
-    if (missing) toast(`${missing} ta mahsulot hozir mavjud emas`, 'default');
-    onGoCart();
-  };
-
-  const initials = (user?.firstName || '?').slice(0, 1).toUpperCase();
+  if (sub) {
+    const title = items.find((i) => i.id === sub)?.label;
+    return (
+      <div className="page">
+        <div className="subhead">
+          <button type="button" className="subhead__back" onClick={() => setSub(null)} aria-label={t('back')}>
+            <ChevronIcon dir="left" />
+          </button>
+          <h1 className="page__title">{title}</h1>
+        </div>
+        {sub === 'favorites' && <Favorites />}
+        {sub === 'branches' && <Branches />}
+        {sub === 'contacts' && <Contacts />}
+        {sub === 'about' && <About />}
+        {sub === 'review' && <Review onDone={() => setSub(null)} />}
+        {sub === 'language' && <Language onDone={() => setSub(null)} />}
+      </div>
+    );
+  }
 
   return (
     <div className="page">
-      <h1 className="page__title">Profil</h1>
-
-      <div className="panel profile">
-        <div className="avatar">{initials}</div>
-        <div className="profile__info">
-          <div className="profile__name">{[user?.firstName, user?.lastName].filter(Boolean).join(' ')}</div>
-          {user?.username && <div className="muted small">@{user.username}</div>}
+      <div className="profile-head">
+        <div className="avatar">{(app.user?.firstName || '?').slice(0, 1).toUpperCase()}</div>
+        <div>
+          <div className="profile__name">{[app.user?.firstName, app.user?.lastName].filter(Boolean).join(' ') || t('guest')}</div>
+          {app.user?.phone && <div className="muted small">{app.user.phone}</div>}
         </div>
       </div>
+      <div className="plist">
+        {items.map((i) => (
+          <button
+            key={i.id}
+            type="button"
+            className="plist__item"
+            onClick={() => {
+              haptic.tap();
+              if (i.action) i.action();
+              else setSub(i.id);
+            }}
+          >
+            <span className="plist__icon">{i.icon}</span>
+            <span className="plist__label">{i.label}</span>
+            {i.badge && <span className="plist__badge">{i.badge}</span>}
+            {i.value && <span className="plist__value">{i.value}</span>}
+            <ChevronIcon width={20} height={20} className="plist__chev" />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-      <div className="panel panel--form">
-        <div className="row-between">
-          <span className="field__label">Telefon raqam</span>
-          {!editing && (
-            <button type="button" className="link" onClick={() => setEditing(true)}>
-              {user?.phone ? "O'zgartirish" : "Qo'shish"}
-            </button>
+function Favorites() {
+  const { t } = useT();
+  const app = useApp();
+  const list = app.products.filter((p) => app.favorites.has(p.id));
+  if (!list.length) return <div className="panel muted">{t('noFavorites')}</div>;
+  return (
+    <div className="grid">
+      {list.map((p) => (
+        <ProductCard key={p.id} product={p} />
+      ))}
+    </div>
+  );
+}
+
+function Branches() {
+  const { t } = useT();
+  const { settings } = useApp();
+  return (
+    <div className="panel branch">
+      <div className="branch__icon">
+        <StoreIcon />
+      </div>
+      <div className="branch__body">
+        <div className="branch__name">Madi Sushi</div>
+        <div className="branch__addr">{settings.pickupAddress}</div>
+        {settings.workHours && (
+          <div className="muted small">
+            🕒 {t('workHours')}: {settings.workHours}
+          </div>
+        )}
+        <div className="branch__actions">
+          <button type="button" className="btn btn--outline" onClick={() => openLink(yandexSearchUrl(settings.pickupAddress))}>
+            <PinIcon width={18} height={18} /> {t('openInMaps')}
+          </button>
+          {settings.contactPhone && (
+            <a className="btn btn--outline" href={`tel:${settings.contactPhone.replace(/[^\d+]/g, '')}`}>
+              <PhoneIcon width={18} height={18} /> {t('call')}
+            </a>
           )}
         </div>
-        {editing ? (
-          <div className="phone-row">
-            <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(formatPhoneInput(e.target.value))} />
-            <button type="button" className="btn btn--primary" onClick={savePhone}>
-              Saqlash
-            </button>
-          </div>
-        ) : (
-          <div className="profile__phone">{user?.phone || 'Kiritilmagan'}</div>
-        )}
       </div>
+    </div>
+  );
+}
 
-      <h3 className="block-title">📜 Mening buyurtmalarim</h3>
-      {error && (
-        <div className="panel">
-          <p className="muted">{error}</p>
-          <button type="button" className="btn btn--outline" onClick={load}>
-            Qayta urinish
-          </button>
-        </div>
-      )}
-      {!orders && !error && <div className="skeleton" />}
-      {orders && !orders.length && <div className="panel muted">Hali buyurtmalar yo'q. Birinchi buyurtmangizni bering! 🍣</div>}
-      {orders?.map((o) => (
-        <div key={o.id} className="panel order">
-          <div className="row-between">
-            <div>
-              <div className="order__id">Buyurtma #{o.id}</div>
-              <div className="muted small">{formatDate(o.createdAt)}</div>
-            </div>
-            <span className={`pill pill--${STATUS[o.status]?.tone}`}>{STATUS[o.status]?.label}</span>
-          </div>
-          <div className="order__items">
-            {o.items.map((i) => (
-              <div key={i.productId} className="order__item">
-                <span>
-                  {i.name} × {i.qty}
-                </span>
-                <span>{money(i.price * i.qty)}</span>
-              </div>
-            ))}
-          </div>
-          <div className="row-between order__foot">
-            <span className="muted small">
-              {o.deliveryType === 'DELIVERY' ? '🛵 Yetkazib berish' : '🏃 Olib ketish'} · {o.paymentType === 'CARD' ? '💳 Karta' : '💵 Naqd'}
+function Contacts() {
+  const { t } = useT();
+  const { settings } = useApp();
+  const rows = [
+    settings.contactPhone && {
+      icon: <PhoneIcon width={20} height={20} />,
+      label: t('phoneLabel'),
+      value: settings.contactPhone,
+      href: `tel:${settings.contactPhone.replace(/[^\d+]/g, '')}`,
+    },
+    settings.instagram && {
+      icon: <span className="ig">IG</span>,
+      label: 'Instagram',
+      value: `@${settings.instagram}`,
+      link: `https://instagram.com/${settings.instagram}`,
+    },
+    {
+      icon: <PinIcon width={20} height={20} />,
+      label: t('branches'),
+      value: settings.pickupAddress,
+      link: yandexSearchUrl(settings.pickupAddress),
+    },
+  ].filter(Boolean);
+  return (
+    <div className="panel contact">
+      {rows.map((r) =>
+        r.href ? (
+          <a key={r.label} className="contact__row" href={r.href}>
+            {r.icon}
+            <span>
+              <span className="muted small block">{r.label}</span>
+              {r.value}
             </span>
-            <b>{money(o.total)}</b>
-          </div>
-          <button type="button" className="btn btn--outline btn--block" onClick={() => reorder(o)}>
-            <RepeatIcon width={18} height={18} /> Yana shundan buyurtma qilish
-          </button>
-        </div>
-      ))}
-
-      <h3 className="block-title">Biz haqimizda</h3>
-      <div className="panel contact">
-        <button type="button" className="contact__row" onClick={() => openLink(yandexSearchUrl(settings.pickupAddress))}>
-          <PinIcon width={18} height={18} />
-          <span>{settings.pickupAddress}</span>
-          <ArrowIcon width={14} height={14} />
-        </button>
-        {settings.contactPhone && (
-          <a className="contact__row" href={`tel:${settings.contactPhone.replace(/[^\d+]/g, '')}`}>
-            <PhoneIcon width={18} height={18} />
-            <span>{settings.contactPhone}</span>
+            <ArrowIcon width={14} height={14} />
           </a>
-        )}
+        ) : (
+          <button key={r.label} type="button" className="contact__row" onClick={() => openLink(r.link)}>
+            {r.icon}
+            <span>
+              <span className="muted small block">{r.label}</span>
+              {r.value}
+            </span>
+            <ArrowIcon width={14} height={14} />
+          </button>
+        )
+      )}
+    </div>
+  );
+}
+
+function About() {
+  const { lang } = useT();
+  const { settings } = useApp();
+  const text = (lang === 'ru' ? settings.aboutRu : settings.aboutUz) || settings.aboutUz || settings.aboutRu;
+  return (
+    <div className="panel about">
+      <div className="about__logo">
+        <span className="brand__mark brand__mark--lg">鮨</span>
+        <div className="brand__name">MADI SUSHI</div>
       </div>
+      <p>{text}</p>
+    </div>
+  );
+}
+
+function Review({ onDone }) {
+  const { t } = useT();
+  const [rating, setRating] = useState(0);
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const send = async () => {
+    if (!rating) return toast(t('reviewNeedRating'), 'error');
+    setBusy(true);
+    try {
+      await api.review(rating, text.trim());
+      haptic.success();
+      toast(t('reviewThanks'), 'success');
+      onDone();
+    } catch (e) {
+      toast(e.message, 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="panel review">
+      <p className="review__title">{t('reviewTitle')}</p>
+      <div className="stars">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            type="button"
+            className={n <= rating ? 'is-on' : ''}
+            onClick={() => {
+              haptic.tap();
+              setRating(n);
+            }}
+            aria-label={`${n}`}
+          >
+            <StarIcon filled={n <= rating} width={36} height={36} />
+          </button>
+        ))}
+      </div>
+      <textarea rows={4} maxLength={1000} placeholder={t('reviewPh')} value={text} onChange={(e) => setText(e.target.value)} />
+      <button type="button" className="btn btn--primary btn--block" onClick={send} disabled={busy}>
+        {busy ? t('sending') : t('reviewSend')}
+      </button>
+    </div>
+  );
+}
+
+function Language({ onDone }) {
+  const { lang, setLang } = useT();
+  return (
+    <div className="plist">
+      {Object.entries(LANG_NAMES).map(([code, name]) => (
+        <button
+          key={code}
+          type="button"
+          className="plist__item"
+          onClick={() => {
+            haptic.tap();
+            setLang(code);
+            onDone();
+          }}
+        >
+          <span className="plist__icon">{code === 'uz' ? '🇺🇿' : '🇷🇺'}</span>
+          <span className="plist__label">{name}</span>
+          {lang === code && <span className="plist__check">✓</span>}
+        </button>
+      ))}
     </div>
   );
 }

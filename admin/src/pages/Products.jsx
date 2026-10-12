@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { money } from '../format.js';
 import Modal from '../components/Modal.jsx';
@@ -9,18 +9,20 @@ export default function Products() {
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(null); // null | 'new' | product
   const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState([]);
 
   const load = () =>
-    api
-      .products()
-      .then((d) => setProducts(d.products))
+    Promise.all([api.products(), api.categories()])
+      .then(([p, c]) => {
+        setProducts(p.products);
+        setCategories(c.categories);
+      })
       .catch((e) => setError(e.message));
   useEffect(() => {
     load();
   }, []);
 
-  const categories = useMemo(() => [...new Set((products || []).map((p) => p.category))], [products]);
-  const list = (products || []).filter((p) => !category || p.category === category);
+  const list = (products || []).filter((p) => !category || p.categoryId === category);
 
   const toggle = async (p) => {
     setProducts((list) => list.map((x) => (x.id === p.id ? { ...x, isActive: !p.isActive } : x)));
@@ -55,9 +57,9 @@ export default function Products() {
       </div>
 
       <div className="tabs">
-        {['', ...categories].map((c) => (
-          <button key={c || 'all'} type="button" className={`tab ${category === c ? 'is-active' : ''}`} onClick={() => setCategory(c)}>
-            {c || 'Hammasi'}
+        {[{ id: '', nameUz: 'Hammasi' }, ...categories].map((c) => (
+          <button key={c.id || 'all'} type="button" className={`tab ${category === c.id ? 'is-active' : ''}`} onClick={() => setCategory(c.id)}>
+            {c.nameUz}
           </button>
         ))}
       </div>
@@ -83,11 +85,15 @@ export default function Products() {
                   <div className="thumb">{p.imageUrl ? <img src={p.imageUrl} alt="" /> : '🍣'}</div>
                 </td>
                 <td>
-                  <div className="strong">{p.name}</div>
+                  <div className="strong">
+                    {p.isHit && <span title="Xit savdo">⭐ </span>}
+                    {p.name}
+                  </div>
+                  {p.nameRu && <div className="muted small">🇷🇺 {p.nameRu}</div>}
                   <div className="muted small clamp">{p.description}</div>
                 </td>
                 <td>
-                  <span className="tag">{p.category}</span>
+                  <span className="tag">{p.category?.nameUz || '—'}</span>
                 </td>
                 <td className="nowrap">
                   <div className="strong text-red">{money(p.price)}</div>

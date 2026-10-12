@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 import { useCart } from '../store.jsx';
 import { mediaUrl } from '../api.js';
 import { haptic, onBackButton } from '../telegram.js';
-import { money } from '../format.js';
+import { useT } from '../i18n.jsx';
 import Price from './Price.jsx';
 import Stepper from './Stepper.jsx';
 
 export default function ProductSheet({ product, onClose }) {
   const cart = useCart();
+  const { t, pick, money } = useT();
+  const name = pick(product, 'name');
+  const description = pick(product, 'description');
+  const ingredients = pick(product, 'ingredients') || [];
   const inCart = cart.qtyOf(product.id);
   const [qty, setQty] = useState(inCart || 1);
   const [closing, setClosing] = useState(false);
@@ -40,18 +44,17 @@ export default function ProductSheet({ product, onClose }) {
         <div className="sheet__handle" />
         <div className="sheet__scroll">
           <div className="sheet__media">
-            {product.imageUrl ? <img src={mediaUrl(product.imageUrl)} alt={product.name} /> : <div className="card__ph">🍣</div>}
+            {product.imageUrl ? <img src={mediaUrl(product.imageUrl)} alt={name} /> : <div className="card__ph">🍣</div>}
           </div>
           <div className="sheet__content">
-            <span className="eyebrow">{product.category}</span>
-            <h2 className="sheet__title">{product.name}</h2>
+            <h2 className="sheet__title">{name}</h2>
             <Price price={product.price} oldPrice={product.oldPrice} size="lg" />
-            {product.description && <p className="sheet__desc">{product.description}</p>}
-            {product.ingredients?.length > 0 && (
+            {description && <p className="sheet__desc">{description}</p>}
+            {ingredients.length > 0 && (
               <>
-                <h4 className="sheet__subtitle">Tarkibi</h4>
+                <h4 className="sheet__subtitle">{t('composition')}</h4>
                 <ul className="bullets">
-                  {product.ingredients.map((i) => (
+                  {ingredients.map((i) => (
                     <li key={i}>{i}</li>
                   ))}
                 </ul>
@@ -62,7 +65,7 @@ export default function ProductSheet({ product, onClose }) {
         <div className="sheet__footer">
           <Stepper value={qty} onChange={setQty} min={inCart ? 0 : 1} size="lg" />
           <button type="button" className="btn btn--primary btn--grow" onClick={submit}>
-            {qty === 0 ? "Savatdan o'chirish" : `${inCart ? 'Yangilash' : "Qo'shish"} · ${money(product.price * qty)}`}
+            {qty === 0 ? t('removeFromCart') : `${inCart ? t('update') : t('add')} · ${money(product.price * qty)}`}
           </button>
         </div>
       </div>

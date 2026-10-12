@@ -9,6 +9,7 @@ const Upload = require('./models/Upload');
 const { publicMenu } = require('./controllers/cartController');
 const h = require('./middlewares/asyncHandler');
 const { errText, redact } = require('./services/redact');
+const { t } = require('./services/i18n');
 const webapp = require('./core/webapp');
 const printQueue = require('./services/printQueue');
 const { registerBotRoutes } = require('./routes/bot.routes');
@@ -102,25 +103,33 @@ app.use((err, req, res, next) => {
   if (err.type === 'entity.parse.failed') return res.status(400).json({ error: "Noto'g'ri so'rov" });
   if (err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ error: 'Rasm hajmi 5 MB dan oshmasligi kerak' });
   if (err.code === 'P2025') return res.status(404).json({ error: 'Topilmadi' });
+  if (err.code === 'P2003') return res.status(400).json({ error: "Bog'liq ma'lumot topilmadi (masalan, kategoriya)" });
   const status = err.status || 500;
   if (status >= 500) console.error('[api]', redact(err.stack || err.message));
   return res.status(status).json({ error: status >= 500 ? "Serverda xatolik. Qayta urinib ko'ring" : err.message });
 });
 
 async function startBot() {
-  await bot.api
-    .setMyCommands([
-      { command: 'start', description: 'Menyuni ochish' },
-      { command: 'info', description: 'Manzil va aloqa' },
-    ])
-    .catch((err) => console.warn('[bot] Buyruqlar:', errText(err)));
+  // Buyruqlar ro'yxati: o'zbekcha (asosiy) va ruscha (Telegram tili rus bo'lganlar uchun)
+  for (const lang of ['uz', 'ru']) {
+    await bot.api
+      .setMyCommands(
+        [
+          { command: 'start', description: t(lang, 'commandStart') },
+          { command: 'info', description: t(lang, 'commandInfo') },
+          { command: 'lang', description: t(lang, 'commandLang') },
+        ],
+        lang === 'ru' ? { language_code: 'ru' } : undefined
+      )
+      .catch((err) => console.warn('[bot] Buyruqlar:', errText(err)));
+  }
   webapp.start();
 
   if (useWebhook) {
     await bot.init();
     await bot.api.setWebhook(`${config.publicUrl}${webhook.path}`, {
       secret_token: webhook.secretToken,
-      allowed_updates: ['message'],
+      allowed_updates: ['message', 'callback_query'],
     });
     console.log(`[bot] @${bot.botInfo.username} webhook rejimida ishlayapti ✅`);
     return;
@@ -129,7 +138,7 @@ async function startBot() {
   bot
     .start({
         drop_pending_updates: true,
-        allowed_updates: ['message'],
+        allowed_updates: ['message', 'callback_query'],
       onStart: (me) => console.log(`[bot] @${me.username} ishlayapti ✅`),
     })
     .catch((err) => {

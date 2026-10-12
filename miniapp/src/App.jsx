@@ -1,29 +1,76 @@
-import { useCallback, useEffect, useState } from 'react';
-import { api } from './api.js';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { api, setApiLang } from './api.js';
 import { CartProvider, useToastListener } from './store.jsx';
-import { onBackButton } from './telegram.js';
+import { AppContext, hasLocation, storedLocation, storedMode } from './appState.jsx';
+import { LangContext, guessLang } from './i18n.jsx';
+import { onBackButton, openLink, tg } from './telegram.js';
+import { yandexSearchUrl } from './format.js';
 import BottomNav from './components/BottomNav.jsx';
 import ProductSheet from './components/ProductSheet.jsx';
+import AddressSheet from './components/AddressSheet.jsx';
 import { Toasts } from './components/Controls.jsx';
+import LocationGate from './pages/LocationGate.jsx';
+import Home from './pages/Home.jsx';
 import Menu from './pages/Menu.jsx';
 import Cart from './pages/Cart.jsx';
+import Orders from './pages/Orders.jsx';
 import Profile from './pages/Profile.jsx';
 import Success from './pages/Success.jsx';
 import snapshot from './menu-snapshot.json';
 
 const hasSnapshot = Array.isArray(snapshot.products) && snapshot.products.length > 0;
 const RETRY_MS = 4000;
+const LANG_KEY = 'madi_lang_v1';
+const GATE_KEY = 'madi_gate_done_v1';
+
+const readLS = (k) => {
+  try {
+    return localStorage.getItem(k);
+  } catch {
+    return null;
+  }
+};
+const writeLS = (k, v) => {
+  try {
+    localStorage.setItem(k, v);
+  } catch {
+    /* ignore */
+  }
+};
+
+const initialLang = () => {
+  const saved = readLS(LANG_KEY);
+  if (saved === 'uz' || saved === 'ru') return saved;
+  return guessLang(tg?.initDataUnsafe?.user?.language_code);
+};
+
+const userLocation = (u) =>
+  u && (u.lastAddress || u.lastLat != null) ? { lat: u.lastLat, lon: u.lastLon, address: u.lastAddress || '' } : null;
 
 export default function App() {
   // Menyu nusxasi ilova bilan birga keladi: server uyg'onguncha mijoz menyuni ko'rib turadi
   const [data, setData] = useState(() =>
-    hasSnapshot ? { products: snapshot.products, settings: snapshot.settings, user: null, fromSnapshot: true } : null
+    hasSnapshot
+      ? { products: snapshot.products, categories: snapshot.categories || [], settings: snapshot.settings, user: null }
+      : null
   );
   const [error, setError] = useState('');
-  const [tab, setTab] = useState('menu');
+  const [lang, setLangState] = useState(initialLang);
+  const [favorites, setFavorites] = useState(() => new Set());
+  const [location, setLocationState] = useState(() => storedLocation.get());
+  const [mode, setModeState] = useState(() => storedMode.get());
+  const [gateDone, setGateDone] = useState(() => readLS(GATE_KEY) === '1');
+  const [tab, setTab] = useState('home');
+  const [menuFocus, setMenuFocus] = useState(null);
   const [sheet, setSheet] = useState(null);
+  const [addressOpen, setAddressOpen] = useState(false);
   const [order, setOrder] = useState(null);
   const [toasts, setToasts] = useState([]);
+
+  useEffect(() => {
+    setApiLang(lang);
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const load = useCallback(() => {
     setError('');
@@ -31,10 +78,17 @@ export default function App() {
       .bootstrap()
       .then((d) => {
         setData(d);
+        setFavorites(new Set(d.favorites || []));
+        // Til: foydalanuvchi botda yoki ilovada tanlagani ustun
+        if (d.user?.lang === 'uz' || d.user?.lang === 'ru') {
+          setLangState(d.user.lang);
+          writeLS(LANG_KEY, d.user.lang);
+        }
+        // Bu qurilmada manzil saqlanmagan bo'lsa — serverdagisini olamiz
+        setLocationState((cur) => cur || userLocation(d.user));
         return true;
       })
       .catch((e) => {
-        // Nusxa bor bo'lsa xatolik ko'rsatilmaydi — mijoz menyuni ko'rib turadi
         if (!hasSnapshot) setError(e.message);
         return e.status === 401 ? 'stop' : false;
       });
@@ -63,16 +117,76 @@ export default function App() {
     }, [])
   );
 
-  // Telegram "orqaga" tugmasi: savat/profildan menyuga qaytaradi
-  useEffect(() => {
-    if (tab === 'menu' || sheet || order) return undefined;
-    return onBackButton(() => setTab('menu'));
-  }, [tab, sheet, order]);
-
-  const goTab = (t) => {
+  const goTab = useCallback((t) => {
     setTab(t);
+    if (t !== 'menu') setMenuFocus(null);
     window.scrollTo({ top: 0 });
-  };
+  }, []);
+
+  // Telegram "orqaga" tugmasi: bosh sahifaga qaytaradi
+  useEffect(() => {
+    if (tab === 'home' || tab === 'profile' || sheet || addressOpen || order) return undefined;
+    return onBackButton(() => goTab('home'));
+  }, [tab, sheet, addressOpen, order, goTab]);
+
+  const app = useMemo(() => {
+    if (!data) return null;
+    return {
+      ...data,
+      favorites,
+      location,
+      mode,
+      setUser: (u) => setData((d) => ({ ...d, user: u })),
+      reload: load,
+      goTab,
+      openMenu: (categoryId = null) => {
+        setMenuFocus(categoryId);
+        setTab('menu');
+        if (!categoryId) window.scrollTo({ top: 0 });
+      },
+      openProduct: setSheet,
+      openAddress: () => setAddressOpen(true),
+      openBranches: () => openLink(yandexSearchUrl(data.settings.pickupAddress)),
+      setMode: (m) => {
+        setModeState(m);
+        storedMode.set(m);
+      },
+      setLocation: (loc) => {
+        setLocationState(loc);
+        storedLocation.set(loc);
+        api.saveLocation(loc).catch(() => {});
+      },
+      finishGate: () => {
+        setGateDone(true);
+        writeLS(GATE_KEY, '1');
+      },
+      toggleFavorite: (id) => {
+        setFavorites((cur) => {
+          const next = new Set(cur);
+          if (next.has(id)) next.delete(id);
+          else next.add(id);
+          return next;
+        });
+        api
+          .toggleFavorite(id)
+          .then((r) => setFavorites(new Set(r.favorites)))
+          .catch(() => {});
+      },
+    };
+  }, [data, favorites, location, mode, load, goTab]);
+
+  const langCtx = useMemo(
+    () => ({
+      lang,
+      setLang: (l) => {
+        setLangState(l);
+        writeLS(LANG_KEY, l);
+        setApiLang(l);
+        api.setLang(l).catch(() => {});
+      },
+    }),
+    [lang]
+  );
 
   if (error && !data) {
     return (
@@ -80,13 +194,13 @@ export default function App() {
         <div className="brand__mark brand__mark--lg">鮨</div>
         <p>{error}</p>
         <button type="button" className="btn btn--primary" onClick={load}>
-          Qayta urinish
+          {lang === 'ru' ? 'Повторить' : 'Qayta urinish'}
         </button>
       </div>
     );
   }
 
-  if (!data) {
+  if (!app) {
     return (
       <div className="splash">
         <div className="brand__mark brand__mark--lg spin">鮨</div>
@@ -95,41 +209,37 @@ export default function App() {
     );
   }
 
-  const { products, settings, user } = data;
-  const setUser = (u) => setData((d) => ({ ...d, user: u }));
+  const showGate = !gateDone && !hasLocation(location);
 
   return (
-    <CartProvider products={products}>
-      {order ? (
-        <Success
-          order={order}
-          onDone={() => {
-            setOrder(null);
-            goTab('menu');
-          }}
-        />
-      ) : (
-        <>
-          {tab === 'menu' && <Menu products={products} settings={settings} user={user} onOpenProduct={setSheet} />}
-          {tab === 'cart' && (
-            <Cart
-              products={products}
-              settings={settings}
-              user={user}
-              onUserChange={setUser}
-              onGoMenu={() => goTab('menu')}
-              onReload={load}
-              onSuccess={setOrder}
+    <LangContext.Provider value={langCtx}>
+      <AppContext.Provider value={app}>
+        <CartProvider products={app.products}>
+          {showGate ? (
+            <LocationGate />
+          ) : order ? (
+            <Success
+              order={order}
+              onDone={() => {
+                setOrder(null);
+                goTab('home');
+              }}
             />
+          ) : (
+            <>
+              {tab === 'home' && <Home />}
+              {tab === 'menu' && <Menu focusCategory={menuFocus} />}
+              {tab === 'cart' && <Cart onSuccess={setOrder} />}
+              {tab === 'orders' && <Orders />}
+              {tab === 'profile' && <Profile />}
+              <BottomNav tab={tab} onChange={goTab} />
+              {sheet && <ProductSheet product={sheet} onClose={() => setSheet(null)} />}
+              {addressOpen && <AddressSheet onClose={() => setAddressOpen(false)} />}
+            </>
           )}
-          {tab === 'profile' && (
-            <Profile user={user} settings={settings} products={products} onUserChange={setUser} onGoCart={() => goTab('cart')} />
-          )}
-          <BottomNav tab={tab} onChange={goTab} />
-          {sheet && <ProductSheet product={sheet} onClose={() => setSheet(null)} />}
-        </>
-      )}
-      <Toasts items={toasts} />
-    </CartProvider>
+          <Toasts items={toasts} />
+        </CartProvider>
+      </AppContext.Provider>
+    </LangContext.Provider>
   );
 }

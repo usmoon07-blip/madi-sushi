@@ -11,6 +11,11 @@ export const mediaUrl = (url) => {
   return url;
 };
 
+let currentLang = 'uz';
+export const setApiLang = (lang) => {
+  currentLang = lang;
+};
+
 async function request(path, { method = 'GET', body } = {}) {
   let res;
   try {
@@ -20,15 +25,16 @@ async function request(path, { method = 'GET', body } = {}) {
         'Content-Type': 'application/json',
         'X-Telegram-Init-Data': tg?.initData || '',
         'ngrok-skip-browser-warning': '1',
+        'X-Lang': currentLang,
       },
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch {
-    throw new Error("Internet aloqasi yo'q. Qayta urinib ko'ring");
+    throw new Error(currentLang === 'ru' ? 'Нет подключения к интернету. Попробуйте снова' : "Internet aloqasi yo'q. Qayta urinib ko'ring");
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.error || "Xatolik yuz berdi. Qayta urinib ko'ring");
+    const err = new Error(data.error || (currentLang === 'ru' ? 'Произошла ошибка. Попробуйте снова' : "Xatolik yuz berdi. Qayta urinib ko'ring"));
     err.status = res.status;
     throw err;
   }
@@ -38,6 +44,10 @@ async function request(path, { method = 'GET', body } = {}) {
 export const api = {
   bootstrap: () => request('/bootstrap'),
   menu: () => request('/menu'),
+  setLang: (lang) => request('/me/lang', { method: 'POST', body: { lang } }),
+  saveLocation: (loc) => request('/me/location', { method: 'POST', body: loc }),
+  toggleFavorite: (id) => request(`/favorites/${id}`, { method: 'POST' }),
+  review: (rating, text) => request('/reviews', { method: 'POST', body: { rating, text } }),
   me: () => request('/me'),
   savePhone: (phone) => request('/me/phone', { method: 'POST', body: { phone } }),
   geocode: (lat, lon) => request('/geocode', { method: 'POST', body: { lat, lon } }),

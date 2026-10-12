@@ -1,7 +1,7 @@
 const { prisma } = require('../database/connection');
 
 const ACTIVE_STATUSES = ['NEW', 'ACCEPTED', 'ON_WAY'];
-const withUser = { user: { select: { id: true, telegramId: true, firstName: true, username: true } } };
+const withUser = { user: { select: { id: true, telegramId: true, firstName: true, username: true, lang: true } } };
 
 const create = (data) => prisma.order.create({ data, include: withUser });
 const findByClientRef = (clientRef) => prisma.order.findUnique({ where: { clientRef }, include: withUser });

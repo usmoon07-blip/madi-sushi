@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const config = require('../config/default');
 const Product = require('../models/Product');
+const Category = require('../models/Category');
+const Review = require('../models/Review');
 const Order = require('../models/Order');
 const Settings = require('../models/Settings');
 const { createAdminToken, safeEqual, recordLoginFailure, clearLoginFailures } = require('../middlewares/auth.middleware');
@@ -118,10 +120,10 @@ function productData(body, { partial = false } = {}) {
     if (!name) throw new HttpError(400, 'Mahsulot nomini kiriting');
     data.name = name.slice(0, 80);
   }
-  if (!partial || has('category')) {
-    const category = String(body.category || '').trim();
-    if (!category) throw new HttpError(400, 'Kategoriyani kiriting');
-    data.category = category.slice(0, 40);
+  if (!partial || has('categoryId')) {
+    const categoryId = Number(body.categoryId);
+    if (!Number.isInteger(categoryId) || categoryId <= 0) throw new HttpError(400, 'Kategoriyani tanlang');
+    data.categoryId = categoryId;
   }
   if (!partial || has('price')) {
     const price = intOrNull(body.price);
@@ -133,12 +135,19 @@ function productData(body, { partial = false } = {}) {
     if (Number.isNaN(oldPrice)) throw new HttpError(400, "Eski narx noto'g'ri");
     data.oldPrice = oldPrice || null;
   }
+  if (has('nameRu')) data.nameRu = String(body.nameRu || '').trim().slice(0, 80);
   if (has('description')) data.description = String(body.description || '').trim().slice(0, 500);
+  if (has('descriptionRu')) data.descriptionRu = String(body.descriptionRu || '').trim().slice(0, 500);
+  if (has('isHit')) data.isHit = Boolean(body.isHit);
   if (has('imageUrl')) data.imageUrl = String(body.imageUrl || '').trim().slice(0, 500);
-  if (has('ingredients')) {
-    const list = Array.isArray(body.ingredients) ? body.ingredients : String(body.ingredients || '').split(/[\n,]/);
-    data.ingredients = list.map((s) => String(s).trim()).filter(Boolean).slice(0, 20).map((s) => s.slice(0, 60));
-  }
+  const list = (v) =>
+    (Array.isArray(v) ? v : String(v || '').split(/[\n,]/))
+      .map((x) => String(x).trim())
+      .filter(Boolean)
+      .slice(0, 20)
+      .map((x) => x.slice(0, 60));
+  if (has('ingredients')) data.ingredients = list(body.ingredients);
+  if (has('ingredientsRu')) data.ingredientsRu = list(body.ingredientsRu);
   if (has('isActive')) data.isActive = Boolean(body.isActive);
   if (has('sortOrder')) data.sortOrder = Math.round(Number(body.sortOrder)) || 0;
 
@@ -151,8 +160,52 @@ async function listProducts(req, res) {
 }
 
 async function createProduct(req, res) {
-  const product = await Product.create(productData(req.body || {}));
-  res.status(201).json({ product });
+  try {
+    const product = await Product.create(productData(req.body || {}));
+    res.status(201).json({ product });
+  } catch (err) {
+    if (err.code === 'P2003') throw new HttpError(400, 'Kategoriya topilmadi');
+    throw err;
+  }
+}
+
+// ---- Kategoriyalar ----
+function categoryData(body, { partial = false } = {}) {
+  const data = {};
+  const has = (k) => Object.prototype.hasOwnProperty.call(body, k);
+  if (!partial || has('nameUz')) {
+    const nameUz = String(body.nameUz || '').trim();
+    if (!nameUz) throw new HttpError(400, 'Kategoriya nomini kiriting');
+    data.nameUz = nameUz.slice(0, 40);
+  }
+  if (has('nameRu')) data.nameRu = String(body.nameRu || '').trim().slice(0, 40);
+  if (has('imageUrl')) data.imageUrl = String(body.imageUrl || '').trim().slice(0, 500);
+  if (has('sortOrder')) data.sortOrder = Math.round(Number(body.sortOrder)) || 0;
+  if (has('isActive')) data.isActive = Boolean(body.isActive);
+  return data;
+}
+
+async function listCategories(req, res) {
+  res.json({ categories: await Category.listAll() });
+}
+
+async function createCategory(req, res) {
+  res.status(201).json({ category: await Category.create(categoryData(req.body || {})) });
+}
+
+async function updateCategory(req, res) {
+  res.json({ category: await Category.update(parseId(req.params.id), categoryData(req.body || {}, { partial: true })) });
+}
+
+async function deleteCategory(req, res) {
+  // Kategoriya o'chsa, mahsulotlari o'chmaydi — "kategoriyasiz" bo'lib qoladi
+  await Category.remove(parseId(req.params.id));
+  res.json({ ok: true });
+}
+
+// ---- Otzivlar ----
+async function listReviews(req, res) {
+  res.json({ reviews: await Review.list() });
 }
 
 async function updateProduct(req, res) {
@@ -200,6 +253,10 @@ async function updateSettings(req, res) {
   }
   if ('pickupAddress' in body) data.pickupAddress = String(body.pickupAddress || '').trim().slice(0, 200);
   if ('contactPhone' in body) data.contactPhone = String(body.contactPhone || '').trim().slice(0, 40);
+  if ('workHours' in body) data.workHours = String(body.workHours || '').trim().slice(0, 60);
+  if ('instagram' in body) data.instagram = String(body.instagram || '').trim().replace(/^@/, '').slice(0, 60);
+  if ('aboutUz' in body) data.aboutUz = String(body.aboutUz || '').trim().slice(0, 2000);
+  if ('aboutRu' in body) data.aboutRu = String(body.aboutRu || '').trim().slice(0, 2000);
   if ('isOpen' in body) data.isOpen = Boolean(body.isOpen);
   if ('printMode' in body) {
     if (!['OFF', 'NEW', 'ACCEPTED'].includes(body.printMode)) throw new HttpError(400, "Chek rejimi noto'g'ri");
@@ -243,6 +300,11 @@ module.exports = {
   uploadImage,
   getSettings,
   updateSettings,
+  listCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  listReviews,
   getPrintQueue,
   claimPrint,
   printOrderNow,

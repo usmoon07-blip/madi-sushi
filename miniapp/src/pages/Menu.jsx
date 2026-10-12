@@ -1,71 +1,77 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useApp } from '../appState.jsx';
+import { useT } from '../i18n.jsx';
+import Header from '../components/Header.jsx';
+import CategoryTiles from '../components/CategoryTiles.jsx';
 import ProductCard from '../components/ProductCard.jsx';
-import { money } from '../format.js';
 
-export default function Menu({ products, settings, user, onOpenProduct }) {
-  const categories = useMemo(() => [...new Set(products.map((p) => p.category))], [products]);
-  const [active, setActive] = useState('all');
+const HIT_ID = 'hit';
+
+// To'liq menyu: rasmli kategoriya qatori + kategoriyalarga ajratilgan bo'limlar
+export default function Menu({ focusCategory }) {
+  const { t, pick } = useT();
+  const app = useApp();
+  const [active, setActive] = useState(focusCategory || null);
+  const sectionRefs = useRef({});
 
   const groups = useMemo(() => {
-    const list = active === 'all' ? categories : [active];
-    return list.map((c) => ({ category: c, items: products.filter((p) => p.category === c) })).filter((g) => g.items.length);
-  }, [active, categories, products]);
+    const list = [];
+    const hits = app.products.filter((p) => p.isHit);
+    if (hits.length) list.push({ id: HIT_ID, name: t('hits'), items: hits, imageUrl: '' });
+    for (const c of app.categories) {
+      const items = app.products.filter((p) => p.categoryId === c.id);
+      if (items.length) list.push({ id: c.id, name: pick(c, 'name'), items, imageUrl: c.imageUrl });
+    }
+    const known = new Set(app.categories.map((c) => c.id));
+    const other = app.products.filter((p) => !known.has(p.categoryId));
+    if (other.length) list.push({ id: 'other', name: '🍽', items: other, imageUrl: '' });
+    return list;
+  }, [app.products, app.categories, pick, t]);
+
+  const tiles = groups.map((g) => ({ id: g.id, nameUz: g.name, imageUrl: g.imageUrl, emoji: g.id === HIT_ID ? '⭐' : '🍽' }));
+
+  const scrollTo = (id, smooth = true) => {
+    const el = sectionRefs.current[id];
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - 150;
+    window.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
+  };
+
+  useEffect(() => {
+    if (focusCategory) setTimeout(() => scrollTo(focusCategory, false), 30);
+  }, [focusCategory]);
+
+  // Qaysi bo'lim ko'rinayotganini kuzatib, tepadagi plitkani belgilash
+  useEffect(() => {
+    const onScroll = () => {
+      let current = groups[0]?.id;
+      for (const g of groups) {
+        const el = sectionRefs.current[g.id];
+        if (el && el.getBoundingClientRect().top < 170) current = g.id;
+      }
+      setActive(current);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [groups]);
 
   return (
     <div className="page">
-      <header className="top">
-        <div className="brand">
-          <span className="brand__mark">鮨</span>
-          <div>
-            <div className="brand__name">MADI SUSHI</div>
-            <div className="brand__sub">Salom, {user?.firstName || 'mehmon'} 👋</div>
-          </div>
-        </div>
-      </header>
-
-      {!settings.isOpen && <div className="notice">⏸ Hozir buyurtmalar qabul qilinmayapti. Menyuni ko'rishingiz mumkin.</div>}
-
-      <section className="hero">
-        <div className="hero__glow" />
-        <span className="eyebrow eyebrow--light">Premium sushi bar</span>
-        <h1 className="hero__title">
-          Yangi tayyorlangan
-          <br />
-          sushi — <em>eshigingizgacha</em>
-        </h1>
-        {settings.freeDeliveryFrom > 0 && (
-          <p className="hero__text">{money(settings.freeDeliveryFrom)} dan yuqori buyurtmalarga yetkazib berish bepul</p>
-        )}
-        <div className="hero__roll" aria-hidden="true">
-          <span />
-        </div>
-      </section>
-
-      <div className="chips" role="tablist">
-        {[{ id: 'all', label: 'Hammasi' }, ...categories.map((c) => ({ id: c, label: c }))].map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            className={`chip ${active === c.id ? 'is-active' : ''}`}
-            onClick={() => setActive(c.id)}
-          >
-            {c.label}
-          </button>
-        ))}
+      <Header />
+      <div className="tiles-bar">
+        <CategoryTiles categories={tiles} variant="row" active={active} onSelect={(c) => scrollTo(c.id)} />
       </div>
-
       {groups.map((g) => (
-        <section key={g.category} className="section">
-          <h2 className="section__title">{g.category}</h2>
+        <section key={g.id} className="section" ref={(el) => (sectionRefs.current[g.id] = el)}>
+          <h2 className="section__title">{g.id === HIT_ID ? `${g.name} ⭐` : g.name}</h2>
           <div className="grid">
             {g.items.map((p) => (
-              <ProductCard key={p.id} product={p} onOpen={onOpenProduct} />
+              <ProductCard key={p.id} product={p} />
             ))}
           </div>
         </section>
       ))}
-
-      {!products.length && <div className="empty">Menyu hozircha bo'sh</div>}
+      {!groups.length && <div className="empty">{t('menuEmpty')}</div>}
     </div>
   );
 }

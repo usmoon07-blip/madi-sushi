@@ -1,0 +1,296 @@
+import { createContext, useContext } from 'react';
+
+export const dict = {
+  uz: {
+    // Umumiy
+    sum: "so'm",
+    loading: 'Yuklanmoqda...',
+    retry: 'Qayta urinish',
+    save: 'Saqlash',
+    cancel: 'Bekor qilish',
+    back: 'Orqaga',
+    noInternet: "Internet aloqasi yo'q. Qayta urinib ko'ring",
+    genericError: "Xatolik yuz berdi. Qayta urinib ko'ring",
+
+    // Pastki panel
+    navHome: 'Bosh sahifa',
+    navCart: 'Savat',
+    navOrders: 'Buyurtmalar',
+    navProfile: 'Profil',
+
+    // Lokatsiya so'rash
+    gateTitle: 'Yetkazib berish manzilini aniqlaymiz',
+    gateText: 'Kuryer sizni aniq topishi va yetkazib berish narxini hisoblash uchun lokatsiyangizni yuboring',
+    gateSend: 'Lokatsiyani yuborish',
+    gateLocating: 'Aniqlanmoqda...',
+    gatePickup: "Olib ketaman — o'zim boraman",
+    gateManual: "Manzilni qo'lda kiritish",
+    gateManualPh: "Tuman, ko'cha, uy raqami",
+    gateDenied: "Lokatsiyaga ruxsat berilmadi. Sozlamalardan ruxsat bering yoki manzilni qo'lda yozing",
+    gateFailed: "Lokatsiyani aniqlab bo'lmadi. Manzilni qo'lda yozing",
+
+    // Manzil va usul
+    delivery: 'Yetkazib berish',
+    pickup: 'Olib ketish',
+    courier: 'Kuryer orqali',
+    deliveryTo: 'Yetkazib berish manzili',
+    pickupFrom: 'Olib ketish manzili',
+    detectingAddress: 'Manzil aniqlanmoqda...',
+    chooseAddress: 'Manzilni tanlang',
+    addressSheetTitle: 'Yetkazib berish manzili',
+    detectAgain: 'Joriy lokatsiyani aniqlash',
+    orTypeAddress: "Yoki manzilni qo'lda yozing",
+    howToGet: 'Qabul qilish usuli',
+
+    // Bosh sahifa / menyu
+    hello: (name) => `Salom, ${name} 👋`,
+    guest: 'mehmon',
+    menu: 'Menyu',
+    toMenu: "Menyuga o'tish",
+    hits: 'Xit savdo',
+    allMenu: 'Menyu',
+    menuEmpty: "Menyu hozircha bo'sh",
+    closedNotice: "⏸ Hozir buyurtmalar qabul qilinmayapti. Menyuni ko'rishingiz mumkin.",
+    freeDeliveryFrom: (sum) => `${sum} dan yuqori buyurtmalarga yetkazib berish bepul`,
+    composition: 'Tarkibi',
+    add: "Qo'shish",
+    update: 'Yangilash',
+    removeFromCart: "Savatdan o'chirish",
+
+    // Savat
+    cart: 'Savat',
+    cartEmpty: "Savat bo'sh",
+    cartEmptyText: 'Menyudan sevimli rollaringizni tanlang',
+    upsell: (name) => `Qo'shimcha ravishda <b>${name}</b> qo'shasizmi?`,
+    address: 'Manzil',
+    change: "O'zgartirish",
+    addressNote: 'Xonadon, podyezd, qavat',
+    addressNotePh: 'Masalan: 12-xonadon, 3-podyezd, 4-qavat',
+    noLocationHint: '📍 Kuryer sizni aniq va tez topishi uchun lokatsiyani yuboring',
+    sendLocation: 'Lokatsiyani yuborish',
+    phone: 'Telefon raqam',
+    sendTgPhone: 'Telegram raqamimni yuborish',
+    waiting: 'Kutilmoqda...',
+    payment: "To'lov usuli",
+    cash: 'Naqd',
+    card: 'Karta',
+    cardHint: (to) => `Quyidagi kartaga o'tkazing va chekni ${to} ko'rsating:`,
+    toCourier: 'kuryerga',
+    toCashier: 'kassada',
+    cardByStaff: (who) => `Karta ma'lumotlari ${who} tomonidan beriladi.`,
+    courierWho: 'kuryer',
+    cashierWho: 'kassir',
+    copied: 'Karta raqami nusxalandi',
+    comment: 'Izoh',
+    commentPh: "Masalan: qo'ng'iroq qilmang, eshik oldida qoldiring",
+    products: 'Mahsulotlar',
+    deliveryFee: 'Yetkazib berish',
+    free: 'Bepul',
+    moreForFree: (sum) => `Yana ${sum} — yetkazib berish bepul`,
+    minOrder: (sum) => `Minimal buyurtma summasi: ${sum}`,
+    total: 'Jami',
+    confirm: 'Buyurtmani tasdiqlash',
+    sending: 'Yuborilmoqda...',
+    errClosed: 'Hozir buyurtmalar qabul qilinmayapti',
+    errAddress: 'Lokatsiyani yuboring yoki manzilni yozing',
+    errPhone: "Telefon raqamini to'liq kiriting",
+    errPhoneManual: "Raqamni qo'lda kiriting",
+
+    // Muvaffaqiyat
+    successTitle: 'Buyurtma qabul qilindi!',
+    orderNo: 'Buyurtma raqami',
+    successDelivery: "Kuryerimiz tez orada siz bilan bog'lanadi. Tafsilotlar botga yuborildi.",
+    successPickup: "Buyurtma tayyor bo'lganda botga xabar keladi.",
+    close: 'Yopish',
+    backToMenu: 'Menyuga qaytish',
+
+    // Buyurtmalar
+    myOrders: 'Buyurtmalarim',
+    noOrders: "Hali buyurtmalar yo'q. Birinchi buyurtmangizni bering! 🍣",
+    order: 'Buyurtma',
+    reorder: 'Yana shundan buyurtma qilish',
+    unavailableAll: 'Bu buyurtmadagi mahsulotlar hozir mavjud emas',
+    unavailableSome: (n) => `${n} ta mahsulot hozir mavjud emas`,
+    status: {
+      NEW: 'Qabul qilindi',
+      ACCEPTED: 'Tayyorlanmoqda',
+      ON_WAY: "Yo'lda",
+      DONE: 'Yakunlandi',
+      CANCELLED: 'Bekor qilindi',
+    },
+
+    // Profil
+    profile: 'Profil',
+    favorites: 'Yoqtirilganlar',
+    branches: 'Filiallar',
+    contacts: 'Kontaktlar',
+    about: 'Biz haqimizda',
+    leaveReview: 'Otziv qoldirish',
+    language: 'Til',
+    noFavorites: "Hali yoqtirilgan taomlar yo'q. Menyuda ❤️ belgisini bosing",
+    workHours: 'Ish vaqti',
+    openInMaps: 'Xaritada ochish',
+    call: "Qo'ng'iroq qilish",
+    phoneLabel: 'Telefon',
+    reviewTitle: 'Bizni baholang',
+    reviewPh: "Fikr va takliflaringizni yozing (ixtiyoriy)",
+    reviewSend: 'Yuborish',
+    reviewThanks: '🙏 Fikringiz uchun rahmat!',
+    reviewNeedRating: 'Iltimos, yulduzcha bilan baholang',
+  },
+  ru: {
+    sum: 'сум',
+    loading: 'Загрузка...',
+    retry: 'Повторить',
+    save: 'Сохранить',
+    cancel: 'Отмена',
+    back: 'Назад',
+    noInternet: 'Нет подключения к интернету. Попробуйте снова',
+    genericError: 'Произошла ошибка. Попробуйте снова',
+
+    navHome: 'Главная',
+    navCart: 'Корзина',
+    navOrders: 'Заказы',
+    navProfile: 'Профиль',
+
+    gateTitle: 'Определим адрес доставки',
+    gateText: 'Отправьте геолокацию, чтобы курьер точно нашёл вас и мы рассчитали стоимость доставки',
+    gateSend: 'Отправить геолокацию',
+    gateLocating: 'Определяем...',
+    gatePickup: 'Заберу сам — самовывоз',
+    gateManual: 'Ввести адрес вручную',
+    gateManualPh: 'Район, улица, номер дома',
+    gateDenied: 'Нет доступа к геолокации. Разрешите доступ в настройках или введите адрес вручную',
+    gateFailed: 'Не удалось определить геолокацию. Введите адрес вручную',
+
+    delivery: 'Доставка',
+    pickup: 'Самовывоз',
+    courier: 'Курьером',
+    deliveryTo: 'Адрес доставки',
+    pickupFrom: 'Адрес самовывоза',
+    detectingAddress: 'Определение адреса...',
+    chooseAddress: 'Выберите адрес',
+    addressSheetTitle: 'Адрес доставки',
+    detectAgain: 'Определить текущее местоположение',
+    orTypeAddress: 'Или введите адрес вручную',
+    howToGet: 'Способ получения',
+
+    hello: (name) => `Привет, ${name} 👋`,
+    guest: 'гость',
+    menu: 'Меню',
+    toMenu: 'В меню',
+    hits: 'Хит продаж',
+    allMenu: 'Меню',
+    menuEmpty: 'Меню пока пусто',
+    closedNotice: '⏸ Сейчас заказы не принимаются. Меню можно посмотреть.',
+    freeDeliveryFrom: (sum) => `Бесплатная доставка при заказе от ${sum}`,
+    composition: 'Состав',
+    add: 'Добавить',
+    update: 'Обновить',
+    removeFromCart: 'Убрать из корзины',
+
+    cart: 'Корзина',
+    cartEmpty: 'Корзина пуста',
+    cartEmptyText: 'Выберите любимые роллы в меню',
+    upsell: (name) => `Добавить к заказу <b>${name}</b>?`,
+    address: 'Адрес',
+    change: 'Изменить',
+    addressNote: 'Квартира, подъезд, этаж',
+    addressNotePh: 'Например: кв. 12, подъезд 3, этаж 4',
+    noLocationHint: '📍 Отправьте геолокацию, чтобы курьер быстро и точно нашёл вас',
+    sendLocation: 'Отправить геолокацию',
+    phone: 'Номер телефона',
+    sendTgPhone: 'Отправить номер из Telegram',
+    waiting: 'Ожидание...',
+    payment: 'Способ оплаты',
+    cash: 'Наличные',
+    card: 'Карта',
+    cardHint: (to) => `Переведите на карту ниже и покажите чек ${to}:`,
+    toCourier: 'курьеру',
+    toCashier: 'на кассе',
+    cardByStaff: (who) => `Реквизиты карты сообщит ${who}.`,
+    courierWho: 'курьер',
+    cashierWho: 'кассир',
+    copied: 'Номер карты скопирован',
+    comment: 'Комментарий',
+    commentPh: 'Например: не звонить, оставить у двери',
+    products: 'Товары',
+    deliveryFee: 'Доставка',
+    free: 'Бесплатно',
+    moreForFree: (sum) => `Ещё ${sum} — и доставка бесплатно`,
+    minOrder: (sum) => `Минимальная сумма заказа: ${sum}`,
+    total: 'Итого',
+    confirm: 'Оформить заказ',
+    sending: 'Отправляем...',
+    errClosed: 'Сейчас заказы не принимаются',
+    errAddress: 'Отправьте геолокацию или введите адрес',
+    errPhone: 'Введите номер телефона полностью',
+    errPhoneManual: 'Введите номер вручную',
+
+    successTitle: 'Заказ принят!',
+    orderNo: 'Номер заказа',
+    successDelivery: 'Наш курьер скоро свяжется с вами. Подробности отправлены в бот.',
+    successPickup: 'Когда заказ будет готов, бот пришлёт уведомление.',
+    close: 'Закрыть',
+    backToMenu: 'Вернуться в меню',
+
+    myOrders: 'Мои заказы',
+    noOrders: 'Заказов пока нет. Сделайте первый заказ! 🍣',
+    order: 'Заказ',
+    reorder: 'Повторить заказ',
+    unavailableAll: 'Товары из этого заказа сейчас недоступны',
+    unavailableSome: (n) => `${n} товар(а) сейчас недоступны`,
+    status: {
+      NEW: 'Принят',
+      ACCEPTED: 'Готовится',
+      ON_WAY: 'В пути',
+      DONE: 'Завершён',
+      CANCELLED: 'Отменён',
+    },
+
+    profile: 'Профиль',
+    favorites: 'Избранное',
+    branches: 'Филиалы',
+    contacts: 'Контакты',
+    about: 'О нас',
+    leaveReview: 'Оставить отзыв',
+    language: 'Язык',
+    noFavorites: 'В избранном пока пусто. Нажмите ❤️ в меню',
+    workHours: 'Время работы',
+    openInMaps: 'Открыть на карте',
+    call: 'Позвонить',
+    phoneLabel: 'Телефон',
+    reviewTitle: 'Оцените нас',
+    reviewPh: 'Напишите ваши впечатления и пожелания (необязательно)',
+    reviewSend: 'Отправить',
+    reviewThanks: '🙏 Спасибо за отзыв!',
+    reviewNeedRating: 'Пожалуйста, поставьте оценку',
+  },
+};
+
+export const LANG_NAMES = { uz: "O'zbekcha", ru: 'Русский' };
+
+export const LangContext = createContext({ lang: 'uz', setLang: () => {} });
+
+// Matn olish: t('key') yoki t('key', arg)
+export function useT() {
+  const { lang, setLang } = useContext(LangContext);
+  const table = dict[lang] || dict.uz;
+  const t = (key, ...args) => {
+    const v = table[key] ?? dict.uz[key] ?? key;
+    return typeof v === 'function' ? v(...args) : v;
+  };
+  // Ikki tilli maydon: pick(product, 'name') -> ruscha bo'lsa nameRu (bo'sh bo'lsa o'zbekchasi)
+  const pick = (obj, field) => {
+    if (!obj) return '';
+    if (lang === 'ru') {
+      const ru = obj[`${field}Ru`];
+      if (Array.isArray(ru) ? ru.length : ru) return ru;
+    }
+    return obj[field] ?? obj[`${field}Uz`];
+  };
+  const money = (n) => `${Math.round(Number(n) || 0).toLocaleString('ru-RU').replace(/ /g, ' ')} ${table.sum}`;
+  return { t, lang, setLang, pick, money };
+}
+
+export const guessLang = (code) => (/^(ru|uk|be|kk|ky|tg)/.test(String(code || '')) ? 'ru' : 'uz');

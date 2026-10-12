@@ -49,6 +49,11 @@ export const api = {
   createProduct: (data) => request('/products', { method: 'POST', body: data }),
   updateProduct: (id, data) => request(`/products/${id}`, { method: 'PUT', body: data }),
   deleteProduct: (id) => request(`/products/${id}`, { method: 'DELETE' }),
+  categories: () => request('/categories'),
+  createCategory: (data) => request('/categories', { method: 'POST', body: data }),
+  updateCategory: (id, data) => request(`/categories/${id}`, { method: 'PUT', body: data }),
+  deleteCategory: (id) => request(`/categories/${id}`, { method: 'DELETE' }),
+  reviews: () => request('/reviews'),
   upload: (file) => {
     const form = new FormData();
     form.append('image', file);

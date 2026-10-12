@@ -9,33 +9,60 @@ const { money, escapeHtml, normalizePhone } = require('../services/format');
 const { yandexRouteUrl, yandexGoUrl } = require('../services/maps');
 const { reverseGeocode } = require('../services/geocode');
 const { errText } = require('../services/redact');
+const { t, normLang } = require('../services/i18n');
 
-const menuKeyboard = () => {
+const brand = config.brand.name;
+const langOf = (user) => normLang(user?.lang);
+
+const menuKeyboard = (lang) => {
   const url = webapp.getUrl();
-  return url ? new InlineKeyboard().webApp('🍣 Menyuni ochish', url) : undefined;
+  return url ? new InlineKeyboard().webApp(t(lang, 'openMenuBtn'), url) : undefined;
 };
 
+const langKeyboard = () => new InlineKeyboard().text("🇺🇿 O'zbekcha", 'lang:uz').text('🇷🇺 Русский', 'lang:ru');
+
+async function sendWelcome(ctx, lang) {
+  const keyboard = menuKeyboard(lang);
+  const text = `${t(lang, 'welcome', escapeHtml(ctx.from.first_name || ''), brand)}\n\n${t(lang, keyboard ? 'openMenuHint' : 'menuNotReady')}`;
+  await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard });
+}
+
+// /start: til tanlanmagan bo'lsa — avval til so'raladi
 async function onStart(ctx) {
   if (!ctx.from) return;
-  await User.upsertFromTelegram(ctx.from);
-  const name = escapeHtml(ctx.from.first_name || '');
-  const keyboard = menuKeyboard();
-  const text =
-    `<b>Assalomu alaykum, ${name}!</b>\n\n` +
-    `🍣 <b>${config.brand.name}</b> — Toshkentdagi premium sushi bar.\n` +
-    `Rollar, setlar va nigirilarni bir necha bosishda buyurtma qiling.\n\n` +
-    (keyboard ? '👇 Menyuni ochish uchun tugmani bosing' : '⏳ Menyu hozircha ishga tushirilmoqda, birozdan so‘ng qayta urinib ko‘ring.');
-  await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard });
+  const user = await User.upsertFromTelegram(ctx.from);
+  if (!user.lang) {
+    await ctx.reply(`🇺🇿 Tilni tanlang\n🇷🇺 Выберите язык`, { reply_markup: langKeyboard() });
+    return;
+  }
+  await sendWelcome(ctx, langOf(user));
+}
+
+async function onLangCommand(ctx) {
+  if (!ctx.from) return;
+  const user = await User.upsertFromTelegram(ctx.from);
+  await ctx.reply(t(langOf(user), 'chooseLang'), { reply_markup: langKeyboard() });
+}
+
+async function onCallback(ctx) {
+  const data = ctx.callbackQuery.data || '';
+  const m = data.match(/^lang:(uz|ru)$/);
+  if (!m || !ctx.from) return ctx.answerCallbackQuery();
+  const lang = m[1];
+  const user = await User.upsertFromTelegram(ctx.from);
+  await User.update(user.id, { lang });
+  await ctx.answerCallbackQuery({ text: t(lang, 'langSaved') });
+  await ctx.editMessageText(t(lang, 'langSaved')).catch(() => {});
+  return sendWelcome(ctx, lang);
 }
 
 async function onContact(ctx) {
   const contact = ctx.message.contact;
   if (!ctx.from || contact.user_id !== ctx.from.id) return;
   const phone = normalizePhone(contact.phone_number);
+  const user = await User.upsertFromTelegram(ctx.from);
   if (phone) await User.setPhoneByTelegramId(ctx.from.id, phone);
-  await ctx.reply('✅ Raqamingiz saqlandi. Buyurtmani Mini App ichida davom ettiring.', {
-    reply_markup: { remove_keyboard: true },
-  });
+  await ctx.reply(t(langOf(user), 'phoneSaved'), { reply_markup: { remove_keyboard: true } });
 }
 
 // Mijoz botga lokatsiya yubordi — lokatsiyasiz buyurtmasiga biriktiramiz
@@ -43,52 +70,50 @@ async function onLocation(ctx) {
   if (!ctx.from) return;
   const { latitude: lat, longitude: lon } = ctx.message.location;
   const user = await User.upsertFromTelegram(ctx.from);
+  const lang = langOf(user);
   const order = await Order.findAwaitingLocation(user.id);
   if (!order) {
-    await ctx.reply('📍 Lokatsiya qabul qilindi. Buyurtma berish uchun «🍣 Menyu» tugmasini bosing.', {
-      reply_markup: { remove_keyboard: true },
-    });
+    await User.update(user.id, { lastLat: lat, lastLon: lon }).catch(() => {});
+    await ctx.reply(t(lang, 'locationNoOrder'), { reply_markup: { remove_keyboard: true } });
     return;
   }
-  await attachLocation(ctx, order, user, lat, lon);
-}
-
-async function attachLocation(ctx, order, user, lat, lon) {
   const data = { lat, lon };
   if (!order.address) data.address = (await reverseGeocode(lat, lon)).address;
   const updated = await Order.setLocation(order.id, data);
   await User.update(user.id, { lastLat: lat, lastLon: lon }).catch(() => {});
-  await ctx.reply(`✅ Rahmat! Lokatsiya buyurtma #${order.id} ga biriktirildi.`, { reply_markup: { remove_keyboard: true } });
+  await ctx.reply(t(lang, 'locationAttached', order.id), { reply_markup: { remove_keyboard: true } });
   const settings = await Settings.get();
   await notifyAdmins(updated, settings, { title: `📍 <b>Buyurtma #${order.id}: lokatsiya biriktirildi</b>` });
 }
 
 async function onHelp(ctx) {
+  if (!ctx.from) return;
+  const user = await User.upsertFromTelegram(ctx.from);
+  const lang = langOf(user);
   const settings = await Settings.get();
   const lines = [
-    `<b>${config.brand.name}</b>`,
+    `<b>${brand}</b>`,
     `📍 ${escapeHtml(settings.pickupAddress)}`,
+    settings.workHours ? `🕒 ${escapeHtml(settings.workHours)}` : null,
     settings.contactPhone ? `📞 ${escapeHtml(settings.contactPhone)}` : null,
     '',
-    'Buyurtma berish uchun pastdagi «🍣 Menyu» tugmasini bosing.',
+    t(lang, 'helpTail'),
   ].filter((l) => l !== null);
-  await ctx.reply(lines.join('\n'), { parse_mode: 'HTML', reply_markup: menuKeyboard() });
+  await ctx.reply(lines.join('\n'), { parse_mode: 'HTML', reply_markup: menuKeyboard(lang) });
 }
 
 // ---------- Xabarnomalar ----------
 
-function itemsText(items) {
-  return items.map((i) => `• ${escapeHtml(i.name)} × ${i.qty} — ${money(i.price * i.qty)}`).join('\n');
-}
+const itemName = (item, lang) => (lang === 'ru' && item.nameRu ? item.nameRu : item.name);
 
-function orderSummary(order) {
+function orderSummary(order, lang) {
   const isDelivery = order.deliveryType === 'DELIVERY';
   const lines = [
-    itemsText(order.items),
+    order.items.map((i) => `• ${escapeHtml(itemName(i, lang))} × ${i.qty} — ${money(i.price * i.qty)}`).join('\n'),
     '',
-    order.deliveryFee ? `🚚 Yetkazib berish: ${money(order.deliveryFee)}` : null,
-    `💰 <b>Jami: ${money(order.total)}</b>`,
-    `${order.paymentType === 'CARD' ? '💳 Karta orqali' : '💵 Naqd pul'} · ${isDelivery ? '🛵 Yetkazib berish' : '🏃 Olib ketish'}`,
+    order.deliveryFee ? t(lang, 'deliveryLine', money(order.deliveryFee)) : null,
+    t(lang, 'totalLine', money(order.total)),
+    `${t(lang, order.paymentType === 'CARD' ? 'payCard' : 'payCash')} · ${t(lang, isDelivery ? 'typeDelivery' : 'typePickup')}`,
   ];
   return lines.filter((l) => l !== null).join('\n');
 }
@@ -102,42 +127,32 @@ async function safeSend(chatId, text, extra = {}) {
   }
 }
 
+const hasCoords = (o) => Number.isFinite(o.lat) && Number.isFinite(o.lon);
+
 async function notifyNewOrder(order) {
   const settings = await Settings.get();
+  const lang = langOf(order.user);
   const isDelivery = order.deliveryType === 'DELIVERY';
 
-  // Mijozga
-  const tail = isDelivery
-    ? 'Kuryerimiz tez orada bog‘lanadi 🍣'
-    : `Buyurtma tayyor bo‘lganda xabar beramiz.\n📍 Olib ketish manzili: ${escapeHtml(settings.pickupAddress)}`;
-  await safeSend(
-    order.user.telegramId,
-    `✅ <b>Buyurtmangiz muvaffaqiyatli qabul qilindi!</b>\nBuyurtma raqami: <b>#${order.id}</b>\n\n${orderSummary(order)}\n\n${tail}`
-  );
+  // Mijozga — o'z tilida
+  const tail = isDelivery ? t(lang, 'courierSoon') : t(lang, 'pickupSoon', escapeHtml(settings.pickupAddress));
+  await safeSend(order.user.telegramId, `${t(lang, 'orderAccepted', order.id)}\n\n${orderSummary(order, lang)}\n\n${tail}`);
 
   // Lokatsiya yuborilmagan bo'lsa — mijozdan so'raymiz (kuryer aniq topishi uchun)
-  if (isDelivery && !hasCoords(order)) await askLocation(order);
+  if (isDelivery && !hasCoords(order)) {
+    await safeSend(order.user.telegramId, t(lang, 'askLocation'), {
+      reply_markup: {
+        keyboard: [[{ text: t(lang, 'sendLocationBtn'), request_location: true }]],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
+    });
+  }
 
   await notifyAdmins(order, settings);
 }
 
-const hasCoords = (o) => Number.isFinite(o.lat) && Number.isFinite(o.lon);
-
-async function askLocation(order) {
-  await safeSend(
-    order.user.telegramId,
-    `📍 Kuryer manzilingizni aniq topishi uchun <b>lokatsiyangizni yuboring</b> — pastdagi tugmani bosing.`,
-    {
-      reply_markup: {
-        keyboard: [[{ text: '📍 Lokatsiyani yuborish', request_location: true }]],
-        resize_keyboard: true,
-        one_time_keyboard: true,
-      },
-    }
-  );
-}
-
-function adminKeyboard(order, settings) {
+function adminKeyboard(order) {
   if (order.deliveryType !== 'DELIVERY') return undefined;
   const goUrl = yandexGoUrl(order);
   const mapUrl = yandexRouteUrl(order);
@@ -148,6 +163,7 @@ function adminKeyboard(order, settings) {
   return kb;
 }
 
+// Adminga — doim o'zbekcha
 async function notifyAdmins(order, settings, { title } = {}) {
   if (!config.adminIds.length) return;
   const isDelivery = order.deliveryType === 'DELIVERY';
@@ -161,11 +177,11 @@ async function notifyAdmins(order, settings, { title } = {}) {
     order.addressNote ? `🏠 ${escapeHtml(order.addressNote)}` : null,
     order.comment ? `💬 ${escapeHtml(order.comment)}` : null,
     '',
-    orderSummary(order),
+    orderSummary(order, 'uz'),
   ]
     .filter((l) => l !== null)
     .join('\n');
-  const keyboard = adminKeyboard(order, settings);
+  const keyboard = adminKeyboard(order);
 
   for (const adminId of config.adminIds) {
     await safeSend(adminId, text, { reply_markup: keyboard });
@@ -181,17 +197,41 @@ async function notifyAdmins(order, settings, { title } = {}) {
 
 async function notifyStatus(order) {
   const settings = await Settings.get();
+  const lang = langOf(order.user);
   const isDelivery = order.deliveryType === 'DELIVERY';
+  const addr = escapeHtml(settings.pickupAddress);
   const messages = {
-    ACCEPTED: `👨‍🍳 Buyurtmangiz <b>#${order.id}</b> tayyorlanmoqda.`,
-    ON_WAY: isDelivery
-      ? `🛵 Buyurtmangiz <b>#${order.id}</b> yo‘lda! Kuryer tez orada yetib boradi.`
-      : `✅ Buyurtmangiz <b>#${order.id}</b> tayyor!\n📍 ${escapeHtml(settings.pickupAddress)} manzilidan olib ketishingiz mumkin.`,
-    DONE: `🙏 Buyurtma <b>#${order.id}</b> yakunlandi. Yoqimli ishtaha!\n${config.brand.name}ni tanlaganingiz uchun rahmat.`,
-    CANCELLED: `❌ Buyurtmangiz <b>#${order.id}</b> bekor qilindi.${settings.contactPhone ? `\nSavollar bo‘lsa: ${escapeHtml(settings.contactPhone)}` : ''}`,
+    ACCEPTED: t(lang, 'stAccepted', order.id),
+    ON_WAY: isDelivery ? t(lang, 'stOnWayDelivery', order.id) : t(lang, 'stOnWayPickup', order.id, addr),
+    DONE: t(lang, 'stDone', order.id, brand),
+    CANCELLED:
+      t(lang, 'stCancelled', order.id) + (settings.contactPhone ? `\n${t(lang, 'questions', escapeHtml(settings.contactPhone))}` : ''),
   };
   const text = messages[order.status];
-  if (text) await safeSend(order.user.telegramId, text, { reply_markup: order.status === 'DONE' ? menuKeyboard() : undefined });
+  if (text) await safeSend(order.user.telegramId, text, { reply_markup: order.status === 'DONE' ? menuKeyboard(lang) : undefined });
 }
 
-module.exports = { onStart, onContact, onLocation, onHelp, notifyNewOrder, notifyStatus };
+async function notifyReview(review) {
+  const stars = '⭐'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+  const u = review.user;
+  const text = [
+    `📝 <b>Yangi otziv</b> ${stars}`,
+    `👤 ${escapeHtml(u.firstName)}${u.username ? ` (@${escapeHtml(u.username)})` : ''}${u.phone ? ` · ${escapeHtml(u.phone)}` : ''}`,
+    review.text ? `\n${escapeHtml(review.text)}` : null,
+  ]
+    .filter((l) => l !== null)
+    .join('\n');
+  for (const adminId of config.adminIds) await safeSend(adminId, text);
+}
+
+module.exports = {
+  onStart,
+  onLangCommand,
+  onCallback,
+  onContact,
+  onLocation,
+  onHelp,
+  notifyNewOrder,
+  notifyStatus,
+  notifyReview,
+};

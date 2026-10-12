@@ -36,26 +36,70 @@ model User {
   lastAddress String?
   lastLat     Float?
   lastLon     Float?
+  // Til: "uz" | "ru" (null — hali tanlanmagan)
+  lang        String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   orders      Order[]
+  favorites   Favorite[]
+  reviews     Review[]
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  nameUz    String
+  nameRu    String    @default("")
+  imageUrl  String    @default("")
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String   @default("")
-  ingredients String[] @default([])
-  imageUrl    String   @default("")
-  oldPrice    Int?
-  price       Int
-  category    String
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            Int        @id @default(autoincrement())
+  // name/description/ingredients — o'zbekcha, *Ru — ruscha
+  name          String
+  nameRu        String     @default("")
+  description   String     @default("")
+  descriptionRu String     @default("")
+  ingredients   String[]   @default([])
+  ingredientsRu String[]   @default([])
+  imageUrl      String     @default("")
+  oldPrice      Int?
+  price         Int
+  categoryId    Int?
+  category      Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  isHit         Boolean    @default(false)
+  isActive      Boolean    @default(true)
+  sortOrder     Int        @default(0)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  favorites     Favorite[]
 
-  @@index([isActive, category])
+  @@index([isActive, categoryId])
+}
+
+model Favorite {
+  userId    Int
+  productId Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([userId, productId])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int
+  text      String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 model Order {
@@ -97,6 +141,12 @@ model Settings {
   shopLat          Float?
   shopLon          Float?
   isOpen           Boolean  @default(true)
+  workHours        String   @default("10:00 – 02:00")
+  instagram        String   @default("")
+  aboutUz          String   @default("")
+  aboutRu          String   @default("")
+  // Boshlang'ich ma'lumotlar versiyasi (seed bir marta ishlashi uchun)
+  seedVersion      Int      @default(0)
   // Oshxona cheki: OFF | NEW (yangi buyurtma kelganda) | ACCEPTED ("Qabul qilish" bosilganda)
   printMode        String   @default("NEW")
   printerIp        String   @default("")
