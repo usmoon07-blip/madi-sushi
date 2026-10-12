@@ -41,9 +41,9 @@ const dict = {
     askLocation: '📍 Kuryer manzilingizni aniq topishi uchun <b>lokatsiyangizni yuboring</b> — pastdagi tugmani bosing.',
     sendLocationBtn: '📍 Lokatsiyani yuborish',
     askReceipt: (sum, cards) =>
-      `💳 <b>Karta orqali to'lov</b>\n\nIltimos, ${sum} ni quyidagi kartaga o'tkazing:\n${cards}\n\n📸 To'lovni amalga oshirgach, <b>to'lov chekini shu chatga jo'nating</b> — buyurtmangiz darhol tasdiqlanadi.\n\nRahmat! 🙏`,
+      `💳 <b>Karta orqali to'lov</b>\n\nIltimos, ${sum} ni quyidagi kartaga o'tkazing:\n${cards}\n\n📸 To'lovni amalga oshirgach, <b>to'lov chekini shu chatga jo'nating</b> — buyurtmangiz tez orada tasdiqlanadi.\n\nRahmat! 🙏`,
     askReceiptNoCard: (sum) =>
-      `💳 <b>Karta orqali to'lov</b> — ${sum}\n\n📸 To'lovni amalga oshirgach, <b>to'lov chekini shu chatga jo'nating</b> — buyurtmangiz darhol tasdiqlanadi.\n\nRahmat! 🙏`,
+      `💳 <b>Karta orqali to'lov</b> — ${sum}\n\n📸 To'lovni amalga oshirgach, <b>to'lov chekini shu chatga jo'nating</b> — buyurtmangiz tez orada tasdiqlanadi.\n\nRahmat! 🙏`,
     receiptReceived: (id) => `✅ Rahmat, chekingiz qabul qilindi!\nBuyurtma <b>#${id}</b> tez orada tasdiqlanadi va tayyorlashni boshlaymiz 🍣`,
     receiptNoOrder: "🧾 Rahmat! Afsuski, bu chekni biriktirish uchun karta orqali to'lanadigan faol buyurtma topa olmadik. Savollaringiz bo'lsa, biz bilan bog'laning — albatta yordam beramiz.",
     locationNoOrder: '📍 Lokatsiya qabul qilindi. Buyurtma berish uchun «🍣 Menyu» tugmasini bosing.',
@@ -96,9 +96,9 @@ const dict = {
     askLocation: '📍 Чтобы курьер точно нашёл вас, <b>отправьте геолокацию</b> — нажмите кнопку ниже.',
     sendLocationBtn: '📍 Отправить геолокацию',
     askReceipt: (sum, cards) =>
-      `💳 <b>Оплата картой</b>\n\nПожалуйста, переведите ${sum} на карту:\n${cards}\n\n📸 После оплаты, пожалуйста, <b>отправьте чек в этот чат</b> — и мы сразу подтвердим ваш заказ.\n\nСпасибо! 🙏`,
+      `💳 <b>Оплата картой</b>\n\nПожалуйста, переведите ${sum} на карту:\n${cards}\n\n📸 После оплаты, пожалуйста, <b>отправьте чек в этот чат</b> — и мы скоро подтвердим ваш заказ.\n\nСпасибо! 🙏`,
     askReceiptNoCard: (sum) =>
-      `💳 <b>Оплата картой</b> — ${sum}\n\n📸 После оплаты, пожалуйста, <b>отправьте чек в этот чат</b> — и мы сразу подтвердим ваш заказ.\n\nСпасибо! 🙏`,
+      `💳 <b>Оплата картой</b> — ${sum}\n\n📸 После оплаты, пожалуйста, <b>отправьте чек в этот чат</b> — и мы скоро подтвердим ваш заказ.\n\nСпасибо! 🙏`,
     receiptReceived: (id) => `✅ Спасибо, чек получен!\nЗаказ <b>#${id}</b> скоро будет подтверждён, и мы начнём его готовить 🍣`,
     receiptNoOrder: '🧾 Спасибо! К сожалению, мы не нашли активный заказ с оплатой картой для этого чека. Если есть вопросы — свяжитесь с нами, мы обязательно поможем.',
     locationNoOrder: '📍 Геолокация получена. Чтобы сделать заказ, нажмите «🍣 Меню».',
