@@ -3,10 +3,27 @@ export const isTelegram = Boolean(tg?.initData);
 
 const atLeast = (v) => Boolean(tg?.isVersionAtLeast?.(v));
 
+// Telefon va planshetda (iPad ham) Mini App katta — butun ekranga ochilsin
+const MOBILE = ['ios', 'android', 'android_x'];
+
+function syncFullscreen() {
+  document.documentElement.classList.toggle('is-fullscreen', Boolean(tg?.isFullscreen));
+}
+
 export function setupTelegram() {
   if (!tg) return;
   tg.ready();
   tg.expand();
+  try {
+    if (atLeast('8.0')) {
+      tg.onEvent('fullscreenChanged', syncFullscreen);
+      tg.onEvent('fullscreenFailed', () => tg.expand());
+      if (MOBILE.includes(tg.platform) && !tg.isFullscreen) tg.requestFullscreen();
+      syncFullscreen();
+    }
+  } catch {
+    /* fullscreen qo'llanmasa — oddiy expand qoladi */
+  }
   try {
     if (atLeast('6.1')) {
       tg.setHeaderColor('#0a0a0b');

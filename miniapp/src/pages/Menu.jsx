@@ -30,10 +30,13 @@ export default function Menu({ focusCategory }) {
 
   const tiles = groups.map((g) => ({ id: g.id, nameUz: g.name, imageUrl: g.imageUrl, emoji: g.id === HIT_ID ? '⭐' : '🍽' }));
 
+  // Yopishqoq plitkalar paneli pastki cheti (fullscreen'da Telegram tugmalari hisobiga balandroq)
+  const barBottom = () => (document.querySelector('.tiles-bar')?.getBoundingClientRect().bottom ?? 130) + 20;
+
   const scrollTo = (id, smooth = true) => {
     const el = sectionRefs.current[id];
     if (!el) return;
-    const top = el.getBoundingClientRect().top + window.scrollY - 150;
+    const top = el.getBoundingClientRect().top + window.scrollY - barBottom();
     window.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
   };
 
@@ -45,9 +48,10 @@ export default function Menu({ focusCategory }) {
   useEffect(() => {
     const onScroll = () => {
       let current = groups[0]?.id;
+      const edge = barBottom();
       for (const g of groups) {
         const el = sectionRefs.current[g.id];
-        if (el && el.getBoundingClientRect().top < 170) current = g.id;
+        if (el && el.getBoundingClientRect().top < edge) current = g.id;
       }
       setActive(current);
     };
