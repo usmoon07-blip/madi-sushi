@@ -80,7 +80,7 @@ Render manzili `https://madi-sushi.onrender.com` dan farq qilsa: GitHub → ombo
 
 ```powershell
 cd Desktop
-git clone -b claude/practical-pasteur-ah4bvu https://github.com/usmoon07-blip/madi-sushi.git
+git clone https://github.com/usmoon07-blip/madi-sushi.git
 cd madi-sushi
 npm run setup
 ```
