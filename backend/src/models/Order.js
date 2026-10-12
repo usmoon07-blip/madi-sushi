@@ -20,6 +20,24 @@ function listForAdmin({ status, take = 150 } = {}) {
 const updateStatus = (id, status) =>
   prisma.order.update({ where: { id }, data: { status }, include: withUser });
 
+// ---- Lokatsiyasiz yetkazib berish buyurtmalari ----
+const LOCATION_WINDOW_MS = 3 * 60 * 60 * 1000;
+
+const findAwaitingLocation = (userId) =>
+  prisma.order.findFirst({
+    where: {
+      userId,
+      deliveryType: 'DELIVERY',
+      lat: null,
+      status: { in: ACTIVE_STATUSES },
+      createdAt: { gte: new Date(Date.now() - LOCATION_WINDOW_MS) },
+    },
+    orderBy: { id: 'desc' },
+    include: withUser,
+  });
+
+const setLocation = (id, data) => prisma.order.update({ where: { id }, data, include: withUser });
+
 // ---- Oshxona cheki navbati ----
 const PRINT_STATUSES = { NEW: ['NEW', 'ACCEPTED', 'ON_WAY'], ACCEPTED: ['ACCEPTED', 'ON_WAY'] };
 const PRINT_WINDOW_MS = 12 * 60 * 60 * 1000;
@@ -65,4 +83,4 @@ async function stats() {
   };
 }
 
-module.exports = { ACTIVE_STATUSES, printQueue, claimPrint, releasePrint, create, findByClientRef, findById, listForUser, listForAdmin, updateStatus, stats };
+module.exports = { ACTIVE_STATUSES, findAwaitingLocation, setLocation, printQueue, claimPrint, releasePrint, create, findByClientRef, findById, listForUser, listForAdmin, updateStatus, stats };

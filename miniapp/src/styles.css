@@ -1179,3 +1179,8 @@ textarea:focus {
 .sheet__footer .btn {
   white-space: nowrap;
 }
+.geo-hint {
+  margin: -4px 0 0;
+  font-size: 13px;
+  color: #f5b54a;
+}

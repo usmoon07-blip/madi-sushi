@@ -10,6 +10,7 @@ const { HttpError } = require('./cartController');
 const botController = require('./botController');
 const printQueue = require('../services/printQueue');
 const { parseAddress } = require('../services/printer');
+const { parseCoords } = require('../services/maps');
 
 const STATUSES = ['NEW', 'ACCEPTED', 'ON_WAY', 'DONE', 'CANCELLED'];
 
@@ -201,6 +202,15 @@ async function updateSettings(req, res) {
   if ('pickupAddress' in body) data.pickupAddress = String(body.pickupAddress || '').trim().slice(0, 200);
   if ('contactPhone' in body) data.contactPhone = String(body.contactPhone || '').trim().slice(0, 40);
   if ('isOpen' in body) data.isOpen = Boolean(body.isOpen);
+  if ('shopLocation' in body) {
+    const raw = String(body.shopLocation || '').trim();
+    if (!raw) Object.assign(data, { shopLat: null, shopLon: null });
+    else {
+      const point = parseCoords(raw);
+      if (!point) throw new HttpError(400, "Filial lokatsiyasi noto'g'ri. Masalan: 41.311081, 69.240562");
+      Object.assign(data, { shopLat: point.lat, shopLon: point.lon });
+    }
+  }
   if ('printMode' in body) {
     if (!['OFF', 'NEW', 'ACCEPTED'].includes(body.printMode)) throw new HttpError(400, "Chek rejimi noto'g'ri");
     data.printMode = body.printMode;

@@ -93,6 +93,9 @@ model Settings {
   minOrder         Int      @default(50000)
   pickupAddress    String   @default("Toshkent, Foziltepa ko'chasi, 40")
   contactPhone     String   @default("")
+  // Filial nuqtasi: Yandex Go'da "Qayerdan" maydoni uchun
+  shopLat          Float?
+  shopLon          Float?
   isOpen           Boolean  @default(true)
   // Oshxona cheki: OFF | NEW (yangi buyurtma kelganda) | ACCEPTED ("Qabul qilish" bosilganda)
   printMode        String   @default("NEW")

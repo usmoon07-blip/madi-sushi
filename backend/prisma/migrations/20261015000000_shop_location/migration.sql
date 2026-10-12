@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Settings" ADD COLUMN     "shopLat" DOUBLE PRECISION,
+ADD COLUMN     "shopLon" DOUBLE PRECISION;
+

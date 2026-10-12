@@ -237,6 +237,9 @@ export default function Cart({ products, settings, user, onUserChange, onSuccess
               onChange={(e) => setAddress(e.target.value)}
             />
           </label>
+          {!coords && (
+            <p className="geo-hint">📍 Kuryer sizni aniq va tez topishi uchun lokatsiyani yuboring</p>
+          )}
           {coords && (
             <div className="geo-row">
               <span className="geo-row__dot" /> Lokatsiya biriktirildi

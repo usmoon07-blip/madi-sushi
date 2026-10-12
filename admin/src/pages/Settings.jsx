@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { SAMPLE_ORDER, device, printReceipt, printerConfig, usePrinterConfig } from '../printing.js';
 
+const coordsText = (s) => (s.shopLat != null && s.shopLon != null ? `${s.shopLat}, ${s.shopLon}` : '');
+
 const PRINT_MODES = [
   { value: 'NEW', label: 'Yangi buyurtma kelishi bilan' },
   { value: 'ACCEPTED', label: '«Qabul qilish» bosilganda' },
@@ -29,7 +31,7 @@ export default function Settings() {
     api
       .settings()
       .then(({ settings, serverMode }) => {
-        setForm({ ...settings, cards: settings.cards || [] });
+        setForm({ ...settings, cards: settings.cards || [], shopLocation: coordsText(settings) });
         setCloud(serverMode === 'cloud');
         setConnection(settings.printerIp && serverMode !== 'cloud' ? 'NETWORK' : 'USB');
       })
@@ -64,8 +66,9 @@ export default function Settings() {
         paperWidth: form.paperWidth,
         printCopies: form.printCopies,
         printerIp: connection === 'NETWORK' ? form.printerIp : '',
+        shopLocation: form.shopLocation,
       });
-      setForm({ ...settings, cards: settings.cards || [] });
+      setForm({ ...settings, cards: settings.cards || [], shopLocation: coordsText(settings) });
       printerConfig.set({ ...settings, printerError: null });
       setSaved(true);
     } catch (err) {
@@ -297,6 +300,22 @@ export default function Settings() {
             <input value={form.contactPhone} onChange={set('contactPhone')} placeholder="+998 90 123 45 67" />
           </label>
         </div>
+        <label className="field">
+          <span>Filial lokatsiyasi — Yandex Go'da «Qayerdan» maydoniga qo'yiladi</span>
+          <input value={form.shopLocation} onChange={set('shopLocation')} placeholder="41.311081, 69.240562  yoki Yandex Maps havolasi" />
+        </label>
+        <p className="hint">
+          💡 Yandex Maps'da filialingiz ustiga bosib turing → pastda chiqqan koordinatani (masalan <b>41.311081, 69.240562</b>) nusxalab shu yerga qo'ying.
+          Yandex Maps havolasini ham qo'yish mumkin.
+          {form.shopLat != null && (
+            <>
+              {' '}
+              <a className="link-inline" href={`https://yandex.uz/maps/?pt=${form.shopLon},${form.shopLat}&z=17`} target="_blank" rel="noreferrer">
+                Saqlangan nuqtani xaritada tekshirish ↗
+              </a>
+            </>
+          )}
+        </p>
       </section>
     </form>
   );

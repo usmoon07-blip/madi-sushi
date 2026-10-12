@@ -846,3 +846,75 @@ h3 {
     display: none;
   }
 }
+
+/* ---------- Yandex Go ---------- */
+.btn--ygo {
+  padding: 6px 12px;
+  font-size: 13px;
+  background: #fce000;
+  color: #111;
+  border-radius: 8px;
+  font-weight: 800;
+}
+.warn-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #f5b54a;
+  background: rgba(245, 166, 35, 0.12);
+  border: 1px solid rgba(245, 166, 35, 0.35);
+}
+.ygo {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+@media (max-width: 600px) {
+  .ygo {
+    flex-direction: column;
+  }
+}
+.ygo__qr {
+  flex: none;
+  width: 220px;
+  height: 220px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px;
+  color: #000;
+}
+.ygo__qr img {
+  width: 100%;
+  height: 100%;
+}
+.ygo__info ol {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+}
+.ygo__coords {
+  font-family: ui-monospace, monospace;
+  background: var(--surface-2);
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+.ygo__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ygo__actions .btn--ygo {
+  padding: 10px 16px;
+  font-size: 14px;
+}
+.link-inline {
+  color: var(--red-hi);
+  font-weight: 700;
+}

@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api.js';
 import { beep } from '../sound.js';
 import { printReceipt, printerConfig } from '../printing.js';
-import { NEXT_STATUS, STATUSES, formatDate, money, statusOf, yandexNavi, yandexRoute } from '../format.js';
+import { NEXT_STATUS, STATUSES, courierNote, formatDate, isTouchDevice, money, statusOf, yandexGo, yandexNavi, yandexRoute } from '../format.js';
+import { usePrinterConfig } from '../printing.js';
+import YandexGoModal from '../components/YandexGoModal.jsx';
 
 const FILTERS = [
   { value: 'ACTIVE', label: 'Faol' },
@@ -23,6 +25,16 @@ export default function Orders({ onActiveCount, visible }) {
   const [busy, setBusy] = useState(null);
   const [fresh, setFresh] = useState(new Set());
   const lastSeenId = useRef(null);
+  const settings = usePrinterConfig(); // sozlamalar (filial lokatsiyasi shu yerda)
+  const [goOrder, setGoOrder] = useState(null);
+
+  const openYandexGo = (order) => {
+    const url = yandexGo(order, settings);
+    if (!url) return;
+    // Telefonda — ilovani to'g'ridan-to'g'ri ochamiz, kompyuterda — QR-kod
+    if (isTouchDevice()) window.location.href = url;
+    else setGoOrder(order);
+  };
 
   const load = useCallback(async () => {
     try {
@@ -185,8 +197,17 @@ export default function Orders({ onActiveCount, visible }) {
                         <div className="small">{o.address || 'Faqat lokatsiya'}</div>
                         {o.addressNote && <div className="muted small">🏠 {o.addressNote}</div>}
                         <div className="map-links">
+                          {o.lat != null ? (
+                            <button type="button" className="btn btn--ygo" onClick={() => openYandexGo(o)}>
+                              🚕 Yandex Go
+                            </button>
+                          ) : (
+                            <span className="warn-pill" title="Bot mijozdan lokatsiya so'radi. Yuborsa, shu yerda paydo bo'ladi">
+                              ⚠️ Lokatsiya yo'q
+                            </span>
+                          )}
                           <a className="btn btn--map" href={yandexRoute(o)} target="_blank" rel="noreferrer">
-                            🗺 Yandex Maps
+                            🗺 Maps
                           </a>
                           {o.lat != null && (
                             <a className="btn btn--map btn--map-alt" href={yandexNavi(o)}>
@@ -227,6 +248,10 @@ export default function Orders({ onActiveCount, visible }) {
         {orders && !orders.length && <div className="empty">Bu bo'limda buyurtmalar yo'q</div>}
         {!orders && !error && <div className="empty">Yuklanmoqda...</div>}
       </div>
+
+      {goOrder && (
+        <YandexGoModal order={goOrder} url={yandexGo(goOrder, settings)} note={courierNote(goOrder)} onClose={() => setGoOrder(null)} />
+      )}
     </div>
   );
 }

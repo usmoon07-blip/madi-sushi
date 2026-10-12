@@ -3,9 +3,11 @@ const config = require('../config/default');
 const { bot } = require('../core/bot');
 const webapp = require('../core/webapp');
 const User = require('../models/User');
+const Order = require('../models/Order');
 const Settings = require('../models/Settings');
 const { money, escapeHtml, normalizePhone } = require('../services/format');
-const { yandexRouteUrl } = require('../services/maps');
+const { yandexRouteUrl, yandexGoUrl } = require('../services/maps');
+const { reverseGeocode } = require('../services/geocode');
 const { errText } = require('../services/redact');
 
 const menuKeyboard = () => {
@@ -34,6 +36,26 @@ async function onContact(ctx) {
   await ctx.reply('✅ Raqamingiz saqlandi. Buyurtmani Mini App ichida davom ettiring.', {
     reply_markup: { remove_keyboard: true },
   });
+}
+
+// Mijoz botga lokatsiya yubordi — lokatsiyasiz buyurtmasiga biriktiramiz
+async function onLocation(ctx) {
+  if (!ctx.from) return;
+  const { latitude: lat, longitude: lon } = ctx.message.location;
+  const user = await User.upsertFromTelegram(ctx.from);
+  const order = await Order.findAwaitingLocation(user.id);
+  const done = { reply_markup: { remove_keyboard: true } };
+  if (!order) {
+    await ctx.reply('📍 Lokatsiya qabul qilindi. Buyurtma berish uchun «🍣 Menyu» tugmasini bosing.', done);
+    return;
+  }
+  const data = { lat, lon };
+  if (!order.address) data.address = (await reverseGeocode(lat, lon)).address;
+  const updated = await Order.setLocation(order.id, data);
+  await User.update(user.id, { lastLat: lat, lastLon: lon }).catch(() => {});
+  await ctx.reply(`✅ Rahmat! Lokatsiya buyurtma #${order.id} ga biriktirildi.`, done);
+  const settings = await Settings.get();
+  await notifyAdmins(updated, settings, { title: `📍 <b>Buyurtma #${order.id}: mijoz lokatsiya yubordi</b>` });
 }
 
 async function onHelp(ctx) {
@@ -88,15 +110,49 @@ async function notifyNewOrder(order) {
     `✅ <b>Buyurtmangiz muvaffaqiyatli qabul qilindi!</b>\nBuyurtma raqami: <b>#${order.id}</b>\n\n${orderSummary(order)}\n\n${tail}`
   );
 
-  // Adminlarga
+  // Lokatsiya yuborilmagan bo'lsa — mijozdan so'raymiz (kuryer aniq topishi uchun)
+  if (isDelivery && !hasCoords(order)) await askLocation(order);
+
+  await notifyAdmins(order, settings);
+}
+
+const hasCoords = (o) => Number.isFinite(o.lat) && Number.isFinite(o.lon);
+
+async function askLocation(order) {
+  await safeSend(
+    order.user.telegramId,
+    `📍 Kuryer manzilingizni aniq topishi uchun <b>lokatsiyangizni yuboring</b> — pastdagi tugmani bosing.`,
+    {
+      reply_markup: {
+        keyboard: [[{ text: '📍 Lokatsiyani yuborish', request_location: true }]],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
+    }
+  );
+}
+
+function adminKeyboard(order, settings) {
+  if (order.deliveryType !== 'DELIVERY') return undefined;
+  const goUrl = yandexGoUrl(order, settings);
+  const mapUrl = yandexRouteUrl(order);
+  if (!goUrl && !mapUrl) return undefined;
+  const kb = new InlineKeyboard();
+  if (goUrl) kb.url('🚕 Yandex Go — dostavka', goUrl).row();
+  if (mapUrl) kb.url('🗺 Yandex Maps', mapUrl);
+  return kb;
+}
+
+async function notifyAdmins(order, settings, { title } = {}) {
   if (!config.adminIds.length) return;
-  const mapUrl = isDelivery ? yandexRouteUrl(order) : null;
+  const isDelivery = order.deliveryType === 'DELIVERY';
   const text = [
-    `🆕 <b>Yangi buyurtma #${order.id}</b>`,
+    title || `🆕 <b>Yangi buyurtma #${order.id}</b>`,
     '',
     `👤 ${escapeHtml(order.customerName)}${order.user.username ? ` (@${escapeHtml(order.user.username)})` : ''}`,
     `📞 ${escapeHtml(order.phone)}`,
     isDelivery ? `📍 ${escapeHtml(order.address || 'Lokatsiya bo‘yicha')}` : '🏃 Mijoz o‘zi olib ketadi',
+    isDelivery && !hasCoords(order) ? '⚠️ <b>Lokatsiya yo‘q</b> — mijozdan so‘raldi, kelsa alohida xabar beriladi' : null,
     order.addressNote ? `🏠 ${escapeHtml(order.addressNote)}` : null,
     order.comment ? `💬 ${escapeHtml(order.comment)}` : null,
     '',
@@ -104,11 +160,11 @@ async function notifyNewOrder(order) {
   ]
     .filter((l) => l !== null)
     .join('\n');
-  const keyboard = mapUrl ? new InlineKeyboard().url('🗺 Yandex Maps’da ochish', mapUrl) : undefined;
+  const keyboard = adminKeyboard(order, settings);
 
   for (const adminId of config.adminIds) {
     await safeSend(adminId, text, { reply_markup: keyboard });
-    if (isDelivery && Number.isFinite(order.lat) && Number.isFinite(order.lon)) {
+    if (isDelivery && hasCoords(order)) {
       try {
         await bot.api.sendLocation(adminId, order.lat, order.lon);
       } catch (err) {
@@ -133,4 +189,4 @@ async function notifyStatus(order) {
   if (text) await safeSend(order.user.telegramId, text, { reply_markup: order.status === 'DONE' ? menuKeyboard() : undefined });
 }
 
-module.exports = { onStart, onContact, onHelp, notifyNewOrder, notifyStatus };
+module.exports = { onStart, onContact, onLocation, onHelp, notifyNewOrder, notifyStatus };

@@ -128,6 +128,16 @@ Hammasi shu. Server ngrok manzilini **o'zi topadi** va botdagi **🍣 Menyu** tu
 
 Yangi buyurtma kelganda, adminning Telegramiga ham xabar, Yandex tugmasi va xaritadagi nuqta (lokatsiya) yuboriladi.
 
+## 🚕 Yandex Go orqali kuryer chaqirish
+
+Har bir yetkazib berish buyurtmasida **🚕 Yandex Go** tugmasi bor (admin panelda va adminga keladigan Telegram xabarida).
+U Yandex Go ilovasining **Dostavka** bo'limini ochadi: **Qayerga** maydonida mijozning aniq lokatsiyasi (koordinata), **Qayerdan** maydonida filial turadi.
+
+- **Telefonda** bosilsa — Yandex Go darhol ochiladi.
+- **Kompyuterda** bosilsa — QR-kod chiqadi: telefon kamerasi bilan skanerlang. U yerda **📋 Kuryerga izohni nusxalash** tugmasi ham bor (mijoz telefoni, podyezd, naqd summa).
+- **Filial nuqtasi:** Sozlamalar → Filial → «Filial lokatsiyasi». Yandex Maps'da filial ustiga bosib turing, chiqqan koordinatani (masalan `41.311081, 69.240562`) yoki Yandex Maps havolasini qo'ying.
+- Mijoz lokatsiya yubormay faqat manzil yozgan bo'lsa, bot undan **lokatsiya so'raydi**. Yuborsa, buyurtmaga avtomatik biriktiriladi va sizga yangi xabar keladi. Shungacha admin panelda «⚠️ Lokatsiya yo'q» yozuvi turadi.
+
 ## 5. 🖨 Oshxona cheki (avtomatik chop etish)
 
 Buyurtma kelganda oshxona printerida chek **avtomatik** chiqadi: buyurtma raqami, mahsulotlar (katta harfda), izoh, mijoz telefoni, manzil, to'lov turi va summa.
