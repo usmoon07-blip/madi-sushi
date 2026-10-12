@@ -1755,25 +1755,26 @@ textarea:focus {
 /* ---------- Bosh sahifa: kategoriyalar slaydi ---------- */
 .carousel {
   position: relative;
-  margin: 0 -16px;
 }
+/* Doim 3 ta to'liq plitka ko'rinadi; surilganda ham plitkalar chetga yopishadi */
 .carousel__track {
+  --gap: 12px;
   display: flex;
-  gap: 12px;
+  gap: var(--gap);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  scroll-padding-left: 16px;
-  padding: 4px 16px 6px;
+  padding: 4px 0 12px;
   scrollbar-width: none;
+  overscroll-behavior-x: contain;
 }
 .carousel__track::-webkit-scrollbar {
   display: none;
 }
 .carousel__item {
-  flex: none;
-  width: 42%;
-  max-width: 190px;
+  flex: 0 0 calc((100% - 2 * var(--gap)) / 3);
+  min-width: 0;
   scroll-snap-align: start;
+  scroll-snap-stop: always;
   display: grid;
   gap: 8px;
   justify-items: center;
@@ -1781,14 +1782,14 @@ textarea:focus {
 .carousel__img {
   width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: 22px;
+  border-radius: 20px;
   overflow: hidden;
   display: grid;
   place-items: center;
-  font-size: 34px;
+  font-size: 30px;
   background: #120a0b;
   border: 3px solid rgba(255, 255, 255, 0.92);
-  box-shadow: 0 10px 22px rgba(60, 0, 6, 0.45);
+  box-shadow: 0 4px 10px rgba(60, 0, 6, 0.35);
 }
 .carousel__img img {
   width: 100%;
@@ -1798,28 +1799,11 @@ textarea:focus {
 .carousel__name {
   max-width: 100%;
   font-weight: 800;
-  font-size: 15px;
+  font-size: 14px;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.carousel__dots {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 10px;
-}
-.carousel__dots button {
-  width: 7px;
-  height: 7px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.45);
-  transition: width 0.25s, background 0.25s;
-}
-.carousel__dots button.is-active {
-  width: 20px;
-  background: #fff;
 }
 
 /* Rasm ochilmasa */
