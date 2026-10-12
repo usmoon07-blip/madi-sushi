@@ -38,24 +38,91 @@ async function onContact(ctx) {
   });
 }
 
-// Mijoz botga lokatsiya yubordi — lokatsiyasiz buyurtmasiga biriktiramiz
+const isAdmin = (id) => config.adminIds.includes(String(id));
+const coordsLabel = (lat, lon) => `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+
+// Lokatsiya keldi: admin bo'lsa — filial nuqtasini saqlashni taklif qilamiz; mijoz bo'lsa — buyurtmaga biriktiramiz
 async function onLocation(ctx) {
   if (!ctx.from) return;
   const { latitude: lat, longitude: lon } = ctx.message.location;
   const user = await User.upsertFromTelegram(ctx.from);
   const order = await Order.findAwaitingLocation(user.id);
-  const done = { reply_markup: { remove_keyboard: true } };
-  if (!order) {
-    await ctx.reply('📍 Lokatsiya qabul qilindi. Buyurtma berish uchun «🍣 Menyu» tugmasini bosing.', done);
+
+  if (isAdmin(ctx.from.id)) {
+    const kb = new InlineKeyboard().text('🏠 Filial lokatsiyasi qilib saqlash', `shop:${lat.toFixed(6)},${lon.toFixed(6)}`);
+    if (order) kb.row().text(`📦 Buyurtma #${order.id} ga biriktirish`, `loc:${order.id}:${lat.toFixed(6)},${lon.toFixed(6)}`);
+    await ctx.reply(`📍 ${coordsLabel(lat, lon)}\nBu lokatsiyani nima qilay?`, { reply_markup: kb });
     return;
   }
+
+  if (!order) {
+    await ctx.reply('📍 Lokatsiya qabul qilindi. Buyurtma berish uchun «🍣 Menyu» tugmasini bosing.', {
+      reply_markup: { remove_keyboard: true },
+    });
+    return;
+  }
+  await attachLocation(ctx, order, user, lat, lon);
+}
+
+async function attachLocation(ctx, order, user, lat, lon) {
   const data = { lat, lon };
   if (!order.address) data.address = (await reverseGeocode(lat, lon)).address;
   const updated = await Order.setLocation(order.id, data);
   await User.update(user.id, { lastLat: lat, lastLon: lon }).catch(() => {});
-  await ctx.reply(`✅ Rahmat! Lokatsiya buyurtma #${order.id} ga biriktirildi.`, done);
+  await ctx.reply(`✅ Rahmat! Lokatsiya buyurtma #${order.id} ga biriktirildi.`, { reply_markup: { remove_keyboard: true } });
   const settings = await Settings.get();
-  await notifyAdmins(updated, settings, { title: `📍 <b>Buyurtma #${order.id}: mijoz lokatsiya yubordi</b>` });
+  await notifyAdmins(updated, settings, { title: `📍 <b>Buyurtma #${order.id}: lokatsiya biriktirildi</b>` });
+}
+
+// Admin tugmani bosdi
+async function onCallback(ctx) {
+  const data = ctx.callbackQuery.data || '';
+  if (!isAdmin(ctx.from.id)) return ctx.answerCallbackQuery();
+
+  const shop = data.match(/^shop:(-?\d+\.\d+),(-?\d+\.\d+)$/);
+  if (shop) {
+    const [lat, lon] = [Number(shop[1]), Number(shop[2])];
+    await Settings.update({ shopLat: lat, shopLon: lon });
+    await ctx.answerCallbackQuery({ text: 'Saqlandi ✅' });
+    await ctx.editMessageText(
+      `✅ <b>Filial lokatsiyasi saqlandi</b>\n📍 ${coordsLabel(lat, lon)}\n\nEndi Yandex Go'da «Qayerdan» maydoniga shu nuqta qo'yiladi.`,
+      {
+        parse_mode: 'HTML',
+        reply_markup: new InlineKeyboard().url('🗺 Xaritada tekshirish', `https://yandex.uz/maps/?pt=${lon},${lat}&z=18`),
+      }
+    );
+    return undefined;
+  }
+
+  const loc = data.match(/^loc:(\d+):(-?\d+\.\d+),(-?\d+\.\d+)$/);
+  if (loc) {
+    const user = await User.upsertFromTelegram(ctx.from);
+    const order = await Order.findAwaitingLocation(user.id);
+    await ctx.answerCallbackQuery();
+    await ctx.editMessageReplyMarkup({ reply_markup: undefined }).catch(() => {});
+    if (order && order.id === Number(loc[1])) await attachLocation(ctx, order, user, Number(loc[2]), Number(loc[3]));
+    return undefined;
+  }
+  return ctx.answerCallbackQuery();
+}
+
+// Admin uchun: /filial — filial lokatsiyasini o'rnatish yo'riqnomasi
+async function onShopCommand(ctx) {
+  if (!ctx.from || !isAdmin(ctx.from.id)) return onHelp(ctx);
+  const settings = await Settings.get();
+  const current =
+    settings.shopLat != null ? `Hozirgi nuqta: ${coordsLabel(settings.shopLat, settings.shopLon)}` : 'Hozircha filial nuqtasi saqlanmagan.';
+  return ctx.reply(
+    `🏠 <b>Filial lokatsiyasi</b>\n${current}\n\nRestoranda turib pastdagi tugmani bosing — lokatsiyangiz yuboriladi, keyin «Filial lokatsiyasi qilib saqlash» ni tanlang.`,
+    {
+      parse_mode: 'HTML',
+      reply_markup: {
+        keyboard: [[{ text: '📍 Restoran lokatsiyasini yuborish', request_location: true }]],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
+    }
+  );
 }
 
 async function onHelp(ctx) {
@@ -189,4 +256,4 @@ async function notifyStatus(order) {
   if (text) await safeSend(order.user.telegramId, text, { reply_markup: order.status === 'DONE' ? menuKeyboard() : undefined });
 }
 
-module.exports = { onStart, onContact, onLocation, onHelp, notifyNewOrder, notifyStatus };
+module.exports = { onStart, onContact, onLocation, onCallback, onShopCommand, onHelp, notifyNewOrder, notifyStatus };
