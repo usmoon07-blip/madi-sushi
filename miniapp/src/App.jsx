@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, setApiLang } from './api.js';
 import { CartProvider, useToastListener } from './store.jsx';
-import { AppContext, hasLocation, storedLocation, storedMode } from './appState.jsx';
+import { AppContext, storedLocation, storedMode } from './appState.jsx';
 import { LangContext, guessLang } from './i18n.jsx';
 import { onBackButton, openLink, tg } from './telegram.js';
 import { yandexSearchUrl } from './format.js';
@@ -22,7 +22,6 @@ import snapshot from './menu-snapshot.json';
 const hasSnapshot = Array.isArray(snapshot.products) && snapshot.products.length > 0;
 const RETRY_MS = 4000;
 const LANG_KEY = 'madi_lang_v1';
-const GATE_KEY = 'madi_gate_done_v1';
 
 const readLS = (k) => {
   try {
@@ -60,7 +59,8 @@ export default function App() {
   const [favorites, setFavorites] = useState(() => new Set());
   const [location, setLocationState] = useState(() => storedLocation.get());
   const [mode, setModeState] = useState(() => storedMode.get());
-  const [gateDone, setGateDone] = useState(() => readLS(GATE_KEY) === '1');
+  // Har safar ilova ochilganda mijoz avval yetkazish yoki olib ketishni tanlaydi
+  const [gateDone, setGateDone] = useState(false);
   const [tab, setTab] = useState('home');
   const [menuFocus, setMenuFocus] = useState(null);
   const [sheet, setSheet] = useState(null);
@@ -159,7 +159,7 @@ export default function App() {
       },
       finishGate: () => {
         setGateDone(true);
-        writeLS(GATE_KEY, '1');
+        window.scrollTo({ top: 0 });
       },
       toggleFavorite: (id) => {
         setFavorites((cur) => {
@@ -209,7 +209,7 @@ export default function App() {
     );
   }
 
-  const showGate = !gateDone && !hasLocation(location);
+  const showGate = !gateDone;
 
   return (
     <LangContext.Provider value={langCtx}>

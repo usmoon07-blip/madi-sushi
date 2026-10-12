@@ -1485,6 +1485,29 @@ textarea:focus {
   display: grid;
   gap: 10px;
 }
+.gate__saved {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--red);
+  background: var(--red-soft);
+  color: var(--text);
+  text-align: left;
+}
+.gate__saved-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--red-hi);
+}
+.gate__saved-addr {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.35;
+}
 .locform {
   display: grid;
   gap: 10px;

@@ -1,4 +1,4 @@
-import { useApp } from '../appState.jsx';
+import { hasLocation, useApp } from '../appState.jsx';
 import { LANG_NAMES, useT } from '../i18n.jsx';
 import LocationForm from '../components/LocationForm.jsx';
 import Logo from '../components/Logo.jsx';
@@ -7,6 +7,7 @@ import Logo from '../components/Logo.jsx';
 export default function LocationGate() {
   const { t, lang, setLang } = useT();
   const app = useApp();
+  const saved = hasLocation(app.location);
 
   return (
     <div className="gate">
@@ -23,6 +24,19 @@ export default function LocationGate() {
         <p>{t('gateText')}</p>
       </div>
       <div className="gate__actions">
+        {saved && (
+          <button
+            type="button"
+            className="gate__saved"
+            onClick={() => {
+              app.setMode('DELIVERY');
+              app.finishGate();
+            }}
+          >
+            <span className="gate__saved-label">{t('gateSaved')}</span>
+            <span className="gate__saved-addr">📍 {app.location.address || `${app.location.lat}, ${app.location.lon}`}</span>
+          </button>
+        )}
         <LocationForm
           onDone={(loc) => {
             app.setLocation(loc);
