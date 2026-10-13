@@ -5,12 +5,13 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 // Menyu suratlari — mijozning menyu plakatidan kesib, sifati oshirilgan
-const img = (name) => `/static/products/menu-hd/${name}.jpg`;
+const img = (name) => `/static/products/menu-v3/${name}.jpg`;
 // 4-versiya: menyu mijozning plakatiga to'liq almashtirildi
 // 5-versiya: Burger set — sushi-burger surati; setlarning yig'ma (kollaj) rasmlari olib tashlandi
 // 6-versiya: uchala set uchun buyurtmachi bergan professional suratlar
+// 8-versiya: rollar ostidagi qora soya olib tashlandi (menu-v3)
 // 7-versiya: barcha suratlar Real-ESRGAN bilan tiniqlashtirildi (yangi papka — telefon keshi eskisini ko'rsatmasin)
-const SEED_VERSION = 7;
+const SEED_VERSION = 8;
 
 const ABOUT_UZ =
   "Madi Sushi — Toshkentdagi premium sushi bar. Biz har bir rollni buyurtmadan so'ng yangi tayyorlaymiz: " +
@@ -102,7 +103,7 @@ async function main() {
   else {
     if (settings.seedVersion < 5) await updateSets();
     if (settings.seedVersion < 6) await setSetPhotos();
-    await moveToHd();
+    await moveImages(['/static/products/menu/', '/static/products/menu-hd/'], '/static/products/menu-v3/');
   }
 
   await prisma.settings.update({
@@ -115,17 +116,17 @@ async function main() {
   });
 }
 
-// 7-versiya: /static/products/menu/ -> /static/products/menu-hd/ (admin yuklagan rasmlarga tegmaydi)
-async function moveToHd() {
-  const from = '/static/products/menu/';
-  const to = '/static/products/menu-hd/';
-  for (const p of await prisma.product.findMany({ where: { imageUrl: { startsWith: from } } })) {
-    await prisma.product.update({ where: { id: p.id }, data: { imageUrl: p.imageUrl.replace(from, to) } });
+// 7–8-versiya: suratlar yangi papkaga (telefon keshi eskisini ko'rsatmasin; admin yuklaganlariga tegmaydi)
+async function moveImages(froms, to) {
+  for (const from of froms) {
+    for (const p of await prisma.product.findMany({ where: { imageUrl: { startsWith: from } } })) {
+      await prisma.product.update({ where: { id: p.id }, data: { imageUrl: p.imageUrl.replace(from, to) } });
+    }
+    for (const c of await prisma.category.findMany({ where: { imageUrl: { startsWith: from } } })) {
+      await prisma.category.update({ where: { id: c.id }, data: { imageUrl: c.imageUrl.replace(from, to) } });
+    }
   }
-  for (const c of await prisma.category.findMany({ where: { imageUrl: { startsWith: from } } })) {
-    await prisma.category.update({ where: { id: c.id }, data: { imageUrl: c.imageUrl.replace(from, to) } });
-  }
-  console.log('✅ Suratlar HD papkaga o‘tkazildi');
+  console.log('✅ Suratlar yangi papkaga o‘tkazildi:', to);
 }
 
 // 6-versiya: setlarga yangi suratlar (admin o'zi yuklagan rasm bo'lsa — tegmaymiz)
