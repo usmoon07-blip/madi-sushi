@@ -200,7 +200,7 @@ function Contacts() {
 }
 
 function About() {
-  const { lang } = useT();
+  const { t, lang } = useT();
   const { settings } = useApp();
   const text = (lang === 'ru' ? settings.aboutRu : settings.aboutUz) || settings.aboutUz || settings.aboutRu;
   return (
@@ -209,6 +209,15 @@ function About() {
         <Logo size={132} />
       </div>
       <p>{text}</p>
+      {settings.instagram && (
+        <button type="button" className="about__ig" onClick={() => openLink(`https://instagram.com/${settings.instagram}`)}>
+          <span className="ig">IG</span>
+          <span>
+            <span className="muted small block">{t('followInstagram')}</span>
+            <b>@{settings.instagram}</b>
+          </span>
+        </button>
+      )}
     </div>
   );
 }

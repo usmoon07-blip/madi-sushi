@@ -2141,3 +2141,17 @@ html.is-fullscreen {
   gap: 6px 16px;
   margin-top: 4px;
 }
+
+.about__ig {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  color: var(--text);
+  text-align: left;
+}

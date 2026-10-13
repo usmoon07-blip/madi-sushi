@@ -145,7 +145,8 @@ export const dict = {
 
     // Profil
     profile: 'Profil',
-    favorites: 'Yoqtirilganlar',
+    favorites: 'Sevimlilar',
+    followInstagram: 'Instagram sahifamiz',
     branches: 'Filiallar',
     chooseBranch: 'Filialni tanlang',
     changeBranch: 'Filialni almashtirish',
@@ -153,7 +154,7 @@ export const dict = {
     about: 'Biz haqimizda',
     leaveReview: 'Otziv qoldirish',
     language: 'Til',
-    noFavorites: "Hali yoqtirilgan taomlar yo'q. Menyuda ❤️ belgisini bosing",
+    noFavorites: "Hali sevimli taomlar yo'q. Menyuda ❤️ belgisini bosing",
     workHours: 'Ish vaqti',
     openInMaps: 'Xaritada ochish',
     call: "Qo'ng'iroq qilish",
@@ -300,6 +301,7 @@ export const dict = {
 
     profile: 'Профиль',
     favorites: 'Избранное',
+    followInstagram: 'Наш Instagram',
     branches: 'Филиалы',
     chooseBranch: 'Выберите филиал',
     changeBranch: 'Сменить филиал',

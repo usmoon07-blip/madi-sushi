@@ -342,7 +342,16 @@ async function updateSettings(req, res) {
   if ('pickupAddress' in body) data.pickupAddress = String(body.pickupAddress || '').trim().slice(0, 200);
   if ('contactPhone' in body) data.contactPhone = String(body.contactPhone || '').trim().slice(0, 40);
   if ('workHours' in body) data.workHours = String(body.workHours || '').trim().slice(0, 60);
-  if ('instagram' in body) data.instagram = String(body.instagram || '').trim().replace(/^@/, '').slice(0, 60);
+  // "@nom", "instagram.com/nom" yoki to'liq havola — faqat nom saqlanadi
+  if ('instagram' in body) {
+    data.instagram = String(body.instagram || '')
+      .trim()
+      .replace(/^https?:\/\//i, '')
+      .replace(/^(www\.)?instagram\.com\//i, '')
+      .replace(/^@/, '')
+      .split(/[/?#]/)[0]
+      .slice(0, 60);
+  }
   if ('aboutUz' in body) data.aboutUz = String(body.aboutUz || '').trim().slice(0, 2000);
   if ('aboutRu' in body) data.aboutRu = String(body.aboutRu || '').trim().slice(0, 2000);
   if ('isOpen' in body) data.isOpen = Boolean(body.isOpen);
