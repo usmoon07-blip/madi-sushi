@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-13T11:20:47.584Z",
+  "generatedAt": "2026-10-13T11:24:07.297Z",
   "products": [
     {
       "id": 17,
@@ -363,6 +363,20 @@
       "oldPrice": null,
       "price": 20000,
       "categoryId": 11,
+      "isHit": false
+    },
+    {
+      "id": 40,
+      "name": "Tartar sousli non",
+      "nameRu": "Хлеб с соусом тартар",
+      "description": "Issiq yumshoq non, tartar sousi bilan",
+      "descriptionRu": "Тёплый мягкий хлеб с соусом тартар",
+      "ingredients": [],
+      "ingredientsRu": [],
+      "imageUrl": "/static/products/menu-v3/tartar-non.jpg",
+      "oldPrice": null,
+      "price": 20000,
+      "categoryId": 10,
       "isHit": false
     },
     {

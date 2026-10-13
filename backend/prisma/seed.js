@@ -9,6 +9,7 @@ const img = (name) => `/static/products/menu-v3/${name}.jpg`;
 // 4-versiya: menyu mijozning plakatiga to'liq almashtirildi
 // 5-versiya: Burger set — sushi-burger surati; setlarning yig'ma (kollaj) rasmlari olib tashlandi
 // 6-versiya: uchala set uchun buyurtmachi bergan professional suratlar
+// 15-versiya: «Tartar sousli non» — 20 000 so'm
 // 14-versiya: «Zapechyonniy set» — 204 000 so'm, yoqildi
 // 13-versiya: «Zapechyonniy set» qo'shildi (narxi kiritilguncha yashirin)
 // 12-versiya: yetkazib berish narxi olib tashlandi (0)
@@ -17,7 +18,7 @@ const img = (name) => `/static/products/menu-v3/${name}.jpg`;
 // 9-versiya: Instagram — sushi_madi
 // 8-versiya: rollar ostidagi qora soya olib tashlandi (menu-v3)
 // 7-versiya: barcha suratlar Real-ESRGAN bilan tiniqlashtirildi (yangi papka — telefon keshi eskisini ko'rsatmasin)
-const SEED_VERSION = 14;
+const SEED_VERSION = 15;
 
 const ABOUT_UZ =
   "Madi Sushi — Toshkentdagi premium sushi bar. Biz har bir rollni buyurtmadan so'ng yangi tayyorlaymiz: " +
@@ -99,6 +100,7 @@ const PRODUCTS = [
   { category: 'Souslar', name: 'Imbir', nameRu: 'Имбирь', description: '1 dona', descriptionRu: '1 шт', price: 5000, imageUrl: img('ginger') },
   { category: 'Souslar', name: 'Vasabi', nameRu: 'Васаби', description: '1 dona', descriptionRu: '1 шт', price: 5000, imageUrl: img('wasabi') },
   { category: 'Souslar', name: 'Tayoqchalar (chop)', nameRu: 'Палочки', description: '1 juft', descriptionRu: '1 пара', price: 5000, imageUrl: img('chop') },
+  { category: 'Souslar', name: 'Tartar sousli non', nameRu: 'Хлеб с соусом тартар', description: "Issiq yumshoq non, tartar sousi bilan", descriptionRu: 'Тёплый мягкий хлеб с соусом тартар', price: 20000, imageUrl: img('tartar-non') },
   { category: 'Ichimliklar', name: 'Coca-Cola 1,5 L', nameRu: 'Coca-Cola 1,5 л', description: '1,5 litr', descriptionRu: '1,5 литра', price: 20000, imageUrl: img('cola') },
   { category: 'Ichimliklar', name: 'Coca-Cola 2 L', nameRu: 'Coca-Cola 2 л', description: '2 litr', descriptionRu: '2 литра', price: 25000, imageUrl: img('cola') },
 ];
@@ -130,6 +132,7 @@ async function main() {
     if (settings.seedVersion < 5) await updateSets();
     if (settings.seedVersion < 6) await setSetPhotos();
     if (settings.seedVersion < 13) await addProduct('Zapechyonniy set');
+    if (settings.seedVersion < 15) await addProduct('Tartar sousli non');
     if (settings.seedVersion < 14) {
       await prisma.product.updateMany({ where: { name: 'Zapechyonniy set' }, data: { price: 204000, isActive: true, sortOrder: 3 } }); // setlar qatorida, rollardan oldin
     }
