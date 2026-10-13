@@ -9,13 +9,14 @@ const img = (name) => `/static/products/menu-v3/${name}.jpg`;
 // 4-versiya: menyu mijozning plakatiga to'liq almashtirildi
 // 5-versiya: Burger set — sushi-burger surati; setlarning yig'ma (kollaj) rasmlari olib tashlandi
 // 6-versiya: uchala set uchun buyurtmachi bergan professional suratlar
+// 13-versiya: «Zapechyonniy set» qo'shildi (narxi kiritilguncha yashirin)
 // 12-versiya: yetkazib berish narxi olib tashlandi (0)
 // 11-versiya: asosiy filial (Foziltepa) koordinatasi
 // 10-versiya: «Qo'shimchalar» kategoriyasi «Souslar» deb nomlandi
 // 9-versiya: Instagram — sushi_madi
 // 8-versiya: rollar ostidagi qora soya olib tashlandi (menu-v3)
 // 7-versiya: barcha suratlar Real-ESRGAN bilan tiniqlashtirildi (yangi papka — telefon keshi eskisini ko'rsatmasin)
-const SEED_VERSION = 12;
+const SEED_VERSION = 13;
 
 const ABOUT_UZ =
   "Madi Sushi — Toshkentdagi premium sushi bar. Biz har bir rollni buyurtmadan so'ng yangi tayyorlaymiz: " +
@@ -68,6 +69,19 @@ const PRODUCTS = [
     imageUrl: img('jarini-set'),
     isHit: true,
   },
+  {
+    category: 'Setlar',
+    name: 'Zapechyonniy set',
+    nameRu: 'Запечённый сет',
+    description: "Issiq zapechyonniy rollar to'plami (30 dona) + bonus: 10 dona zapechyonniy roll (xohishingizga ko'ra) va tartar sousli non.",
+    descriptionRu: 'Сет из запечённых роллов (30 шт) + бонус: 10 шт запечённых роллов на ваш выбор и хлеб с соусом тартар.',
+    ingredients: ['Zapechyonniy kuriniy roll — 20 dona', 'Krabli zapechyonniy roll — 10 dona', "🎁 Bonus: 10 dona zapechyonniy roll — xohishga ko'ra (izohda yozing)", '🎁 Bonus: tartar sousli non'],
+    ingredientsRu: ['Ролл запечённый куриный — 20 шт', 'Ролл запечённый с крабом — 10 шт', '🎁 Бонус: 10 шт запечённых роллов — на выбор (укажите в комментарии)', '🎁 Бонус: хлеб с соусом тартар'],
+    price: 0,
+    imageUrl: img('zapechyon-set'),
+    isHit: true,
+    isActive: false,
+  },
   { category: 'Rollar', name: 'Karamelniy ugor', nameRu: 'Карамельный угорь', description: '8 dona', descriptionRu: '8 шт', price: 100000, imageUrl: img('karamel-ugor'), isHit: true },
   { category: 'Rollar', name: 'Filadelfiya klassika', nameRu: 'Филадельфия классика', description: '8 dona', descriptionRu: '8 шт', price: 88000, imageUrl: img('filadelfiya-klassika'), isHit: true },
   { category: 'Rollar', name: 'Fila layt', nameRu: 'Фила лайт', description: '8 dona', descriptionRu: '8 шт', price: 73000, imageUrl: img('fila-layt') },
@@ -115,6 +129,7 @@ async function main() {
   else {
     if (settings.seedVersion < 5) await updateSets();
     if (settings.seedVersion < 6) await setSetPhotos();
+    if (settings.seedVersion < 13) await addProduct('Zapechyonniy set');
     if (settings.seedVersion < 11) {
       // Asosiy (birinchi) filialning aniq lokatsiyasi
       const main = await prisma.branch.findFirst({ orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] });
@@ -136,6 +151,16 @@ async function main() {
       aboutRu: settings.aboutRu || ABOUT_RU,
     },
   });
+}
+
+// Yangi mahsulotni qo'shadi (bor bo'lsa — tegmaydi)
+async function addProduct(name) {
+  if (await prisma.product.findFirst({ where: { name } })) return;
+  const { category, isHit, ...data } = PRODUCTS.find((x) => x.name === name);
+  const cat = await prisma.category.findFirst({ where: { nameUz: category } });
+  const last = await prisma.product.findFirst({ where: { categoryId: cat?.id }, orderBy: { sortOrder: 'desc' } });
+  await prisma.product.create({ data: { ...data, categoryId: cat?.id ?? null, isHit: Boolean(isHit), sortOrder: (last?.sortOrder ?? 0) + 1 } });
+  console.log('✅ Yangi mahsulot:', name);
 }
 
 // 7–8-versiya: suratlar yangi papkaga (telefon keshi eskisini ko'rsatmasin; admin yuklaganlariga tegmaydi)
