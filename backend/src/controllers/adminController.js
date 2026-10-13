@@ -131,8 +131,8 @@ async function printTest(req, res) {
     ],
     comment: 'Sinov cheki - printer ishlayapti',
     subtotal: 190000,
-    deliveryFee: 15000,
-    total: 205000,
+    deliveryFee: 0,
+    total: 190000,
     customerName: 'Sinov',
     phone: '+998 90 000 00 00',
     address: settings.pickupAddress,
@@ -332,7 +332,7 @@ async function getSettings(req, res) {
 async function updateSettings(req, res) {
   const body = req.body || {};
   const data = {};
-  for (const key of ['deliveryFee', 'minOrder']) {
+  for (const key of ['minOrder']) {
     if (key in body) {
       const n = intOrNull(body[key]);
       if (n === null || Number.isNaN(n)) throw new HttpError(400, "Summalarni to'g'ri kiriting");

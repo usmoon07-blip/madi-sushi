@@ -9,12 +9,13 @@ const img = (name) => `/static/products/menu-v3/${name}.jpg`;
 // 4-versiya: menyu mijozning plakatiga to'liq almashtirildi
 // 5-versiya: Burger set — sushi-burger surati; setlarning yig'ma (kollaj) rasmlari olib tashlandi
 // 6-versiya: uchala set uchun buyurtmachi bergan professional suratlar
+// 12-versiya: yetkazib berish narxi olib tashlandi (0)
 // 11-versiya: asosiy filial (Foziltepa) koordinatasi
 // 10-versiya: «Qo'shimchalar» kategoriyasi «Souslar» deb nomlandi
 // 9-versiya: Instagram — sushi_madi
 // 8-versiya: rollar ostidagi qora soya olib tashlandi (menu-v3)
 // 7-versiya: barcha suratlar Real-ESRGAN bilan tiniqlashtirildi (yangi papka — telefon keshi eskisini ko'rsatmasin)
-const SEED_VERSION = 11;
+const SEED_VERSION = 12;
 
 const ABOUT_UZ =
   "Madi Sushi — Toshkentdagi premium sushi bar. Biz har bir rollni buyurtmadan so'ng yangi tayyorlaymiz: " +
@@ -130,6 +131,7 @@ async function main() {
     data: {
       seedVersion: SEED_VERSION,
       instagram: 'sushi_madi',
+      deliveryFee: 0,
       aboutUz: settings.aboutUz || ABOUT_UZ,
       aboutRu: settings.aboutRu || ABOUT_RU,
     },

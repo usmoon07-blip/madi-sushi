@@ -50,8 +50,7 @@ export default function Cart({ onSuccess }) {
   }, [app.products, app.categories]);
 
   const isDelivery = mode === 'DELIVERY';
-  const deliveryFee = isDelivery ? settings.deliveryFee : 0;
-  const total = cart.subtotal + deliveryFee;
+  const total = cart.subtotal;
   const cards = settings.cards || [];
   const hasCoords = location?.lat != null && location?.lon != null;
 
@@ -335,12 +334,6 @@ export default function Cart({ onSuccess }) {
           <span>{t('products')}</span>
           <span>{money(cart.subtotal)}</span>
         </div>
-        {isDelivery && (
-          <div className="summary__row">
-            <span>{t('deliveryFee')}</span>
-            <span>{money(settings.deliveryFee)}</span>
-          </div>
-        )}
         <div className="summary__row summary__row--total">
           <span>{t('total')}</span>
           <span>{money(total)}</span>

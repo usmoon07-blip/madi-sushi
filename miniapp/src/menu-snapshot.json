@@ -396,7 +396,6 @@
   ],
   "settings": {
     "cards": [],
-    "deliveryFee": 15000,
     "minOrder": 50000,
     "pickupAddress": "Toshkent, Foziltepa ko'chasi, 40",
     "contactPhone": "",

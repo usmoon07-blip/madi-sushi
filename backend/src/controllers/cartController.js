@@ -42,7 +42,6 @@ const publicUser = (u) => ({
 
 const publicSettings = (s) => ({
   cards: Array.isArray(s.cards) ? s.cards : [],
-  deliveryFee: s.deliveryFee,
   minOrder: s.minOrder,
   pickupAddress: s.pickupAddress,
   contactPhone: s.contactPhone,
@@ -260,7 +259,8 @@ async function createOrder(req, res) {
     throw new HttpError(400, t(req.lang, 'errAddress'));
   }
 
-  const deliveryFee = deliveryType === 'DELIVERY' ? settings.deliveryFee : 0;
+  // Yetkazib berish narxi buyurtmaga qo'shilmaydi — uni restoran Yandex bilan o'zi kelishadi
+  const deliveryFee = 0;
 
   const customerName = [req.user.firstName, req.user.lastName].filter(Boolean).join(' ').slice(0, 100);
 

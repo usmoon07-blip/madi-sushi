@@ -138,7 +138,7 @@ model Order {
 model Settings {
   id               Int      @id @default(1)
   cards            Json     @default("[]")
-  deliveryFee      Int      @default(15000)
+  deliveryFee      Int      @default(0) // ishlatilmaydi — yetkazish narxi buyurtmaga qo'shilmaydi
   freeDeliveryFrom Int      @default(0) // ishlatilmaydi — bepul yetkazish yo'q
   minOrder         Int      @default(50000)
   pickupAddress    String   @default("Toshkent, Foziltepa ko'chasi, 40")
