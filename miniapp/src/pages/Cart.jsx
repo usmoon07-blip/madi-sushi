@@ -338,6 +338,7 @@ export default function Cart({ onSuccess }) {
           <span>{t('total')}</span>
           <span>{money(total)}</span>
         </div>
+        {isDelivery && <div className="summary__note">🛵 {t('deliveryExtra')}</div>}
         {cart.subtotal < settings.minOrder && <div className="summary__hint summary__hint--red">{t('minOrder', money(settings.minOrder))}</div>}
       </div>
 

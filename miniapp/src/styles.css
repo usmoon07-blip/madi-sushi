@@ -2155,3 +2155,9 @@ html.is-fullscreen {
   color: var(--text);
   text-align: left;
 }
+
+.summary__note {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
