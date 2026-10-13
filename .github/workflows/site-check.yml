@@ -28,3 +28,6 @@ jobs:
           for s in $FIND gateSaved is-fullscreen requestFullscreen madi_gate_done_v1 brand__logo; do
             printf '%-22s %s\n' "$s" "$(grep -c "$s" app.js)"
           done
+          echo "--- Setlar (bazadan) ---"
+          curl -fsS "$SERVER_URL/api/menu" | python3 -c "import json,sys; d=json.load(sys.stdin); [print(p['name'], p['imageUrl']) for p in d['products'] if 'set' in p['name'].lower()]; print('mahsulotlar:', len(d['products']))"
+          for f in family-set burger-set jarini-set; do printf '%-12s %s\n' "$f" "$(curl -s -o /dev/null -w '%{http_code}' "$SERVER_URL/static/products/menu/$f.jpg")"; done
