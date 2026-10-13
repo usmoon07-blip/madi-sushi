@@ -9,10 +9,11 @@ const img = (name) => `/static/products/menu-v3/${name}.jpg`;
 // 4-versiya: menyu mijozning plakatiga to'liq almashtirildi
 // 5-versiya: Burger set — sushi-burger surati; setlarning yig'ma (kollaj) rasmlari olib tashlandi
 // 6-versiya: uchala set uchun buyurtmachi bergan professional suratlar
+// 10-versiya: «Qo'shimchalar» kategoriyasi «Souslar» deb nomlandi
 // 9-versiya: Instagram — sushi_madi
 // 8-versiya: rollar ostidagi qora soya olib tashlandi (menu-v3)
 // 7-versiya: barcha suratlar Real-ESRGAN bilan tiniqlashtirildi (yangi papka — telefon keshi eskisini ko'rsatmasin)
-const SEED_VERSION = 9;
+const SEED_VERSION = 10;
 
 const ABOUT_UZ =
   "Madi Sushi — Toshkentdagi premium sushi bar. Biz har bir rollni buyurtmadan so'ng yangi tayyorlaymiz: " +
@@ -24,7 +25,7 @@ const ABOUT_RU =
 const CATEGORIES = [
   { nameUz: 'Setlar', nameRu: 'Сеты', imageUrl: img('family-set') },
   { nameUz: 'Rollar', nameRu: 'Роллы', imageUrl: img('filadelfiya-klassika') },
-  { nameUz: "Qo'shimchalar", nameRu: 'Добавки', imageUrl: img('wasabi') },
+  { nameUz: 'Souslar', nameRu: 'Соусы', imageUrl: img('wasabi') },
   { nameUz: 'Ichimliklar', nameRu: 'Напитки', imageUrl: img('cola') },
 ];
 
@@ -78,10 +79,10 @@ const PRODUCTS = [
   { category: 'Rollar', name: 'Kaliforniya', nameRu: 'Калифорния', description: '8 dona', descriptionRu: '8 шт', price: 75000, imageUrl: img('kaliforniya'), isHit: true },
   { category: 'Rollar', name: 'Zapechyonniy tovuqli', nameRu: 'Запечённый с курицей', description: '10 dona', descriptionRu: '10 шт', price: 68000, imageUrl: img('zapechyon-tovuq') },
   { category: 'Rollar', name: 'Kurini zapechyonniy', nameRu: 'Куриный запечённый', description: '10 dona', descriptionRu: '10 шт', price: 75000, imageUrl: img('kurini-zapechyon') },
-  { category: "Qo'shimchalar", name: 'Soya sousi', nameRu: 'Соевый соус', description: '1 dona', descriptionRu: '1 шт', price: 5000, imageUrl: img('soy') },
-  { category: "Qo'shimchalar", name: 'Imbir', nameRu: 'Имбирь', description: '1 dona', descriptionRu: '1 шт', price: 5000, imageUrl: img('ginger') },
-  { category: "Qo'shimchalar", name: 'Vasabi', nameRu: 'Васаби', description: '1 dona', descriptionRu: '1 шт', price: 5000, imageUrl: img('wasabi') },
-  { category: "Qo'shimchalar", name: 'Tayoqchalar (chop)', nameRu: 'Палочки', description: '1 juft', descriptionRu: '1 пара', price: 5000, imageUrl: img('chop') },
+  { category: 'Souslar', name: 'Soya sousi', nameRu: 'Соевый соус', description: '1 dona', descriptionRu: '1 шт', price: 5000, imageUrl: img('soy') },
+  { category: 'Souslar', name: 'Imbir', nameRu: 'Имбирь', description: '1 dona', descriptionRu: '1 шт', price: 5000, imageUrl: img('ginger') },
+  { category: 'Souslar', name: 'Vasabi', nameRu: 'Васаби', description: '1 dona', descriptionRu: '1 шт', price: 5000, imageUrl: img('wasabi') },
+  { category: 'Souslar', name: 'Tayoqchalar (chop)', nameRu: 'Палочки', description: '1 juft', descriptionRu: '1 пара', price: 5000, imageUrl: img('chop') },
   { category: 'Ichimliklar', name: 'Coca-Cola 1,5 L', nameRu: 'Coca-Cola 1,5 л', description: '1,5 litr', descriptionRu: '1,5 литра', price: 20000, imageUrl: img('cola') },
   { category: 'Ichimliklar', name: 'Coca-Cola 2 L', nameRu: 'Coca-Cola 2 л', description: '2 litr', descriptionRu: '2 литра', price: 25000, imageUrl: img('cola') },
 ];
@@ -104,6 +105,9 @@ async function main() {
   else {
     if (settings.seedVersion < 5) await updateSets();
     if (settings.seedVersion < 6) await setSetPhotos();
+    if (settings.seedVersion < 10) {
+      await prisma.category.updateMany({ where: { nameUz: "Qo'shimchalar" }, data: { nameUz: 'Souslar', nameRu: 'Соусы' } });
+    }
     await moveImages(['/static/products/menu/', '/static/products/menu-hd/'], '/static/products/menu-v3/');
   }
 
