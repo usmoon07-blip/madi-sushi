@@ -23,6 +23,7 @@ export default function App() {
   const [token, setToken] = useState(auth.get());
   const [page, setPage] = useState(() => (location.hash.slice(1) in { orders: 1, products: 1, categories: 1, branches: 1, reviews: 1, settings: 1 } ? location.hash.slice(1) : 'orders'));
   const [activeCount, setActiveCount] = useState(0);
+  const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => setUnauthorizedHandler(() => setToken('')), []);
   useEffect(() => {
@@ -31,6 +32,8 @@ export default function App() {
   useEffect(() => {
     document.title = activeCount ? `(${activeCount}) Madi Sushi — Admin` : 'Madi Sushi — Admin';
   }, [activeCount]);
+
+  const current = PAGES.find((p) => p.id === page) || PAGES[0];
 
   if (!token) return <Login onLogin={(t) => (auth.set(t), setToken(t))} />;
 
@@ -43,6 +46,48 @@ export default function App() {
             <div className="logo__name">MADI SUSHI</div>
             <div className="logo__sub">Boshqaruv paneli</div>
           </div>
+        </div>
+        {/* Telefonda: bo'limlar pastga ochiladigan ro'yxat */}
+        <div className="mnav">
+          <button type="button" className="mnav__btn" onClick={() => setNavOpen((v) => !v)} aria-expanded={navOpen}>
+            <span>{current.icon}</span>
+            {current.label}
+            {current.id !== 'orders' && activeCount > 0 && <span className="menu__badge">{activeCount}</span>}
+            <span className={`mnav__chev ${navOpen ? 'is-open' : ''}`}>⌄</span>
+          </button>
+          {navOpen && (
+            <>
+              <div className="mnav__backdrop" onClick={() => setNavOpen(false)} />
+              <div className="mnav__menu">
+                {PAGES.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className={page === p.id ? 'is-active' : ''}
+                    onClick={() => {
+                      setPage(p.id);
+                      setNavOpen(false);
+                      window.scrollTo({ top: 0 });
+                    }}
+                  >
+                    <span>{p.icon}</span>
+                    {p.label}
+                    {p.id === 'orders' && activeCount > 0 && <span className="menu__badge">{activeCount}</span>}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  className="mnav__logout"
+                  onClick={() => {
+                    auth.set('');
+                    setToken('');
+                  }}
+                >
+                  <span>↩</span> Chiqish
+                </button>
+              </div>
+            </>
+          )}
         </div>
         <nav className="menu">
           {PAGES.map((p) => (

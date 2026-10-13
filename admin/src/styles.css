@@ -206,18 +206,26 @@ h3 {
     padding: 12px;
     gap: 12px;
   }
-  .menu {
-    display: flex;
-    flex: 1;
-    overflow-x: auto;
-  }
-  .menu__item {
-    width: auto;
-    white-space: nowrap;
-  }
+  .menu,
   .menu__logout {
-    margin-top: 0;
+    display: none;
   }
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    background: var(--bg, #0a0a0b);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .sidebar .logo__sub {
+    display: none;
+  }
+  .sidebar > :not(.logo):not(.mnav) {
+    flex-basis: 100%;
+  }
+
   .main {
     padding: 18px 16px 40px;
   }
@@ -1057,4 +1065,89 @@ h3 {
   transform: rotate(-45deg);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
   border: 3px solid #fff;
+}
+
+/* Telefondagi bo'limlar ro'yxati */
+.mnav {
+  display: none;
+  position: relative;
+}
+.mnav__btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #1c1c20;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: inherit;
+  font-weight: 700;
+  font-size: 15px;
+}
+.mnav__chev {
+  font-size: 18px;
+  line-height: 1;
+  margin-top: -6px;
+  transition: transform 0.15s;
+}
+.mnav__chev.is-open {
+  transform: rotate(180deg) translateY(-6px);
+}
+.mnav__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
+.mnav__menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 31;
+  min-width: 230px;
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 16px;
+  background: #1c1c20;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+}
+.mnav__menu button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 11px;
+  color: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+}
+.mnav__menu button.is-active {
+  background: rgba(225, 29, 46, 0.16);
+  color: #fff;
+}
+.mnav__menu .menu__badge {
+  margin-left: auto;
+}
+.mnav__logout {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 0 0 11px 11px !important;
+  color: #a1a1aa !important;
+}
+@media (max-width: 860px) {
+  .mnav {
+    display: block;
+    margin-left: auto;
+  }
+  .sidebar .logo {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+  }
+  .sidebar .logo__name {
+    font-size: 13px;
+    white-space: nowrap;
+  }
 }
