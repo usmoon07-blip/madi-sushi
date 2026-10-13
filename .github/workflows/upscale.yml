@@ -23,7 +23,7 @@ jobs:
           python-version: '3.11'
       - name: O'rnatish
         run: |
-          pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu
           pip install -q spandrel pillow numpy
           curl -fsSL -o model.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
       - name: Tiniqlashtirish
