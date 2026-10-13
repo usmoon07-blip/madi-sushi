@@ -8,7 +8,8 @@ const prisma = new PrismaClient();
 const img = (name) => `/static/products/menu/${name}.jpg`;
 // 4-versiya: menyu mijozning plakatiga to'liq almashtirildi
 // 5-versiya: Burger set — sushi-burger surati; setlarning yig'ma (kollaj) rasmlari olib tashlandi
-const SEED_VERSION = 5;
+// 6-versiya: uchala set uchun buyurtmachi bergan professional suratlar
+const SEED_VERSION = 6;
 
 const ABOUT_UZ =
   "Madi Sushi — Toshkentdagi premium sushi bar. Biz har bir rollni buyurtmadan so'ng yangi tayyorlaymiz: " +
@@ -18,7 +19,7 @@ const ABOUT_RU =
   'отборная рыба, специальный рис для суши и авторские соусы. Быстро доставляем по всему городу.';
 
 const CATEGORIES = [
-  { nameUz: 'Setlar', nameRu: 'Сеты', imageUrl: img('family') },
+  { nameUz: 'Setlar', nameRu: 'Сеты', imageUrl: img('family-set') },
   { nameUz: 'Rollar', nameRu: 'Роллы', imageUrl: img('filadelfiya-klassika') },
   { nameUz: "Qo'shimchalar", nameRu: 'Добавки', imageUrl: img('wasabi') },
   { nameUz: 'Ichimliklar', nameRu: 'Напитки', imageUrl: img('cola') },
@@ -34,7 +35,7 @@ const PRODUCTS = [
     ingredients: ['Filadelfiya klassika — 8 dona', 'Tempura kuriniy — 8 dona', 'Kaliforniya — 8 dona', 'Kraboviy zapechyonniy — 10 dona', 'Zapechyonniy tovuqli — 10 dona', '🎁 Bonus: sarimsoqli non', '🎁 Bonus: Coca-Cola 2 L'],
     ingredientsRu: ['Филадельфия классика — 8 шт', 'Темпура куриный — 8 шт', 'Калифорния — 8 шт', 'Крабовый запечённый — 10 шт', 'Запечённый с курицей — 10 шт', '🎁 Бонус: чесночный хлеб', '🎁 Бонус: Coca-Cola 2 л'],
     price: 260000,
-    imageUrl: img('family'),
+    imageUrl: img('family-set'),
     isHit: true,
   },
   {
@@ -46,7 +47,7 @@ const PRODUCTS = [
     ingredients: ['Sushi-burger kuriniy — 1 dona', 'Kurini zapechyonniy roll — 10 dona', 'Kraboviy zapechyonniy roll — 10 dona', 'Chiz sezar roll — 8 dona', 'Maki agurets roll — 6 dona', '🎁 Bonus: Coca-Cola 1,5 L', '🎁 Bonus: tartar non'],
     ingredientsRu: ['Суши-бургер куриный — 1 шт', 'Ролл куриный запечённый — 10 шт', 'Ролл крабовый запечённый — 10 шт', 'Ролл чиз цезарь — 8 шт', 'Маки огурец — 6 шт', '🎁 Бонус: Coca-Cola 1,5 л', '🎁 Бонус: тартар хлеб'],
     price: 240000,
-    imageUrl: img('sushi-burger'),
+    imageUrl: img('burger-set'),
     isHit: true,
   },
   {
@@ -58,7 +59,7 @@ const PRODUCTS = [
     ingredients: ['Zapechyonniy losos roll — 10 dona', 'Sezar roll — 8 dona', 'Tempura losos roll — 8 dona', 'Maki losos roll — 6 dona', '🎁 Bonus: Coca-Cola 1,5 L', '🎁 Bonus: tartar non'],
     ingredientsRu: ['Ролл запечённый лосось — 10 шт', 'Ролл цезарь — 8 шт', 'Ролл темпура лосось — 8 шт', 'Маки лосось — 6 шт', '🎁 Бонус: Coca-Cola 1,5 л', '🎁 Бонус: тартар хлеб'],
     price: 200000,
-    imageUrl: img('tempura-losos'),
+    imageUrl: img('jarini-set'),
     isHit: true,
   },
   { category: 'Rollar', name: 'Karamelniy ugor', nameRu: 'Карамельный угорь', description: '8 dona', descriptionRu: '8 шт', price: 100000, imageUrl: img('karamel-ugor'), isHit: true },
@@ -97,7 +98,10 @@ async function main() {
   }
 
   if (settings.seedVersion < 4) await replaceMenu();
-  else await updateSets();
+  else {
+    if (settings.seedVersion < 5) await updateSets();
+    await setSetPhotos();
+  }
 
   await prisma.settings.update({
     where: { id: 1 },
@@ -107,6 +111,19 @@ async function main() {
       aboutRu: settings.aboutRu || ABOUT_RU,
     },
   });
+}
+
+// 6-versiya: setlarga yangi suratlar (admin o'zi yuklagan rasm bo'lsa — tegmaymiz)
+async function setSetPhotos() {
+  const isOurs = (url) => !url || url.startsWith('/static/');
+  for (const name of ['Family set', 'Burger set', 'Jarini set']) {
+    const p = PRODUCTS.find((x) => x.name === name);
+    const old = await prisma.product.findFirst({ where: { name } });
+    if (old && isOurs(old.imageUrl)) await prisma.product.update({ where: { id: old.id }, data: { imageUrl: p.imageUrl } });
+  }
+  const cat = await prisma.category.findFirst({ where: { nameUz: 'Setlar' } });
+  if (cat && isOurs(cat.imageUrl)) await prisma.category.update({ where: { id: cat.id }, data: { imageUrl: CATEGORIES[0].imageUrl } });
+  console.log('✅ Set suratlari yangilandi');
 }
 
 // 5-versiya: faqat Burger set va Jarini set yangilanadi (admin o'zgartirgan rasmga tegmaydi)

@@ -25,7 +25,7 @@
         "🎁 Бонус: чесночный хлеб",
         "🎁 Бонус: Coca-Cola 2 л"
       ],
-      "imageUrl": "/static/products/menu/family.jpg",
+      "imageUrl": "/static/products/menu/family-set.jpg",
       "oldPrice": null,
       "price": 260000,
       "categoryId": 8,
@@ -55,7 +55,7 @@
         "🎁 Бонус: Coca-Cola 1,5 л",
         "🎁 Бонус: тартар хлеб"
       ],
-      "imageUrl": "/static/products/menu/sushi-burger.jpg",
+      "imageUrl": "/static/products/menu/burger-set.jpg",
       "oldPrice": null,
       "price": 240000,
       "categoryId": 8,
@@ -83,7 +83,7 @@
         "🎁 Бонус: Coca-Cola 1,5 л",
         "🎁 Бонус: тартар хлеб"
       ],
-      "imageUrl": "/static/products/menu/tempura-losos.jpg",
+      "imageUrl": "/static/products/menu/jarini-set.jpg",
       "oldPrice": null,
       "price": 200000,
       "categoryId": 8,
@@ -361,7 +361,7 @@
       "id": 8,
       "nameUz": "Setlar",
       "nameRu": "Сеты",
-      "imageUrl": "/static/products/menu/family.jpg"
+      "imageUrl": "/static/products/menu/family-set.jpg"
     },
     {
       "id": 9,
