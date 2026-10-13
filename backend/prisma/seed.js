@@ -9,11 +9,12 @@ const img = (name) => `/static/products/menu-v3/${name}.jpg`;
 // 4-versiya: menyu mijozning plakatiga to'liq almashtirildi
 // 5-versiya: Burger set — sushi-burger surati; setlarning yig'ma (kollaj) rasmlari olib tashlandi
 // 6-versiya: uchala set uchun buyurtmachi bergan professional suratlar
+// 11-versiya: asosiy filial (Foziltepa) koordinatasi
 // 10-versiya: «Qo'shimchalar» kategoriyasi «Souslar» deb nomlandi
 // 9-versiya: Instagram — sushi_madi
 // 8-versiya: rollar ostidagi qora soya olib tashlandi (menu-v3)
 // 7-versiya: barcha suratlar Real-ESRGAN bilan tiniqlashtirildi (yangi papka — telefon keshi eskisini ko'rsatmasin)
-const SEED_VERSION = 10;
+const SEED_VERSION = 11;
 
 const ABOUT_UZ =
   "Madi Sushi — Toshkentdagi premium sushi bar. Biz har bir rollni buyurtmadan so'ng yangi tayyorlaymiz: " +
@@ -97,7 +98,15 @@ async function main() {
   // Yangi bazada birinchi filial — olib ketish manzilidan
   if ((await prisma.branch.count()) === 0 && settings.pickupAddress) {
     await prisma.branch.create({
-      data: { name: 'Foziltepa', nameRu: 'Фозилтепа', address: settings.pickupAddress, phone: settings.contactPhone, workHours: settings.workHours },
+      data: {
+        name: 'Foziltepa',
+        nameRu: 'Фозилтепа',
+        address: settings.pickupAddress,
+        lat: 41.291378,
+        lon: 69.168684,
+        phone: settings.contactPhone,
+        workHours: settings.workHours,
+      },
     });
   }
 
@@ -105,6 +114,11 @@ async function main() {
   else {
     if (settings.seedVersion < 5) await updateSets();
     if (settings.seedVersion < 6) await setSetPhotos();
+    if (settings.seedVersion < 11) {
+      // Asosiy (birinchi) filialning aniq lokatsiyasi
+      const main = await prisma.branch.findFirst({ orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] });
+      if (main) await prisma.branch.update({ where: { id: main.id }, data: { lat: 41.291378, lon: 69.168684 } });
+    }
     if (settings.seedVersion < 10) {
       await prisma.category.updateMany({ where: { nameUz: "Qo'shimchalar" }, data: { nameUz: 'Souslar', nameRu: 'Соусы' } });
     }
