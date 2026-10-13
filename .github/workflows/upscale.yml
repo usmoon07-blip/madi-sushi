@@ -1,0 +1,53 @@
+# Rasmlarni Real-ESRGAN (x4) bilan tiniqlashtiradi: <dir>/in/*.png -> <dir>/out/*.png
+name: Rasmlarni tiniqlashtirish
+
+on:
+  workflow_dispatch:
+    inputs:
+      dir:
+        description: 'Papka (ichida in/ bo‘lishi kerak)'
+        required: true
+        default: 'tmp-upscale'
+
+permissions:
+  contents: write
+
+jobs:
+  upscale:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: O'rnatish
+        run: |
+          pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -q spandrel pillow numpy
+          curl -fsSL -o model.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
+      - name: Tiniqlashtirish
+        env:
+          DIR: ${{ inputs.dir }}
+        run: |
+          python - <<'PY'
+          import os, glob, numpy as np, torch
+          from PIL import Image
+          from spandrel import ModelLoader
+          d = os.environ['DIR']; os.makedirs(f'{d}/out', exist_ok=True)
+          model = ModelLoader().load_from_file('model.pth').eval()
+          for f in sorted(glob.glob(f'{d}/in/*.png')):
+              im = np.asarray(Image.open(f).convert('RGB'), dtype=np.float32) / 255.0
+              t = torch.from_numpy(im).permute(2, 0, 1).unsqueeze(0)
+              with torch.no_grad():
+                  out = model(t).clamp(0, 1)[0].permute(1, 2, 0).numpy()
+              Image.fromarray((out * 255).round().astype(np.uint8)).save(f.replace('/in/', '/out/'))
+              print('ok', f, out.shape)
+          PY
+      - name: Saqlash
+        run: |
+          rm -f model.pth
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${{ inputs.dir }}/out"
+          git commit -m "Tiniqlashtirilgan rasmlar: ${{ inputs.dir }}" && git push
