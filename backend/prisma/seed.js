@@ -7,7 +7,8 @@ const prisma = new PrismaClient();
 // Menyu suratlari — mijozning menyu plakatidan kesib, sifati oshirilgan
 const img = (name) => `/static/products/menu/${name}.jpg`;
 // 4-versiya: menyu mijozning plakatiga to'liq almashtirildi
-const SEED_VERSION = 4;
+// 5-versiya: Burger set — sushi-burger surati; setlarning yig'ma (kollaj) rasmlari olib tashlandi
+const SEED_VERSION = 5;
 
 const ABOUT_UZ =
   "Madi Sushi — Toshkentdagi premium sushi bar. Biz har bir rollni buyurtmadan so'ng yangi tayyorlaymiz: " +
@@ -40,12 +41,12 @@ const PRODUCTS = [
     category: 'Setlar',
     name: 'Burger set',
     nameRu: 'Бургер сет',
-    description: "Burger va 4 xil roll (34 dona) + bonus: Coca-Cola 1,5 L va tartar non.",
-    descriptionRu: 'Бургер и 4 вида роллов (34 шт) + бонус: Coca-Cola 1,5 л и тартар хлеб.',
-    ingredients: ['Burger kuriniy — 1 dona', 'Kurini zapechyonniy roll — 10 dona', 'Kraboviy zapechyonniy roll — 10 dona', 'Chiz sezar roll — 8 dona', 'Maki agurets roll — 6 dona', '🎁 Bonus: Coca-Cola 1,5 L', '🎁 Bonus: tartar non'],
-    ingredientsRu: ['Бургер куриный — 1 шт', 'Ролл куриный запечённый — 10 шт', 'Ролл крабовый запечённый — 10 шт', 'Ролл чиз цезарь — 8 шт', 'Маки огурец — 6 шт', '🎁 Бонус: Coca-Cola 1,5 л', '🎁 Бонус: тартар хлеб'],
+    description: "Sushi-burger va 4 xil roll (34 dona) + bonus: Coca-Cola 1,5 L va tartar non.",
+    descriptionRu: 'Суши-бургер и 4 вида роллов (34 шт) + бонус: Coca-Cola 1,5 л и тартар хлеб.',
+    ingredients: ['Sushi-burger kuriniy — 1 dona', 'Kurini zapechyonniy roll — 10 dona', 'Kraboviy zapechyonniy roll — 10 dona', 'Chiz sezar roll — 8 dona', 'Maki agurets roll — 6 dona', '🎁 Bonus: Coca-Cola 1,5 L', '🎁 Bonus: tartar non'],
+    ingredientsRu: ['Суши-бургер куриный — 1 шт', 'Ролл куриный запечённый — 10 шт', 'Ролл крабовый запечённый — 10 шт', 'Ролл чиз цезарь — 8 шт', 'Маки огурец — 6 шт', '🎁 Бонус: Coca-Cola 1,5 л', '🎁 Бонус: тартар хлеб'],
     price: 240000,
-    imageUrl: img('burger-set'),
+    imageUrl: img('sushi-burger'),
     isHit: true,
   },
   {
@@ -57,7 +58,7 @@ const PRODUCTS = [
     ingredients: ['Zapechyonniy losos roll — 10 dona', 'Sezar roll — 8 dona', 'Tempura losos roll — 8 dona', 'Maki losos roll — 6 dona', '🎁 Bonus: Coca-Cola 1,5 L', '🎁 Bonus: tartar non'],
     ingredientsRu: ['Ролл запечённый лосось — 10 шт', 'Ролл цезарь — 8 шт', 'Ролл темпура лосось — 8 шт', 'Маки лосось — 6 шт', '🎁 Бонус: Coca-Cola 1,5 л', '🎁 Бонус: тартар хлеб'],
     price: 200000,
-    imageUrl: img('jarini-set'),
+    imageUrl: img('tempura-losos'),
     isHit: true,
   },
   { category: 'Rollar', name: 'Karamelniy ugor', nameRu: 'Карамельный угорь', description: '8 dona', descriptionRu: '8 шт', price: 100000, imageUrl: img('karamel-ugor'), isHit: true },
@@ -95,8 +96,43 @@ async function main() {
     });
   }
 
-  // Menyu to'liq yangilanadi: eski mahsulot va kategoriyalar o'chiriladi
-  // (eski buyurtmalar o'chmaydi — tarkibi buyurtmaning o'zida saqlangan)
+  if (settings.seedVersion < 4) await replaceMenu();
+  else await updateSets();
+
+  await prisma.settings.update({
+    where: { id: 1 },
+    data: {
+      seedVersion: SEED_VERSION,
+      aboutUz: settings.aboutUz || ABOUT_UZ,
+      aboutRu: settings.aboutRu || ABOUT_RU,
+    },
+  });
+}
+
+// 5-versiya: faqat Burger set va Jarini set yangilanadi (admin o'zgartirgan rasmga tegmaydi)
+async function updateSets() {
+  for (const name of ['Burger set', 'Jarini set']) {
+    const p = PRODUCTS.find((x) => x.name === name);
+    const old = await prisma.product.findFirst({ where: { name } });
+    if (!old) continue;
+    const keepImage = old.imageUrl && !/\/static\/products\/menu\/(burger|jarini)-set\.jpg$/.test(old.imageUrl);
+    await prisma.product.update({
+      where: { id: old.id },
+      data: {
+        description: p.description,
+        descriptionRu: p.descriptionRu,
+        ingredients: p.ingredients,
+        ingredientsRu: p.ingredientsRu,
+        ...(keepImage ? {} : { imageUrl: p.imageUrl }),
+      },
+    });
+  }
+  console.log('✅ Setlar yangilandi');
+}
+
+// Menyu to'liq yangilanadi: eski mahsulot va kategoriyalar o'chiriladi
+// (eski buyurtmalar o'chmaydi — tarkibi buyurtmaning o'zida saqlangan)
+async function replaceMenu() {
   await prisma.$transaction(async (tx) => {
     await tx.product.deleteMany({});
     await tx.category.deleteMany({});
@@ -109,15 +145,6 @@ async function main() {
       const { category, isHit, ...data } = p;
       await tx.product.create({ data: { ...data, categoryId: ids.get(category), isHit: Boolean(isHit), sortOrder: i + 1 } });
     }
-  });
-
-  await prisma.settings.update({
-    where: { id: 1 },
-    data: {
-      seedVersion: SEED_VERSION,
-      aboutUz: settings.aboutUz || ABOUT_UZ,
-      aboutRu: settings.aboutRu || ABOUT_RU,
-    },
   });
   console.log(`✅ Menyu yangilandi: ${CATEGORIES.length} kategoriya, ${PRODUCTS.length} mahsulot`);
 }

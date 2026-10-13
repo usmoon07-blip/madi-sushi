@@ -55,7 +55,7 @@
         "🎁 Бонус: Coca-Cola 1,5 л",
         "🎁 Бонус: тартар хлеб"
       ],
-      "imageUrl": "/static/products/menu/burger-set.jpg",
+      "imageUrl": "/static/products/menu/sushi-burger.jpg",
       "oldPrice": null,
       "price": 240000,
       "categoryId": 8,
@@ -83,7 +83,7 @@
         "🎁 Бонус: Coca-Cola 1,5 л",
         "🎁 Бонус: тартар хлеб"
       ],
-      "imageUrl": "/static/products/menu/jarini-set.jpg",
+      "imageUrl": "/static/products/menu/tempura-losos.jpg",
       "oldPrice": null,
       "price": 200000,
       "categoryId": 8,
