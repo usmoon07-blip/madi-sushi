@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-13T06:44:46.994Z",
+  "generatedAt": "2026-10-13T11:20:47.584Z",
   "products": [
     {
       "id": 17,
@@ -35,10 +35,10 @@
       "id": 18,
       "name": "Burger set",
       "nameRu": "Бургер сет",
-      "description": "Burger va 4 xil roll (34 dona) + bonus: Coca-Cola 1,5 L va tartar non.",
-      "descriptionRu": "Бургер и 4 вида роллов (34 шт) + бонус: Coca-Cola 1,5 л и тартар хлеб.",
+      "description": "Sushi-burger va 4 xil roll (34 dona) + bonus: Coca-Cola 1,5 L va tartar non.",
+      "descriptionRu": "Суши-бургер и 4 вида роллов (34 шт) + бонус: Coca-Cola 1,5 л и тартар хлеб.",
       "ingredients": [
-        "Burger kuriniy — 1 dona",
+        "Sushi-burger kuriniy — 1 dona",
         "Kurini zapechyonniy roll — 10 dona",
         "Kraboviy zapechyonniy roll — 10 dona",
         "Chiz sezar roll — 8 dona",
@@ -47,7 +47,7 @@
         "🎁 Bonus: tartar non"
       ],
       "ingredientsRu": [
-        "Бургер куриный — 1 шт",
+        "Суши-бургер куриный — 1 шт",
         "Ролл куриный запечённый — 10 шт",
         "Ролл крабовый запечённый — 10 шт",
         "Ролл чиз цезарь — 8 шт",
@@ -86,6 +86,30 @@
       "imageUrl": "/static/products/menu-v3/jarini-set.jpg",
       "oldPrice": null,
       "price": 200000,
+      "categoryId": 8,
+      "isHit": true
+    },
+    {
+      "id": 39,
+      "name": "Zapechyonniy set",
+      "nameRu": "Запечённый сет",
+      "description": "Issiq zapechyonniy rollar to'plami (30 dona) + bonus: 10 dona zapechyonniy roll (xohishingizga ko'ra) va tartar sousli non.",
+      "descriptionRu": "Сет из запечённых роллов (30 шт) + бонус: 10 шт запечённых роллов на ваш выбор и хлеб с соусом тартар.",
+      "ingredients": [
+        "Zapechyonniy kuriniy roll — 20 dona",
+        "Krabli zapechyonniy roll — 10 dona",
+        "🎁 Bonus: 10 dona zapechyonniy roll — xohishga ko'ra (izohda yozing)",
+        "🎁 Bonus: tartar sousli non"
+      ],
+      "ingredientsRu": [
+        "Ролл запечённый куриный — 20 шт",
+        "Ролл запечённый с крабом — 10 шт",
+        "🎁 Бонус: 10 шт запечённых роллов — на выбор (укажите в комментарии)",
+        "🎁 Бонус: хлеб с соусом тартар"
+      ],
+      "imageUrl": "/static/products/menu-v3/zapechyon-set.jpg",
+      "oldPrice": null,
+      "price": 204000,
       "categoryId": 8,
       "isHit": true
     },
