@@ -12,6 +12,7 @@ const { errText, redact } = require('./services/redact');
 const { t } = require('./services/i18n');
 const webapp = require('./core/webapp');
 const printQueue = require('./services/printQueue');
+const keepAwake = require('./services/keepAwake');
 const { registerBotRoutes } = require('./routes/bot.routes');
 const clientRoutes = require('./routes/client.routes');
 const adminRoutes = require('./routes/admin.routes');
@@ -166,6 +167,7 @@ async function main() {
   console.log('[db] Ulandi ✅');
 
   printQueue.start();
+  keepAwake.start();
 
   if (bot) {
     await startBot().catch((err) => console.error('[bot] Ishga tushmadi:', errText(err)));

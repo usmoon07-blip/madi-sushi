@@ -163,7 +163,13 @@ safe-area hisobga olinadi). Brend logosi: tepada, yuklanish va «Biz haqimizda»
    - Environment'ga faqat Render'da kiritiladi: `BOT_TOKEN`, `ADMIN_IDS`, `ADMIN_PASSWORD`,
      `DATABASE_URL`, `DIRECT_URL` (`APP_SECRET` o'zi yaratiladi).
    - Server `RENDER_EXTERNAL_URL`ni o'zi oladi → webhook va Mini App havolasini o'zi o'rnatadi.
-4. **Uxlamasligi uchun:** GitHub Actions `keep-alive.yml` — ish vaqtida **har 10 daqiqada**
+4. **Uxlamasligi uchun (ikki qavat):**
+   - **Server o'zi:** Render'da ishlayotganda ish vaqtida (UTC 4–21) har **8 daqiqada** o'z ochiq manziliga
+     `/api/health` so'rovi yuboradi — Render buni faollik deb hisoblaydi (`KEEP_AWAKE=off|always`,
+     `KEEP_AWAKE_HOURS=4-21` bilan sozlanadi). GitHub jadvali amalda 30–40 daqiqada bir ishlagani uchun
+     yolg'iz o'zi yetmaydi.
+   - **GitHub Actions** — ertalab serverni birinchi bo'lib uyg'otadi va zaxira vazifasini bajaradi.
+   - Eski izoh: GitHub Actions `keep-alive.yml` — ish vaqtida **har 10 daqiqada**
    `/api/health`ga turtki (`*/10 4-21 * * *` UTC = Toshkent 09:00–02:00, oyiga ~540 soat —
    Render'ning bepul 750 soatiga sig'adi). Xato bo'lsa ham workflow qizarmaydi.
 5. **Tez ochilishi uchun:**
