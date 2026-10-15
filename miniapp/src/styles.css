@@ -2161,3 +2161,45 @@ html.is-fullscreen {
   font-size: 13px;
   color: var(--muted);
 }
+
+/* Ishlab chiquvchi (Profil pastida) */
+.madeby {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin: 28px 0 8px;
+  padding: 18px 16px 4px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+.madeby__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.madeby__logo {
+  display: block;
+  width: 168px;
+  height: auto;
+}
+.madeby__slogan {
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #8f8a86;
+}
+.madeby__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 12.5px;
+  color: #c9c9ce;
+}
+.madeby__links b {
+  color: #ff6a2b;
+  font-weight: 700;
+}

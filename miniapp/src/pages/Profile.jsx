@@ -7,6 +7,7 @@ import { haptic, onBackButton, openLink } from '../telegram.js';
 import { yandexSearchUrl } from '../format.js';
 import ProductCard from '../components/ProductCard.jsx';
 import Logo from '../components/Logo.jsx';
+import usmoai from '../assets/usmoai.webp';
 import { branchMapUrl } from '../components/BranchSheet.jsx';
 import {
   ArrowIcon,
@@ -91,6 +92,21 @@ export default function Profile() {
             <ChevronIcon width={20} height={20} className="plist__chev" />
           </button>
         ))}
+      </div>
+      {/* Ishlab chiquvchi */}
+      <div className="madeby">
+        <span className="madeby__label">{t('madeBy')}</span>
+        <img className="madeby__logo" src={usmoai} alt="usmoai" width="168" height="30" />
+        <span className="madeby__slogan">G‘oyangiz — aqlli yechim</span>
+        <div className="madeby__links">
+          <button type="button" onClick={() => openLink('https://t.me/usmoai')}>
+            Telegram <b>@usmoai</b>
+          </button>
+          <span aria-hidden="true">·</span>
+          <button type="button" onClick={() => openLink('https://instagram.com/usmo_ai')}>
+            Instagram <b>@usmo_ai</b>
+          </button>
+        </div>
       </div>
     </div>
   );
