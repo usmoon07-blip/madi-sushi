@@ -7,7 +7,6 @@ import { haptic, onBackButton, openLink } from '../telegram.js';
 import { yandexSearchUrl } from '../format.js';
 import ProductCard from '../components/ProductCard.jsx';
 import Logo from '../components/Logo.jsx';
-import usmoai from '../assets/usmoai.webp';
 import { branchMapUrl } from '../components/BranchSheet.jsx';
 import {
   ArrowIcon,
@@ -94,20 +93,18 @@ export default function Profile() {
         ))}
       </div>
       {/* Ishlab chiquvchi */}
-      <div className="madeby">
-        <span className="madeby__label">{t('madeBy')}</span>
-        <img className="madeby__logo" src={usmoai} alt="usmoai" width="168" height="30" />
-        <span className="madeby__slogan">G‘oyangiz — aqlli yechim</span>
-        <div className="madeby__links">
-          <button type="button" onClick={() => openLink('https://t.me/usmoai')}>
-            Telegram <b>@usmoai</b>
-          </button>
-          <span aria-hidden="true">·</span>
-          <button type="button" onClick={() => openLink('https://instagram.com/usmo_ai')}>
-            Instagram <b>@usmo_ai</b>
-          </button>
-        </div>
-      </div>
+      <footer className="madeby">
+        <span className="madeby__copy">© {new Date().getFullYear()} usmoai</span>
+        <button type="button" className="madeby__tg" onClick={() => openLink('https://t.me/usmoai')} aria-label="Telegram @usmoai">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M21.94 4.66 18.9 19.01c-.23 1.02-.83 1.27-1.69.79l-4.66-3.43-2.25 2.16c-.25.25-.46.46-.94.46l.34-4.74 8.63-7.8c.37-.34-.08-.52-.58-.19L7.08 13.04 2.49 11.6c-1-.31-1.02-1 .21-1.48l17.94-6.92c.83-.31 1.56.19 1.3 1.46Z"
+            />
+          </svg>
+          @usmoai
+        </button>
+      </footer>
     </div>
   );
 }
